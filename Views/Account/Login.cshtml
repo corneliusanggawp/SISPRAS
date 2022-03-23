@@ -1,0 +1,92 @@
+﻿
+@{
+    Layout = null;
+    ViewData["Title"] = "Login";
+}
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no">
+  <title>SISPRA - Login</title>
+  <!-- Google Font: Poppins -->
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900' type='text/css'>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" type="text/css" href="~/lib/bootstrap5/css/bootstrap.min.css" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" type="text/css" href="~/lib/fontawesome-free/all.min.css" />
+  <!-- Theme style -->
+  <link rel="stylesheet" type="text/css" href="~/css/login.stylesheet.css" />
+</head>
+
+<body>
+  <div id="main-wrapper" class="login-register">
+    <div class="container-fluid px-0">
+      <div class="row g-0 min-vh-100">
+        <!-- Welcome Text -->
+        <div class="col-md-6">
+          <div class="hero-wrap d-flex align-items-center h-100">
+            <div class="hero-mask opacity-8 bg-primary"></div>
+            <div class="hero-bg hero-bg-scroll" style="background-image:url('../img/login-bg.jpg');"></div>
+            <div class="hero-content w-100 min-vh-100 d-flex flex-column">
+              <div class="row g-0">
+                <div class="col-10 col-lg-9 mx-auto">
+                  <div class="logo mt-5 mb-5 mb-md-0"> <a class="d-flex" href="#" title="SISPRA"><img src="../favicon.ico" alt="SISPRA"></a> </div>
+                </div>
+              </div>
+              <div class="row g-0 my-auto">
+                <div class="col-10 col-lg-9 mx-auto">
+                  <h1 class="text-11 text-white mb-4">SISPRAS</h1>
+                  <p class="text-4 text-white lh-base mb-5">Selamat datang di layanan SISPRAS, Sistem Informasi Sarana dan Prasarana Universitas Atma Jaya Yogyakarta.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Welcome Text End -->
+        <!-- Login Form -->
+        <div class="col-md-6 d-flex">
+          <div class="container my-auto py-5">
+            <div class="row g-0">
+              <div class="col-10 col-lg-9 col-xl-8 mx-auto">
+                <h3 class="fw-600 mb-4">Log In</h3>
+                <form id="loginForm" method="post">
+                  <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" required placeholder="Masukkan username">
+                  </div>
+                  <div class="mb-3">
+                    <label for="loginPassword" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="loginPassword" required placeholder="Masukkan password">
+                  </div>
+                  <div class="row mt-4">
+                    <div class="col">
+                      <div class="form-check">
+                        <input id="remember-me" name="remember" class="form-check-input" type="checkbox">
+                        <label class="form-check-label" for="remember-me">Ingat Saya</label>
+                      </div>
+                    </div>
+                     <div class="col text-end">User Online : -</div>
+                  </div>
+                  <div class="d-grid my-4">
+                    <button class="btn btn-primary" type="submit">Masuk</button>
+                  </div>
+                </form>
+                <p class="text-center text-muted mb-0">Mengalami masalah? Hubungi <a class="link-primary" href="https://ksi.uajy.ac.id/helpdesk/">Help Desk KSI</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Login Form End -->
+      </div>
+    </div>
+  </div>
+  <!-- Styles Switcher End -->
+  <!-- Script -->
+  <script src="~/lib/jquery/jquery.min.js"></script>
+  <script src="~/lib/bootstrap5/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
