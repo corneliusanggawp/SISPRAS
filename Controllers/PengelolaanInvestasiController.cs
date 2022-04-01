@@ -4,6 +4,7 @@ using SISPRA.DAO;
 using SISPRA.Models;
 using System.Dynamic;
 using System.Linq;
+using System.Security.Claims;
 
 namespace SISPRA.Controllers
 {
@@ -27,16 +28,12 @@ namespace SISPRA.Controllers
         public IActionResult RencanaPengadaanAset()
         {
             var id_role = User.Claims
-                            .Where(c => c.Type == "role")
-                            .Select(c => c.Value).SingleOrDefault();
-            var role     = User.Claims
-                            .Where(c => c.Type == "role")
-                            .Select(c => c.Value).SingleOrDefault();
-            var username = User.Claims
-                            .Where(c => c.Type == "username")
-                            .Select(c => c.Value).SingleOrDefault();
+                        .Where(c => c.Type == "id_role")
+                        .Select(c => c.Value).SingleOrDefault();
+            
+            var role    = User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).SingleOrDefault();
 
-            var data = dao.getRencanaPengadaanAset(id_role, role, username);
+            var data = dao.getRencanaPengadaanAset(id_role, role);
 
             myObj.status = (!data.status) ? data.pesan : "";
             myObj.data = data.data;

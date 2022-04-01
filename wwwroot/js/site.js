@@ -34,6 +34,18 @@ $(function () {
         $('#DetailRencanaPengadaanAset').modal('show');
     });
 
+    $('#showDetailRencanaKhususInvestasiModal').on('click', function () {
+        $.ajax({
+            url: "PengelolaanInvestasi/ajaxGetDetailRencanaKhususInvestasi",
+            type: "POST",
+            data: { "id": id },
+            dataType: "json",
+            success: function (data) {
+                var RencanaKhususInvestasiModal = result.data;
+            }
+        })
+    });
+
 
 
 })

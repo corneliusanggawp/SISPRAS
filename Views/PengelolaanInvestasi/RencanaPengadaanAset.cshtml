@@ -138,23 +138,26 @@
                 <table id="example1" class="table table-bordered table-hover">
                   <thead>
                   <tr>
-                    <th>Tahun</th>
-                    <th>Nama Unit</th>
-                    <th>Program Kegiatan</th>
-                    <th>Nama Program</th>
+                    <th>Tahun:</th>
+                    <th>Nama Unit:</th>
+                    <th>Program Kegiatan:</th>
+                    <th>Nama Program:</th>
                     <th></th>
                   </tr>
                   </thead>
                   <tbody>
+                  @foreach (var RencanaPengadaanAset in Model.data)
+                  {
                   <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    <td>@RencanaPengadaanAset.ID_TAHUN_ANGGARAN</td>
+                    <td>@RencanaPengadaanAset.NAMA_UNIT</td>
+                    <td>@RencanaPengadaanAset.PROGRAM_KEGIATAN</td>
+                    <td>@RencanaPengadaanAset.NAMA_PROGRAM</td>
                     <td>
-                        <button type="button" class="btn btn-primary btn-block btn-sm" data-toggle="modal" data-target="#DetailRencanaKhususInvestasiModal"><i class="fa fa-eye"></i></button>
+                        <button id="showDetailRencanaKhususInvestasiModal" type="button" class="btn btn-primary btn-block btn-sm" data-id="@RencanaPengadaanAset.ID_RKA" data-toggle="modal" data-target="#DetailRencanaKhususInvestasiModal"><i class="fa fa-eye"></i></button>
                     </td>
-                  </tr>
+                  </tr>             
+                  }
                   </tbody>
                   <tfoot>
                   <tr>

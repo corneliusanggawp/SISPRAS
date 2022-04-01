@@ -11,7 +11,7 @@ namespace SISPRA.DAO
 {
     public class PengelolaanInvestasiDAO
     {
-        public DBOutput getRencanaPengadaanAset(string id_role, string role, string npp)
+        public DBOutput getRencanaPengadaanAset(string id_role, string role)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -21,8 +21,13 @@ namespace SISPRA.DAO
                 try
                 {
                     string query = @"
-                        SELECT ID_TAHUN_ANGGARAN, ID_UNIT, ID_REF_PROGRAM_RPKA, NAMA_PROGRAM
-                        FROM sikeu.TBL_RPKA";
+                        SELECT sikeu.TBL_RKA.ID_RPKA, sikeu.TBL_RKA.ID_TAHUN_ANGGARAN, siatmax.MST_UNIT.NAMA_UNIT, sikeu.TBL_MATA_ANGGARAN.PROGRAM_KEGIATAN, sikeu.TBL_RKA.NAMA_PROGRAM, siatmax.MST_UNIT.MST_ID_UNIT, sikeu.TBL_RKA.ID_RKA
+                        FROM sikeu.TBL_RPKA 
+                        INNER JOIN sikeu.TBL_RKA ON sikeu.TBL_RPKA.ID_RPKA = sikeu.TBL_RKA.ID_RPKA 
+                        INNER JOIN sikeu.TBL_MATA_ANGGARAN ON sikeu.TBL_RKA.ID_MT_ANGGARAN = sikeu.TBL_MATA_ANGGARAN.ID_MT_ANGGARAN
+                        INNER JOIN sikeu.REF_PROGRAM ON sikeu.TBL_MATA_ANGGARAN.ID_REF_PROGRAM = sikeu.REF_PROGRAM.ID_REF_PROGRAM 
+                        INNER JOIN siatmax.MST_UNIT ON sikeu.TBL_RPKA.ID_UNIT = siatmax.MST_UNIT.ID_UNIT
+                        WHERE (sikeu.TBL_RKA.ID_TAHUN_ANGGARAN = 2013) AND (siatmax.MST_UNIT.MST_ID_UNIT = 14)";
 
                     if(role != "KPSP")
                     {
