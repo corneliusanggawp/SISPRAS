@@ -6,171 +6,162 @@
 
 <!-- Modal Dialog 1 -->
 <div class="modal fade" id="DetailRencanaKhususInvestasiModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Detail Rencana Khusus Investasi</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-          <div class="card-body table-responsive p-0">
-                <table class="table table-head-fixed text-nowrap">
-                  <thead>
-                    <tr>
-                      <th>Nama Kegiatan</th>
-                      <th>Bulan</th>
-                      <th>Jumlah</th>
-                      <th>Satuan</th>
-                      <th>Harga Satuan</th>
-                      <th>Total</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td>
-                        <button id="showModalDetailRencanaPengadaanAset" type="button" class="btn btn-primary btn-block btn-sm"><i class="fa fa-edit"></i></button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-          </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detail Rencana Khusus Investasi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card-body table-responsive p-0">
+                    //Ganti Ke DataTable
+                    <table id="tabelDetailRencanaKhususInvestasi" class="table table-head-fixed text-nowrap">
+                        <thead>
+                            <tr>
+                                <th>Nama Kegiatan</th>
+                                <th>Bulan</th>
+                                <th>Jumlah</th>
+                                <th>Satuan</th>
+                                <th>Harga Satuan</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyDetailRencanaKhususInvestasi">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 <!-- Modal Dialog 1 End -->
 
 <!-- Modal Dialog 2 -->
 <div class="modal fade" id="DetailRencanaPengadaanAset" tabindex="-1" role="dialog" style="overflow-y:scroll;" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Detail Pengadaan Aset</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                    <label>Kategori</label>
-                    <select class="form-control select2bs4" style="width: 100%;">
-                        <option selected="selected"></option>
-                        <option>A</option>
-                        <option>B</option>
-                        <option>C</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Nama</label>
-                    <input type="text" class="form-control">               
-                </div>
-                <div class="form-group">
-                    <label>Satuan</label>
-                    <input type="text" class="form-control">
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                    <label>Sub Kategori</label>
-                    <select class="form-control select2bs4" style="width: 100%;">
-                        <option selected="selected"></option>
-                        <option>A</option>
-                        <option>B</option>
-                        <option>C</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Merk</label>
-                    <input type="text" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Jumlah</label>
-                    <input type="number" class="form-control">          
-                </div>
-              </div>
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detail Pengadaan Aset</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-
-        <div class="form-group">
-            <label>Harga Satuan</label>
-            <input type="number" class="form-control">            
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Kategori</label>
+                            <select class="form-control select2bs4" style="width: 100%;">
+                                <option selected="selected"></option>
+                                <option>A</option>
+                                <option>B</option>
+                                <option>C</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Nama</label>
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Satuan</label>
+                            <input type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Sub Kategori</label>
+                            <select class="form-control select2bs4" style="width: 100%;">
+                                <option selected="selected"></option>
+                                <option>A</option>
+                                <option>B</option>
+                                <option>C</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Merk</label>
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Jumlah</label>
+                            <input type="number" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Harga Satuan</label>
+                    <input type="number" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Spesifikasi</label>
+                    <textarea class="form-control" rows="3" placeholder="..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Simpan</button>
+            </div>
         </div>
-        <div class="form-group">
-            <label>Spesifikasi</label>
-            <textarea class="form-control" rows="3" placeholder="..."></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Simpan</button>
-      </div>
     </div>
-  </div>
 </div>
 <!-- Modal Dialog 2 End -->
 
 <div class="row">
     <div class="col-12">
-            <div class="card">
-              <div class="card-header">
-                  <div class="form-group">
-                  <label>Filter</label>
-                  <select class="select2bs4" multiple="multiple" data-placeholder="Select a Filter" style="width: 100%;">
-                    <option>KSI</option>
-                  </select>
-              </div>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-                <table id="example1" class="table table-bordered table-hover">
-                  <thead>
-                  <tr>
-                    <th>Tahun:</th>
-                    <th>Nama Unit:</th>
-                    <th>Program Kegiatan:</th>
-                    <th>Nama Program:</th>
-                    <th></th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  @foreach (var RencanaPengadaanAset in Model.data)
-                  {
-                  <tr>
-                    <td>@RencanaPengadaanAset.ID_TAHUN_ANGGARAN</td>
-                    <td>@RencanaPengadaanAset.NAMA_UNIT</td>
-                    <td>@RencanaPengadaanAset.PROGRAM_KEGIATAN</td>
-                    <td>@RencanaPengadaanAset.NAMA_PROGRAM</td>
-                    <td>
-                        <button id="showDetailRencanaKhususInvestasiModal" type="button" class="btn btn-primary btn-block btn-sm" data-id="@RencanaPengadaanAset.ID_RKA" data-toggle="modal" data-target="#DetailRencanaKhususInvestasiModal"><i class="fa fa-eye"></i></button>
-                    </td>
-                  </tr>             
-                  }
-                  </tbody>
-                  <tfoot>
-                  <tr>
-                    <th>Tahun</th>
-                    <th>Nama Unit</th>
-                    <th>Program Kegiatan</th>
-                    <th>Nama Program</th>
-                    <th></th>
-                  </tr>
-                  </tfoot>
-                </table>
-              </div>
-              <!-- /.card-body -->
+        <div class="card">
+            <div class="card-header">
+                <div class="form-group">
+                    <label>Unit</label>
+                    <select class="select2bs4" multiple="multiple" data-placeholder="Pilih unit" style="width: 100%;">
+                        @foreach (var unit in Model.unit)
+                       {
+                        <option data-id="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
+                       }
+                    </select>
+                </div>
             </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <table id="tabelRencanaPengadaanAset" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tahun:</th>
+                            <th>Nama Unit:</th>
+                            <th>Program Kegiatan:</th>
+                            <th>Nama Program:</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody> 
+                        @foreach (var RencanaPengadaanAset in Model.data) { 
+                        <tr>
+                            <td>@RencanaPengadaanAset.ID_TAHUN_ANGGARAN</td>
+                            <td>@RencanaPengadaanAset.NAMA_UNIT</td>
+                            <td>@RencanaPengadaanAset.PROGRAM_KEGIATAN</td>
+                            <td>@RencanaPengadaanAset.NAMA_PROGRAM</td>
+                            <td>
+                                <button id="showDetailRencanaKhususInvestasiModal" type="button" class="btn btn-primary btn-block btn-sm" data-id="@RencanaPengadaanAset.ID_RKA" data-toggle="modal" data-target="#DetailRencanaKhususInvestasiModal"><i class="fa fa-eye"></i></button>
+                            </td>
+                        </tr> 
+                        } 
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Tahun</th>
+                            <th>Nama Unit</th>
+                            <th>Program Kegiatan</th>
+                            <th>Nama Program</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
     </div>
 </div>

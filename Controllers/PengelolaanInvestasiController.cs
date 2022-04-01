@@ -12,12 +12,14 @@ namespace SISPRA.Controllers
     public class PengelolaanInvestasiController : Controller
     {
         dynamic myObj;
-        PengelolaanInvestasiDAO dao;
+        PengelolaanInvestasiDAO mainDAO;
+        MasterDAO masterDAO;
 
         public PengelolaanInvestasiController()
         {
-                myObj   = new ExpandoObject();
-                dao     = new PengelolaanInvestasiDAO();
+            myObj   = new ExpandoObject();
+            mainDAO = new PengelolaanInvestasiDAO();
+            masterDAO = new MasterDAO();
         }
 
         public IActionResult Index()
@@ -27,16 +29,20 @@ namespace SISPRA.Controllers
 
         public IActionResult RencanaPengadaanAset()
         {
-            var id_role = User.Claims
-                        .Where(c => c.Type == "id_role")
-                        .Select(c => c.Value).SingleOrDefault();
+            var id_unit = User.Claims
+                            .Where(c => c.Type == "id_unit")
+                            .Select(c => c.Value).SingleOrDefault();
             
-            var role    = User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).SingleOrDefault();
+            var role    = User.Claims
+                            .Where(c => c.Type == ClaimTypes.Role)
+                            .Select(c => c.Value).SingleOrDefault();
 
-            var data = dao.getRencanaPengadaanAset(id_role, role);
+            var data = mainDAO.getRencanaPengadaanAset(id_unit, role);
+            var unit = masterDAO.getAllUnit();
 
             myObj.status = (!data.status) ? data.pesan : "";
             myObj.data = data.data;
+            myObj.unit = unit;
 
             return View(myObj);
         }
@@ -45,7 +51,7 @@ namespace SISPRA.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult updateDetailRencanaPengadaanAset(DetailRencanaPengadaanAset obj)
         {
-            var check = dao.updateDetailRencanaPengadaanAset(obj);
+            var check = mainDAO.updateDetailRencanaPengadaanAset(obj);
             
             if(check.status == true)
             {
@@ -61,13 +67,13 @@ namespace SISPRA.Controllers
 
         public JsonResult ajaxGetDetailRencanaKhususInvestasi(int id)
         {
-            var data = dao.getDetailRencanaKhususInvestasi(id);
+            var data = mainDAO.getDetailRencanaKhususInvestasi(id);
             return Json(data);
         }
 
         public JsonResult ajaxGetDetailRencanaPengadaanAset(int id)
         {
-            var data = dao.getDetailRencanaPengadaanAset(id);
+            var data = mainDAO.getDetailRencanaPengadaanAset(id);
             return Json(data);
         }
     }

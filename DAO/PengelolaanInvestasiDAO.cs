@@ -11,7 +11,7 @@ namespace SISPRA.DAO
 {
     public class PengelolaanInvestasiDAO
     {
-        public DBOutput getRencanaPengadaanAset(string id_role, string role)
+        public DBOutput getRencanaPengadaanAset(string id_unit, string unit)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -29,13 +29,12 @@ namespace SISPRA.DAO
                         INNER JOIN siatmax.MST_UNIT ON sikeu.TBL_RPKA.ID_UNIT = siatmax.MST_UNIT.ID_UNIT
                         WHERE (sikeu.TBL_RKA.ID_TAHUN_ANGGARAN = 2013) AND (siatmax.MST_UNIT.MST_ID_UNIT = 14)";
 
-                    if(role != "KPSP")
+                    if(unit != "KPSP")
                     {
-                        //Filter Data By Role
-                        query += @" WHERE ID_UNIT = @id_role";
+                        query += @" WHERE ID_UNIT = @id_unit";
                     }
 
-                    var data = conn.Query<dynamic>(query, new { id_role = id_role }).ToList();
+                    var data = conn.Query<dynamic>(query, new { id_unit = id_unit }).ToList();
 
                     output.data = data;
                     return output;
@@ -64,8 +63,9 @@ namespace SISPRA.DAO
                 try
                 {
                     string query = @"
-                        SELECT 
-                        FROM ";
+                        SELECT ID_DTL_RKA, NAMA_KEGIATAN, BULAN, VOLUME, SATUAN, HARGA_SATUAN, SUBTOTAL
+                        FROM sikeu.DTL_RKA
+                        WHERE (ID_DTL_RKA = @id)";
 
                     var data = conn.Query<dynamic>(query, new { id = id }).ToList();
 

@@ -16,7 +16,7 @@ namespace SISPRA.DAO
                 try
                 {
                     string query = @"
-                        SELECT NAMA, NPP, PASSWORD, ID_UNIT, MST_ID_UNIT
+                        SELECT NAMA, NPP, PASSWORD
                         FROM simka.MST_KARYAWAN
                         WHERE USERNAME = @username";
                     var param = new {username = username};

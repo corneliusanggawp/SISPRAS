@@ -42,10 +42,8 @@ namespace SISPRA.Controllers
                     identity = new ClaimsIdentity(new[] {
                                         new Claim(ClaimTypes.Name, userData.NAMA),
                                         new Claim(ClaimTypes.Role, "KPSP"),
-                                        new Claim("id_role", "9"),
-                                        new Claim("npp", userData.NPP),
-                                        new Claim("id_unit", Convert.ToString(userData.ID_UNIT)),
-                                        new Claim("mst_id_unit", Convert.ToString(userData.MST_ID_UNIT))
+                                        new Claim("id_unit", "9"),
+                                        new Claim("npp", userData.NPP)
                                     }, CookieAuthenticationDefaults.AuthenticationScheme);
                 }
                 else 
