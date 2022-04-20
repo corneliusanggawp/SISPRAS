@@ -39,10 +39,14 @@ namespace SISPRA.Controllers
 
             var data = mainDAO.getRencanaPengadaanAset(id_unit, role);
             var unit = masterDAO.getAllUnit();
+            var kategori = mainDAO.getAllKategori();
+            var subKategori = mainDAO.getAllSubKategori();
 
             myObj.status = (!data.status) ? data.pesan : "";
             myObj.data = data.data;
             myObj.unit = unit;
+            myObj.kategori = kategori;
+            myObj.subKategori = subKategori;
 
             return View(myObj);
         }
@@ -51,9 +55,30 @@ namespace SISPRA.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult updateDetailRencanaPengadaanAset(DetailRencanaPengadaanAset obj)
         {
-            var check = mainDAO.updateDetailRencanaPengadaanAset(obj);
+            var check = mainDAO.updateDetailPencairanInvestasi(bbj);
             
             if(check.status == true)
+            {
+                TempData["success"] = "Berhasil merubah data event";
+            }
+            else
+            {
+                TempData["error"] = check.pesan;
+            }
+
+            return RedirectToAction("RencanaPengadaanAset");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult addDetailRencanaPengadaanAset(DetailRencanaPengadaanAset obj)
+        {
+            obj.imageBarang = null;
+            obj.isPO = 0;
+
+            var check = mainDAO.addDetailPencairanInvestasi(obj);
+
+            if (check.status == true)
             {
                 TempData["success"] = "Berhasil merubah data event";
             }
@@ -71,9 +96,15 @@ namespace SISPRA.Controllers
             return Json(data);
         }
 
-        public JsonResult ajaxGetDetailRencanaPengadaanAset(int id)
+        public JsonResult ajaxGetDetailRencanaPengadaanAset(int IDPencairanInvestasi, int IDetailPencarianInvestasi)
         {
-            var data = mainDAO.getDetailRencanaPengadaanAset(id);
+            var data = mainDAO.getDetailRencanaPengadaanAset(IDPencairanInvestasi, IDetailPencarianInvestasi);
+            return Json(data);
+        }
+
+        public JsonResult ajaxGetKategori(int IDRefSK)
+        {
+            var data = mainDAO.getKategori(IDRefSK);
             return Json(data);
         }
     }

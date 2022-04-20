@@ -284,21 +284,7 @@
     <script src="~/lib/toastr/toastr.min.js"></script>
     <!-- Select2 -->
     <script src="~/lib/select2/js/select2.full.min.js"></script>
-    <!-- Site JS -->
-    <script src="~/js/site.js"></script>
-    <script>
-        $('.select2').select2()
-
-        //Initialize Select2 Elements
-        $('.select2bs4').select2({
-            theme: 'bootstrap4'
-        })
-
-        $("#tabelRencanaPengadaanAset").DataTable({
-            "responsive": true, "lengthChange": false, "autoWidth": false,
-            "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
-        }).buttons().container().appendTo('#tabelRencanaPengadaanAset_wrapper .col-md-6:eq(0)');
-    </script>
+    @RenderSection("Scripts", required: false)
 </body>
 
 </html>

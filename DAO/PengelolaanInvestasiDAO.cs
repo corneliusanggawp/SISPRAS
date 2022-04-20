@@ -63,9 +63,11 @@ namespace SISPRA.DAO
                 try
                 {
                     string query = @"
-                        SELECT ID_DTL_RKA, NAMA_KEGIATAN, BULAN, VOLUME, SATUAN, HARGA_SATUAN, SUBTOTAL
-                        FROM sikeu.DTL_RKA
-                        WHERE (ID_DTL_RKA = @id)";
+                        SELECT TBL_PENCAIRAN_INVESTASI.ID_PENCAIRAN_INVESTASI, TBL_DETAIL_PENCAIRAN_INVESTASI.ID_DETAIL_PENCAIRAN_INVESTASI , DTL_RKA.ID_DTL_RKA, DTL_RKA.ID_RKA, DTL_RKA.NAMA_KEGIATAN, DTL_RKA.BULAN, DTL_RKA.VOLUME, DTL_RKA.SATUAN, DTL_RKA.HARGA_SATUAN, DTL_RKA.SUBTOTAL
+                        FROM sikeu.DTL_RKA DTL_RKA 
+                        LEFT JOIN sispras.TBL_PENCAIRAN_INVESTASI TBL_PENCAIRAN_INVESTASI ON DTL_RKA.ID_DTL_RKA = TBL_PENCAIRAN_INVESTASI.ID_DTL_RKA
+	                    LEFT JOIN sispras.TBL_DETAIL_PENCAIRAN_INVESTASI TBL_DETAIL_PENCAIRAN_INVESTASI ON TBL_PENCAIRAN_INVESTASI.ID_PENCAIRAN_INVESTASI = TBL_DETAIL_PENCAIRAN_INVESTASI.ID_PENCAIRAN_INVESTASI 
+                        WHERE (DTL_RKA.ID_RKA = @id)";
 
                     var data = conn.Query<dynamic>(query, new { id = id }).ToList();
 
@@ -86,7 +88,7 @@ namespace SISPRA.DAO
             }
         }
 
-        public DBOutput getDetailRencanaPengadaanAset(int id)
+        public DBOutput getDetailRencanaPengadaanAset(int IDPencairanInvestasi, int IDetailPencarianInvestasi)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -96,14 +98,14 @@ namespace SISPRA.DAO
                 try
                 {
                     string query = @"
-                        SELECT RK.DESKRIPSI AS Kategori, RSK.DESKRIPSI AS [Sub Kategori], DPI.NAMA_PENGADAAN, DPI.MERK, DPI.SATUAN, DPI.SPESIFIKASI, DPI.HARGA_SATUAN, DPI.JUMLAH
+                        SELECT DPI.*
                         FROM sispras.TBL_DETAIL_PENCAIRAN_INVESTASI DPI
                         INNER JOIN sispras.TBL_PENCAIRAN_INVESTASI TPI ON DPI.ID_PENCAIRAN_INVESTASI = TPI.ID_PENCAIRAN_INVESTASI
                         INNER JOIN sispras.REF_KATEGORI RK ON DPI.ID_KATEGORI = RK.ID_KATEGORI 
                         INNER JOIN sispras.REF_SUB_KATEGORI RSK ON DPI.ID_REF_SK = RSK.ID_REF_SK
-                        WHERE TPI.ID_PENCAIRAN_INVESTASI = @id";
+                        WHERE TPI.ID_PENCAIRAN_INVESTASI = @IDPencairanInvestasi AND DPI.ID_DETAIL_PENCAIRAN_INVESTASI = @IDetailPencarianInvestasi";
 
-                    var data = conn.Query<dynamic>(query, new { id = id }).ToList();
+                    var data = conn.QueryFirstOrDefault<dynamic>(query, new { IDPencairanInvestasi = IDPencairanInvestasi, IDetailPencarianInvestasi = IDetailPencarianInvestasi });
 
                     output.data = data;
                     return output;
@@ -122,7 +124,7 @@ namespace SISPRA.DAO
             }
         }
 
-        public DBOutput updateDetailRencanaPengadaanAset(DetailRencanaPengadaanAset obj)
+        public DBOutput addPencairanInvestasi(RencanaPengadaanAset obj)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -132,9 +134,8 @@ namespace SISPRA.DAO
                 try
                 {
                     string query = @"
-                        UPDATE
-                        SET
-                        WHERE";
+                        INSERT INTO sispras.TBL_PENCAIRAN_INVESTASI (ID_PENCAIRAN_INVESTASI, ID_TAHUN_ANGGARAN, ID_UNIT, BULAN_PENGADAAN, TGL_PENCAIRAN, TOTAL_PENCAIRAN, INSERT_DATE, IP_ADDRESS, USER_ID, STATUS_APPROVAL, ID_DTL_RKA)
+                        VALUES (@IDPencairanInvestasi, @IDTahunAnggaran, @IDUnit, @bulanPengadaan, @tanggalPencairan, @totalPencairan, @insertDate, @IPAddress, @userID, @statusApproval, @IDDetailRKA )";
 
                     output.data = conn.Execute(query, obj);
 
@@ -146,6 +147,150 @@ namespace SISPRA.DAO
                     output.pesan = ex.Message;
                     output.data = new List<string>();
                     return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public DBOutput addDetailPencairanInvestasi(DetailRencanaPengadaanAset obj)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        INSERT INTO sispras.TBL_DETAIL_PENCAIRAN_INVESTASI (ID_PENCAIRAN_INVESTASI, ID_DETAIL_PENCAIRAN_INVESTASI,  ID_KATEGORI, ID_REF_SK, SATUAN, HARGA_SATUAN, JUMLAH, IMAGE_BARANG, IS_PO, SPESIFIKASI, NAMA_PENGADAAN, MERK)
+                        VALUES (@IDPencairanInvestasi, @IDDetailPencairanInvestasi, @IDKategori, @IDRefSK, @satuan, @hargaSatuan, @jumlah, @imageBarang, @isPO, @spesifikasi, @namaPengadaan, @merk)";
+
+                    output.data = conn.Execute(query, obj);
+
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public DBOutput updateDetailPencairanInvestasi (DetailRencanaPengadaanAset obj)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        UPDATE sispras.TBL_DETAIL_PENCAIRAN_INVESTASI 
+                        SET ID_PENCAIRAN_INVESTASI = @IDPencairanInvestasi, ID_DETAIL_PENCAIRAN_INVESTASI = @IDDetailPencairanInvestasi,  ID_KATEGORI = @IDKategori, ID_REF_SK = @IDRefSK, SATUAN = @satuan, HARGA_SATUAN = @hargaSatuan, JUMLAH = @jumlah, IMAGE_BARANG = @imageBarang, IS_PO = @isPO, SPESIFIKASI = @spesifikasi, NAMA_PENGADAAN = @namaPengadaan, MERK = @merk
+                        WHERE ID_PENCAIRAN_INVESTASI = @IDPencairanInvestasi AND ID_DETAIL_PENCAIRAN_INVESTASI = @IDDetailPencairanInvestasi";
+
+                    output.data = conn.Execute(query, obj);
+
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public DBOutput getKategori(int IDRefSK)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT ID_KATEGORI
+                        FROM sispras.REF_SUB_KATEGORI
+                        WHERE ID_REF_SK = @IDRefSK";
+
+                    var data = conn.QueryFirstOrDefault<dynamic>(query, new { IDRefSK = IDRefSK });
+
+                    output.data = data;
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public List<dynamic> getAllKategori()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT *
+                        FROM sispras.REF_KATEGORI";
+                    var data = conn.Query<dynamic>(query).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public List<dynamic> getAllSubKategori()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT *
+                        FROM sispras.REF_SUB_KATEGORI";
+                    var data = conn.Query<dynamic>(query).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
                 }
                 finally
                 {

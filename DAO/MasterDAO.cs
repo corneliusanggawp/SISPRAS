@@ -15,7 +15,7 @@ namespace SISPRA.DAO
                 try
                 {
                     string query = @"
-                        SELECT ID_UNIT, NAMA_UNIT
+                        SELECT *
                         FROM siatmax.MST_UNIT";
                     var data = conn.Query<dynamic>(query).ToList();
 
