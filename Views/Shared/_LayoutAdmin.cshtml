@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="~/lib/datatables-bs4/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="~/lib/datatables-responsive/css/responsive.bootstrap4.min.css">
     <link rel="stylesheet" href="~/lib/datatables-buttons/css/buttons.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/lib/datatables-select/css/select.bootstrap4.min.css">
     <!-- Select2 -->
     <link rel="stylesheet" href="~/lib/select2/css/select2.min.css">
     <link rel="stylesheet" href="~/lib/select2-bootstrap4-theme/select2-bootstrap4.min.css">
@@ -206,6 +207,12 @@
                                         <p>Rencana Pengadaan</p>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="PengelolaanInvestasi" asp-action="ApprovalPencairanInvestasi">
+                                        <i class="far fa-plus-square nav-icon"></i>
+                                        <p>Approval Pencairan</p>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     </ul>
@@ -274,17 +281,20 @@
     <script src="~/lib/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
     <script src="~/lib/datatables-buttons/js/dataTables.buttons.min.js"></script>
     <script src="~/lib/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-    <script src="~/lib/jszip/jszip.min.js"></script>
-    <script src="~/lib/pdfmake/pdfmake.min.js"></script>
-    <script src="~/lib/pdfmake/vfs_fonts.js"></script>
     <script src="~/lib/datatables-buttons/js/buttons.html5.min.js"></script>
     <script src="~/lib/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="~/lib/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <script src="~/lib/datatables-select/js/dataTables.select.min.js"></script>
+    <script src="~/lib/jszip/jszip.min.js"></script>
+    <script src="~/lib/pdfmake/pdfmake.min.js"></script>
+    <script src="~/lib/pdfmake/vfs_fonts.js"></script>
+
     <!-- Toastr -->
     <script src="~/lib/toastr/toastr.min.js"></script>
     <!-- Select2 -->
     <script src="~/lib/select2/js/select2.full.min.js"></script>
     @RenderSection("Scripts", required: false)
+
 </body>
 
 </html>

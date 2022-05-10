@@ -11,11 +11,11 @@
         public int IDUnit { get; set; }
         public string bulanPengadaan { get; set; }
         public string tanggalPencairan { get; set; }
-        public string totalPencairan { get; set; }
+        public int totalPencairan { get; set; }
         public string insertDate { get; set; }
         public string IPAddress { get; set; }
         public string userID { get; set; }
-        public int statusApproval { get; set; }
+        public bool statusApproval { get; set; }
         public int IDDetailRKA { get; set; }
     }
 
@@ -33,5 +33,6 @@
         public string spesifikasi { get; set; }
         public string namaPengadaan { get; set; }
         public string merk { get; set; }
+        public int IDDetailRKA { get; set; }
     }
 }

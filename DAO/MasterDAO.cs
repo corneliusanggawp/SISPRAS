@@ -31,5 +31,29 @@ namespace SISPRA.DAO
                 }
             }
         }
+
+        public List<dynamic> getAllTahunAnggaran()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT *
+                        FROM sikeu.TBL_TAHUN_ANGGARAN";
+                    var data = conn.Query<dynamic>(query).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
     }
 }
