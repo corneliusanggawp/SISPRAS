@@ -16,9 +16,10 @@ namespace SISPRA.DAO
                 try
                 {
                     string query = @"
-                        SELECT NAMA, NPP, PASSWORD
+                        SELECT NPP, NAMA, FILE_FOTO, PASSWORD
                         FROM simka.MST_KARYAWAN
                         WHERE USERNAME = @username";
+
                     var param = new {username = username};
                     var data  = conn.QuerySingleOrDefault<dynamic>(query, param);
 
@@ -47,14 +48,15 @@ namespace SISPRA.DAO
                         INNER JOIN siatmax.REF_ROLE ON siatmax.TBL_USER_ROLE.ID_ROLE = siatmax.REF_ROLE.ID_ROLE
                         WHERE NPP = @npp
                         AND siatmax.TBL_USER_ROLE.ID_SISTEM_INFORMASI = 2";
+
                     var param = new { npp = npp };
-                    var data = conn.QuerySingleOrDefault<dynamic>(query, param);
+                    var data = conn.Query<dynamic>(query, param).ToList();
 
                     return data;
                 }
                 catch (Exception ex)
                 {
-                    return null;
+                    return new List<dynamic>();
                 }
                 finally
                 {

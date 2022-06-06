@@ -38,22 +38,28 @@ namespace SISPRA.Controllers
             {
                 if(userData.PASSWORD == password)
                 {
+                    var userRole = dao.getUserRole(userData.NPP);
+
                     isAuthenticated = true;
                     identity = new ClaimsIdentity(new[] {
                                         new Claim(ClaimTypes.Name, userData.NAMA),
-                                        new Claim(ClaimTypes.Role, "KPSP"),
-                                        new Claim("id_unit", "9"),
                                         new Claim("npp", userData.NPP)
                                     }, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    foreach (var role in userRole)
+                    {
+                        identity.AddClaim(new Claim(ClaimTypes.Role, role.DESKRIPSI));
+                    }
+
                 }
                 else 
                 {
-                    TempData["message"] = "Password yang anda masukkan salah";
+                    TempData["error"] = "Password yang anda masukkan salah";
                 }
             }
             else
             {
-                TempData["message"] = "User tidak ditemukan";
+                TempData["error"] = "User tidak ditemukan";
             }
 
             if(isAuthenticated)

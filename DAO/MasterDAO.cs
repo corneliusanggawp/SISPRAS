@@ -8,6 +8,31 @@ namespace SISPRA.DAO
 {
     public class MasterDAO
     {
+        public List<dynamic> getAllMenu(String role)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT *
+                        ";
+                    
+                    var data = conn.Query<dynamic>(query).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
         public List<dynamic> getAllUnit()
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))

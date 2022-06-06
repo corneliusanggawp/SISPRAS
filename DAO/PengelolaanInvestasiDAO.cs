@@ -11,7 +11,7 @@ namespace SISPRA.DAO
 {
     public class PengelolaanInvestasiDAO
     {
-        public DBOutput getRencanaPengadaanAset(string id_unit, string unit)
+        public DBOutput getRencanaPengadaanAset(string id_unit, Array units)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -30,10 +30,15 @@ namespace SISPRA.DAO
                         INNER JOIN siatmax.MST_UNIT ON sikeu.TBL_RPKA.ID_UNIT = siatmax.MST_UNIT.ID_UNIT
                         WHERE (sikeu.TBL_RKA.ID_TAHUN_ANGGARAN = 2013) AND (siatmax.MST_UNIT.MST_ID_UNIT = 14)";
 
-                    if(unit != "KPSP")
+                    foreach (var unit in units)
                     {
-                        query += @" WHERE ID_UNIT = @id_unit";
+                        if ((string)unit != "KPSP")
+                        {
+                            query += @" WHERE ID_UNIT = @id_unit";
+                        }
                     }
+
+                    //units.Contains("sada");
 
                     var data = conn.Query<dynamic>(query, new { id_unit = id_unit }).ToList();
 
@@ -175,7 +180,7 @@ namespace SISPRA.DAO
                                 SELECT      sikeu.TBL_RKA.ID_TAHUN_ANGGARAN, sikeu.TBL_RKA.ID_UNIT, sikeu.DTL_RKA.BULAN, @tanggalPencairan AS TGL_PENCAIRAN, @totalPencairan AS TOTAL_PENCAIRAN, @insertDate AS INSERT_DATE, @IPAddress AS IP_ADDRESS, @userID AS USER_ID, @statusApproval AS STATUS_APPROVAL, sikeu.DTL_RKA.ID_DTL_RKA
                                 FROM        sikeu.TBL_RKA
                                 INNER JOIN  sikeu.DTL_RKA ON sikeu.TBL_RKA.ID_RKA = sikeu.DTL_RKA.ID_RKA
-                                WHERE       (sikeu.DTL_RKA.ID_DTL_RKA = @IDDetailRKA)
+                                  WHERE       (sikeu.DTL_RKA.ID_DTL_RKA = @IDDetailRKA)
                             end
                         else
                             begin
@@ -329,7 +334,7 @@ namespace SISPRA.DAO
             }
         }
 
-        public DBOutput getPencairanInvestasi(string id_unit, string unit)
+        public DBOutput getPencairanInvestasi(string id_unit, Array unit)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -339,15 +344,16 @@ namespace SISPRA.DAO
                 try
                 {
                     string query = @"
-                        SELECT      TPI.*
+                        SELECT      TPI.*, TTA.TAHUN_ANGGARAN, MU.NAMA_UNIT
                         FROM        sispras.TBL_PENCAIRAN_INVESTASI TPI
-                        INNER JOIN  sispras.TBL_DETAIL_PENCAIRAN_INVESTASI TDPI ON TPI.ID_PENCAIRAN_INVESTASI = TDPI.ID_PENCAIRAN_INVESTASI
-                        WHERE		TDPI.ID_DETAIL_PENCAIRAN_INVESTASI IS NOT NULL AND TPI.STATUS_APPROVAL = 0";
+                        INNER JOIN	sikeu.TBL_TAHUN_ANGGARAN TTA ON TPI.ID_TAHUN_ANGGARAN = TTA.ID_TAHUN_ANGGARAN
+                        INNER JOIN	siatmax.MST_UNIT MU ON TPI.ID_UNIT = MU.ID_UNIT
+                        WHERE		 TPI.STATUS_APPROVAL = 0";
 
-                    if (unit != "KPSP")
-                    {
-                        query += @" WHERE TPI.ID_UNIT = @id_unit";
-                    }
+                    //if (unit != "KPSP")
+                    //{
+                    //    query += @" WHERE TPI.ID_UNIT = @id_unit";
+                    //}
 
                     var data = conn.Query<dynamic>(query, new { id_unit = id_unit }).ToList();
 
@@ -387,6 +393,37 @@ namespace SISPRA.DAO
                     var data = conn.Query<dynamic>(query, new { id = id }).ToList();
 
                     output.data = data;
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public DBOutput approvePencairanInvestasi(int id)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                         UPDATE sispras.TBL_PENCAIRAN_INVESTASI 
+                         SET STATUS_APPROVAL = 1
+                         WHERE ID_PENCAIRAN_INVESTASI = @id";
+
+                    output.data = conn.Execute(query, new { id = id });
                     return output;
                 }
                 catch (Exception ex)
