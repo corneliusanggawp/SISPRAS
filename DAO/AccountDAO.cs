@@ -16,12 +16,15 @@ namespace SISPRA.DAO
                 try
                 {
                     string query = @"
-                        SELECT NPP, NAMA, FILE_FOTO, PASSWORD
+                        SELECT simka.MST_KARYAWAN.NPP, simka.MST_KARYAWAN.NAMA, simka.MST_KARYAWAN.FILE_FOTO, simka.MST_KARYAWAN.PASSWORD, simka.MST_KARYAWAN.ID_UNIT
                         FROM simka.MST_KARYAWAN
-                        WHERE USERNAME = @username";
-
+                        INNER JOIN siatmax.TBL_USER_ROLE ON simka.MST_KARYAWAN.NPP = siatmax.TBL_USER_ROLE.NPP
+                        WHERE USERNAME = @username
+                        AND siatmax.TBL_USER_ROLE.ID_SISTEM_INFORMASI = 2
+                        AND siatmax.TBL_USER_ROLE.IS_ACTIVE = 1";
+                        
                     var param = new {username = username};
-                    var data  = conn.QuerySingleOrDefault<dynamic>(query, param);
+                    var data  = conn.QueryFirstOrDefault<dynamic>(query, param);
 
                     return data;
                 }

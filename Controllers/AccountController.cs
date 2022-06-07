@@ -33,22 +33,26 @@ namespace SISPRA.Controllers
             ClaimsIdentity identity = null;
             bool isAuthenticated = false;
             var userData = dao.getUserData(username);
+            var IDUnit = Convert.ToString(userData.ID_UNIT);
 
-            if(userData != null)
+            if (userData != null)
             {
                 if(userData.PASSWORD == password)
                 {
-                    var userRole = dao.getUserRole(userData.NPP);
+                    var userRole    = dao.getUserRole(userData.NPP);
+                    if ( userData.ID_UNIT == null ) { IDUnit = "0"; }
 
                     isAuthenticated = true;
                     identity = new ClaimsIdentity(new[] {
                                         new Claim(ClaimTypes.Name, userData.NAMA),
-                                        new Claim("npp", userData.NPP)
+                                        new Claim("npp", userData.NPP),
+                                        new Claim("id_unit", IDUnit)
                                     }, CookieAuthenticationDefaults.AuthenticationScheme);
 
                     foreach (var role in userRole)
                     {
                         identity.AddClaim(new Claim(ClaimTypes.Role, role.DESKRIPSI));
+                        identity.AddClaim(new Claim("id_role", Convert.ToString(role.ID_ROLE)));
                     }
 
                 }

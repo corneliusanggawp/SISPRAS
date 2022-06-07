@@ -11,7 +11,7 @@ namespace SISPRA.DAO
 {
     public class PengelolaanInvestasiDAO
     {
-        public DBOutput getRencanaPengadaanAset(string id_unit, Array units)
+        public DBOutput getRencanaPengadaanAset(string id_unit, Array id_role)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -28,17 +28,12 @@ namespace SISPRA.DAO
                         INNER JOIN sikeu.REF_PROGRAM ON sikeu.TBL_MATA_ANGGARAN.ID_REF_PROGRAM = sikeu.REF_PROGRAM.ID_REF_PROGRAM 
                         INNER JOIN sikeu.TBL_TAHUN_ANGGARAN ON sikeu.TBL_RKA.ID_TAHUN_ANGGARAN = sikeu.TBL_TAHUN_ANGGARAN.ID_TAHUN_ANGGARAN
                         INNER JOIN siatmax.MST_UNIT ON sikeu.TBL_RPKA.ID_UNIT = siatmax.MST_UNIT.ID_UNIT
-                        WHERE (sikeu.TBL_RKA.ID_TAHUN_ANGGARAN = 2013) AND (siatmax.MST_UNIT.MST_ID_UNIT = 14)";
+                        WHERE (sikeu.TBL_RKA.ID_TAHUN_ANGGARAN = 2013)";
 
-                    foreach (var unit in units)
+                    if(Array.IndexOf(id_role, "9") != -1 && Array.IndexOf(id_role, "13") != -1 && Array.IndexOf(id_role, "14") != -1 && id_unit != "0")
                     {
-                        if ((string)unit != "KPSP")
-                        {
-                            query += @" WHERE ID_UNIT = @id_unit";
-                        }
+                        query += @" AND siatmax.MST_UNIT.MST_ID_UNIT = @id_unit";
                     }
-
-                    //units.Contains("sada");
 
                     var data = conn.Query<dynamic>(query, new { id_unit = id_unit }).ToList();
 
@@ -295,6 +290,7 @@ namespace SISPRA.DAO
                     string query = @"
                         SELECT *
                         FROM sispras.REF_KATEGORI";
+
                     var data = conn.Query<dynamic>(query).ToList();
 
                     return data;
@@ -334,7 +330,7 @@ namespace SISPRA.DAO
             }
         }
 
-        public DBOutput getPencairanInvestasi(string id_unit, Array unit)
+        public DBOutput getPencairanInvestasi(string id_unit, Array id_role)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -348,12 +344,12 @@ namespace SISPRA.DAO
                         FROM        sispras.TBL_PENCAIRAN_INVESTASI TPI
                         INNER JOIN	sikeu.TBL_TAHUN_ANGGARAN TTA ON TPI.ID_TAHUN_ANGGARAN = TTA.ID_TAHUN_ANGGARAN
                         INNER JOIN	siatmax.MST_UNIT MU ON TPI.ID_UNIT = MU.ID_UNIT
-                        WHERE		 TPI.STATUS_APPROVAL = 0";
+                        WHERE		TPI.STATUS_APPROVAL = 0";
 
-                    //if (unit != "KPSP")
-                    //{
-                    //    query += @" WHERE TPI.ID_UNIT = @id_unit";
-                    //}
+                    if (Array.IndexOf(id_role, "9") != -1 && Array.IndexOf(id_role, "13") != -1 && Array.IndexOf(id_role, "14") != -1 && id_unit != "0")
+                    {
+                        query += @" AND siatmax.MST_UNIT.MST_ID_UNIT = @id_unit";
+                    }
 
                     var data = conn.Query<dynamic>(query, new { id_unit = id_unit }).ToList();
 

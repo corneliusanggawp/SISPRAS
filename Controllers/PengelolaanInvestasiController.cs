@@ -30,10 +30,10 @@ namespace SISPRA.Controllers
 
         public IActionResult RencanaPengadaanAset()
         {
-            var id_unit = User.Claims.Where(c => c.Type == "id_unit").Select(c => c.Value).SingleOrDefault();
-            var role    = User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray();
+            var id_unit    = User.Claims.Where(c => c.Type == "id_unit").Select(c => c.Value).ToString();
+            var id_role    = User.Claims.Where(c => c.Type == "id_role").Select(c => c.Value).ToArray();
 
-            var RKA = mainDAO.getRencanaPengadaanAset(id_unit, role);
+            var RKA = mainDAO.getRencanaPengadaanAset(id_unit, id_role);
             myObj.status = (!RKA.status) ? RKA.pesan : "";
             myObj.RKA = RKA.data;
 
@@ -46,10 +46,10 @@ namespace SISPRA.Controllers
 
         public IActionResult ApprovalPencairanInvestasi()
         {
-            var id_unit = User.Claims.Where(c => c.Type == "id_unit").Select(c => c.Value).SingleOrDefault();
-            var role = User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray();
+            var id_unit = User.Claims.Where(c => c.Type == "id_unit").Select(c => c.Value).ToString();
+            var id_role = User.Claims.Where(c => c.Type == "id_role").Select(c => c.Value).ToArray();
 
-            var pencairanInvestasi = mainDAO.getPencairanInvestasi(id_unit, role);
+            var pencairanInvestasi = mainDAO.getPencairanInvestasi(id_unit, id_role);
             myObj.status = (!pencairanInvestasi.status) ? pencairanInvestasi.pesan : "";
             myObj.pencairanInvestasi = pencairanInvestasi.data;
 
