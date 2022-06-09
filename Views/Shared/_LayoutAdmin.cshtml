@@ -1,9 +1,16 @@
 ﻿@using System;
 @using System.Linq;
 @using System.Security.Claims
+@using SISPRA.DAO;
 
 @{
-    var role =  User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray();
+    MasterDAO masterDAO = new MasterDAO();
+
+    var role    =  User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray();
+    var id_role =  User.Claims.Where(c => c.Type == "id_role").Select(c => c.Value).ToArray();
+
+    var mainMenu    = masterDAO.getAllMenu(id_role);
+    var subMenu     = masterDAO.getAllSubMenu(id_role);
 }
 
 <!DOCTYPE html>
@@ -196,6 +203,44 @@
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="nav-icon fas fa-home"></i>
+                                <p> Beranda </p>
+                            </a>
+                        </li>
+                        @foreach (var main in mainMenu)
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="@main.LINK" asp-action="Index">
+                                <i class="nav-icon @main.ICON"></i>
+                                <p> 
+                                    @main.DESKRIPSI
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                @foreach (var sub in subMenu)
+                               {
+                                       if(@sub.ID_SI_MENU == @main.ID_SI_MENU)
+                                        {
+                                            <li class="nav-item">
+                                                <a class="nav-link" asp-area="" asp-controller="@main.LINK" asp-action="@sub.LINK">
+                                                    <i class="far fa-circle nav-icon"></i>
+                                                    <p>@sub.DESKRIPSI</p>
+                                                </a>
+                                            </li>                                            
+                                        }
+                               }
+                           </ul>
+                        </li>                                         
+                        }
+                    </ul>
+                </nav>
+
+
+@*                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
@@ -225,7 +270,7 @@
                             </ul>
                         </li>
                     </ul>
-                </nav>
+                </nav>*@
                 <!-- /.sidebar-menu -->
             </div>
             <!-- /.sidebar -->
