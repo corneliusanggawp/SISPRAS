@@ -28,7 +28,11 @@ namespace SISPRA.DAO
                         INNER JOIN sikeu.REF_PROGRAM ON sikeu.TBL_MATA_ANGGARAN.ID_REF_PROGRAM = sikeu.REF_PROGRAM.ID_REF_PROGRAM 
                         INNER JOIN sikeu.TBL_TAHUN_ANGGARAN ON sikeu.TBL_RKA.ID_TAHUN_ANGGARAN = sikeu.TBL_TAHUN_ANGGARAN.ID_TAHUN_ANGGARAN
                         INNER JOIN siatmax.MST_UNIT ON sikeu.TBL_RPKA.ID_UNIT = siatmax.MST_UNIT.ID_UNIT
-                        WHERE (sikeu.TBL_RKA.ID_TAHUN_ANGGARAN = 2013)";
+                        WHERE sikeu.TBL_RKA.ID_TAHUN_ANGGARAN IN (
+							SELECT ID_TAHUN_ANGGARAN
+							FROM sikeu.TBL_TAHUN_ANGGARAN
+							WHERE IS_CURRENT = 1 
+                        )";
 
                     if(Array.IndexOf(id_role, "9") != -1 && Array.IndexOf(id_role, "13") != -1 && Array.IndexOf(id_role, "14") != -1 && id_unit != "0")
                     {
@@ -344,7 +348,12 @@ namespace SISPRA.DAO
                         FROM        sispras.TBL_PENCAIRAN_INVESTASI TPI
                         INNER JOIN	sikeu.TBL_TAHUN_ANGGARAN TTA ON TPI.ID_TAHUN_ANGGARAN = TTA.ID_TAHUN_ANGGARAN
                         INNER JOIN	siatmax.MST_UNIT MU ON TPI.ID_UNIT = MU.ID_UNIT
-                        WHERE		TPI.STATUS_APPROVAL = 0";
+                        WHERE		TPI.STATUS_APPROVAL = 0
+                        AND TTA.ID_TAHUN_ANGGARAN IN (
+							SELECT ID_TAHUN_ANGGARAN
+							FROM sikeu.TBL_TAHUN_ANGGARAN
+							WHERE IS_CURRENT = 0
+                        )";
 
                     if (Array.IndexOf(id_role, "9") != -1 && Array.IndexOf(id_role, "13") != -1 && Array.IndexOf(id_role, "14") != -1 && id_unit != "0")
                     {
@@ -435,6 +444,47 @@ namespace SISPRA.DAO
                 }
             }
         }
+
+        public DBOutput getRekapPengadaanInvestasi(string id_unit, Array id_role)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT DPI.*, RSK.DESKRIPSI AS SUB_KATEGORI, PI.ID_UNIT
+                        FROM sispras.TBL_DETAIL_PENCAIRAN_INVESTASI DPI
+                        INNER JOIN sispras.REF_SUB_KATEGORI RSK ON DPI.ID_REF_SK = RSK.ID_REF_SK
+                        INNER JOIN sispras.TBL_PENCAIRAN_INVESTASI PI ON DPI.ID_PENCAIRAN_INVESTASI = PI.ID_PENCAIRAN_INVESTASI
+                        WHERE ID_UNIT = @id_unit";
+
+                    //if (Array.IndexOf(id_role, "9") != -1 && Array.IndexOf(id_role, "13") != -1 && Array.IndexOf(id_role, "14") != -1 && id_unit != "0")
+                    //{
+                    //    query += @" AND siatmax.MST_UNIT.MST_ID_UNIT = @id_unit";
+                    //}
+
+                    var data = conn.Query<dynamic>(query, new { id_unit = id_unit }).ToList();
+
+                    output.data = data;
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
 
     }
 }

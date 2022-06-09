@@ -130,7 +130,8 @@ namespace SISPRA.DAO
                 {
                     string query = @"
                         SELECT *
-                        FROM sikeu.TBL_TAHUN_ANGGARAN";
+                        FROM sikeu.TBL_TAHUN_ANGGARAN
+                        WHERE IS_CURRENT = 1";
                     var data = conn.Query<dynamic>(query).ToList();
 
                     return data;

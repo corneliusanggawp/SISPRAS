@@ -79,7 +79,7 @@ namespace SISPRA.Controllers
             }
         }
 
-        public IActionResult LogOut()
+        public IActionResult Logout()
         {
             var login = HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");

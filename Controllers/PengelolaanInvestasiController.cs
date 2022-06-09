@@ -9,7 +9,6 @@ using System.Security.Claims;
 
 namespace SISPRA.Controllers
 {
-    [Authorize(Roles = "KPSP")]
     public class PengelolaanInvestasiController : Controller
     {
         dynamic myObj;
@@ -28,6 +27,7 @@ namespace SISPRA.Controllers
             return View();
         }
 
+        [Authorize(Roles = "KPSP, Unit")]
         public IActionResult RencanaPengadaanAset()
         {
             var id_unit    = User.Claims.Where(c => c.Type == "id_unit").Select(c => c.Value).ToString();
@@ -37,13 +37,15 @@ namespace SISPRA.Controllers
             myObj.status = (!RKA.status) ? RKA.pesan : "";
             myObj.RKA = RKA.data;
 
-            myObj.unit = masterDAO.getAllUnit();
-            myObj.kategori = mainDAO.getAllKategori();
-            myObj.subKategori = mainDAO.getAllSubKategori();
+            myObj.unit          = masterDAO.getAllUnit();
+            myObj.tahun         = masterDAO.getAllTahunAnggaran();
+            myObj.kategori      = mainDAO.getAllKategori();
+            myObj.subKategori   = mainDAO.getAllSubKategori();
 
             return View(myObj);
         }
 
+        [Authorize(Roles = "KPSP")]
         public IActionResult ApprovalPencairanInvestasi()
         {
             var id_unit = User.Claims.Where(c => c.Type == "id_unit").Select(c => c.Value).ToString();
@@ -53,13 +55,31 @@ namespace SISPRA.Controllers
             myObj.status = (!pencairanInvestasi.status) ? pencairanInvestasi.pesan : "";
             myObj.pencairanInvestasi = pencairanInvestasi.data;
 
-            myObj.unit = masterDAO.getAllUnit();
+            myObj.unit          = masterDAO.getAllUnit();
+            myObj.tahun         = masterDAO.getAllTahunAnggaran();
             myObj.tahunAnggaran = masterDAO.getAllTahunAnggaran();
-            myObj.bulanPengadaan = "";
+            myObj.bulanPengadaan= "";
 
             return View(myObj);
         }
 
+        [Authorize(Roles = "Unit")]
+        public IActionResult RekapPengadaanInvestasiUnit()
+        {
+            var id_unit = User.Claims.Where(c => c.Type == "id_unit").Select(c => c.Value).ToString();
+            var id_role = User.Claims.Where(c => c.Type == "id_role").Select(c => c.Value).ToArray();
+
+            var RKI = mainDAO.getRekapPengadaanInvestasi(id_unit, id_role);
+            myObj.status = (!RKI.status) ? RKI.pesan : "";
+            myObj.RKI = RKI.data;
+
+            myObj.unit          = masterDAO.getAllUnit();
+            myObj.tahun         = masterDAO.getAllTahunAnggaran();
+            myObj.kategori      = mainDAO.getAllKategori();
+            myObj.subKategori   = mainDAO.getAllSubKategori();
+
+            return View(myObj);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

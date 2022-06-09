@@ -1,0 +1,149 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Rekap Pengadaan Investasi Unit";
+}
+
+<div class="row">
+    <div class="col-12">
+        @if (TempData["success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="background-color:green">
+                <strong>@TempData["success"].ToString()</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+        @if (TempData["error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>@TempData["error"].ToString()</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+        <div class="card">
+            <div class="card-header">
+                <div class="form-group">
+                    <label>Tahun</label>
+                    <select class="form-control" style="width: 100%;">
+                        <option value="" style="display: none;" disabled selected>Pilih unit</option>
+                        @foreach (var tahun in Model.tahun)
+                       {
+                        <option value="@tahun.ID_TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
+                       }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Unit</label>
+                    <select class="form-control" style="width: 100%;">
+                        <option value="" style="display: none;" disabled selected>Pilih unit</option>
+                        @foreach (var unit in Model.unit)
+                       {
+                        <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
+                       }
+                    </select>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <table id="tabelRekapPengadaanInvestasi" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Nama Barang</th>
+                            <th class="text-center">Merk</th>
+                            <th class="text-center">Spesifikasi</th>
+                            <th class="text-center">Sub Kategori</th>
+                            <th class="text-center">Satuan</th>
+                            <th class="text-center">Harga Satuan</th>
+                            <th class="text-center">Jumlah</th>
+                            <th class="text-center">Total</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody> 
+                        @foreach (var RekapPengadaanInvestasi in Model.RKI)
+                       {
+                        <tr>
+                            <td>@RekapPengadaanInvestasi.NAMA_PENGADAAN</td>
+                            <td>@RekapPengadaanInvestasi.MERK</td>
+                            <td>@RekapPengadaanInvestasi.SPESIFIKASI</td>
+                            <td>@RekapPengadaanInvestasi.SUB_KATEGORI</td>
+                            <td>@RekapPengadaanInvestasi.SATUAN</td>
+                            <td>@RekapPengadaanInvestasi.HARGA_SATUAN</td>
+                            <td class="text-center">@RekapPengadaanInvestasi.JUMLAH</td>
+                            <td>Rp @(RekapPengadaanInvestasi.JUMLAH * RekapPengadaanInvestasi.HARGA_SATUAN)</td>
+                            @if(@RekapPengadaanInvestasi.IS_PO){
+                                 <td>Sudah PO</td>
+                            }
+                            else
+                            {
+                                <td>Belum PO</td>
+                            }
+                        </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th class="text-center">Nama Barang</th>
+                            <th class="text-center">Merk</th>
+                            <th class="text-center">Spesifikasi</th>
+                            <th class="text-center">Sub Kategori</th>
+                            <th class="text-center">Satuan</th>
+                            <th class="text-center">Harga Satuan</th>
+                            <th class="text-center">Jumlah</th>
+                            <th class="text-center">Total</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script> 
+        var tabelRekapPengadaanInvestasi;
+
+        refreshTabelRekapPengadaanInvestasi();
+
+        $('.select2').select2();
+
+        $('.select2bs4').select2({
+            theme: 'bootstrap4'
+        });
+
+
+        function refreshTabelRekapPengadaanInvestasi() {
+            tabelRencanaPengadaanAset = $("#tabelRekapPengadaanInvestasi").DataTable({
+                paging: true,
+                lengthChange: false,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true,
+                buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
+            }).buttons().container().appendTo('#tabelRekapPengadaanInvestasi_wrapper .col-md-6:eq(0)');
+        }
+
+        function getKategori(IDRefSK){
+            $.ajax({
+                url: "/PengelolaanInvestasi/ajaxGetKategori",
+                type: "POST",
+                data: { "IDRefSK": IDRefSK },
+                dataType: "json",
+                success: function (result) {
+                    var IDKategori = result.data;
+
+                    $("#IDKategori").val(IDKategori);
+                }
+            })
+        }
+
+    </script>
+}
