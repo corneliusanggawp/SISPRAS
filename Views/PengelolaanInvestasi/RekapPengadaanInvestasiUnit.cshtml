@@ -6,6 +6,64 @@
 
 <div class="row">
     <div class="col-12">
+        <div class="card card-primary">
+             <div class="card-header">
+                <h3 class="card-title">Filter</h3>
+            </div>
+            
+            <!-- /.card-header -->
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4">
+                         <div class="form-group">
+                            <label>Tahun</label>
+                            <select class="form-control" style="width: 100%;">
+                                <option value="" style="display: none;" disabled selected>Pilih tahun...</option>
+                                @foreach (var tahun in Model.tahun)
+                                {
+                                <option value="@tahun.ID_TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label>Bulan</label>
+                            <select class="form-control" style="width: 100%;">
+                                <option value="" style="display: none;" disabled selected>Pilih bulan...</option>
+                                <option value="Januari">Januari</option>
+                                <option value="Februari">Februari</option>
+                                <option value="Maret">Maret</option>
+                                <option value="April">April</option>
+                                <option value="Mei">Mei</option>
+                                <option value="Juni">Juni</option>
+                                <option value="Juli">Juli</option>
+                                <option value="Agustus">Agustus</option>
+                                <option value="September">September</option>
+                                <option value="Oktober">Oktober</option>
+                                <option value="November">November</option>
+                                <option value="Desember">Desember</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label>Unit</label>
+                            <select class="form-control" style="width: 100%;">
+                                <option value="" style="display: none;" disabled selected>Pilih unit...</option>
+                                @foreach (var unit in Model.unit)
+                               {
+                                <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
+                               }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
         @if (TempData["success"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show" role="alert" style="background-color:green">
@@ -24,30 +82,8 @@
                 </button>
             </div>
         }
+
         <div class="card">
-            <div class="card-header">
-                <div class="form-group">
-                    <label>Tahun</label>
-                    <select class="form-control" style="width: 100%;">
-                        <option value="" style="display: none;" disabled selected>Pilih unit</option>
-                        @foreach (var tahun in Model.tahun)
-                       {
-                        <option value="@tahun.ID_TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
-                       }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Unit</label>
-                    <select class="form-control" style="width: 100%;">
-                        <option value="" style="display: none;" disabled selected>Pilih unit</option>
-                        @foreach (var unit in Model.unit)
-                       {
-                        <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
-                       }
-                    </select>
-                </div>
-            </div>
-            <!-- /.card-header -->
             <div class="card-body">
                 <table id="tabelRekapPengadaanInvestasi" class="table table-bordered table-hover">
                     <thead>
@@ -60,7 +96,7 @@
                             <th class="text-center">Harga Satuan</th>
                             <th class="text-center">Jumlah</th>
                             <th class="text-center">Total</th>
-                            <th class="text-center">Status</th>
+                            <th class="text-center">PO</th>
                         </tr>
                     </thead>
                     <tbody> 
@@ -72,16 +108,24 @@
                             <td>@RekapPengadaanInvestasi.SPESIFIKASI</td>
                             <td>@RekapPengadaanInvestasi.SUB_KATEGORI</td>
                             <td>@RekapPengadaanInvestasi.SATUAN</td>
-                            <td>@RekapPengadaanInvestasi.HARGA_SATUAN</td>
+                            <td>Rp @RekapPengadaanInvestasi.HARGA_SATUAN</td>
                             <td class="text-center">@RekapPengadaanInvestasi.JUMLAH</td>
                             <td>Rp @(RekapPengadaanInvestasi.JUMLAH * RekapPengadaanInvestasi.HARGA_SATUAN)</td>
-                            @if(@RekapPengadaanInvestasi.IS_PO){
-                                 <td>Sudah PO</td>
-                            }
-                            else
-                            {
-                                <td>Belum PO</td>
-                            }
+                            <td>
+                                @if(@RekapPengadaanInvestasi.IS_PO){
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" checked disabled>
+                                        <label class="custom-control-label"></label>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" unchecked disabled>
+                                        <label class="custom-control-label"></label>
+                                    </div>  
+                                }
+                            </td>
                         </tr>
                         }
                     </tbody>

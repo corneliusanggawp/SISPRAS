@@ -1,0 +1,262 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Purchase Order Investasi";
+}
+
+@section Header{
+    <link rel="stylesheet" href="~/lib/jquery-datatables-checkboxes-1.2.12/css/dataTables.checkboxes.css">
+}
+
+<div class="row">
+    <div class="col-md-3">
+        <!-- About Me Box -->
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Filter</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <div class="form-group">
+                    <label>Tahun</label>
+                    <select class="form-control" style="width: 100%;">
+                        <option value="" style="display: none;" disabled selected>Pilih tahun</option>
+                        @foreach (var tahun in Model.tahun)
+                        {
+                        <option value="@tahun.ID_TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Bulan</label>
+                    <select class="form-control" style="width: 100%;">
+                        <option value="" style="display: none;" disabled selected>Pilih unit</option>
+                        <option value="Januari">Januari</option>
+                        <option value="Februari">Februari</option>
+                        <option value="Maret">Maret</option>
+                        <option value="April">April</option>
+                        <option value="Mei">Mei</option>
+                        <option value="Juni">Juni</option>
+                        <option value="Juli">Juli</option>
+                        <option value="Agustus">Agustus</option>
+                        <option value="September">September</option>
+                        <option value="Oktober">Oktober</option>
+                        <option value="November">November</option>
+                        <option value="Desember">Desember</option>
+                    </select>
+                </div>
+
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+
+    <div class="col-md-9">
+        <form class="formDetailPencairanInvestasi" method="post" asp-action="approvalPurchaseOrder" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
+            @Html.AntiForgeryToken()
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h3 class="card-title">Input Purchase Order *</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>Nomor PO</label>
+                                <input id="noPO" name="noPO" type="number" class="form-control" placeholder="Masukan Nomor PO..." required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>Tanggal PO</label>
+                                <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                                    <input id="tanggalPO" name="tanggalPO" type="text" class="form-control datetimepicker-input" placeholder="dd/mm/yy" data-target="#reservationdate" required/>
+                                    <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                                        <div class="input-group-text btn"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input id="idDetailPencairanInvestasi" name="idDetailPencairanInvestasi" type="hidden" class="form-control" required>
+                    <div class="form-group">
+                        <label>Total PO</label>
+                        <div class="input-group">
+                            <input id="totalPO" type="text" class="form-control" placeholder="Rp 0" disabled required>
+                            <span class="input-group-append">
+                                <button id="btnProsesPO" type="submit" class="btn btn-primary">Proses</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </form>
+    </div>
+
+
+    <div class="col-12">
+        @if (TempData["success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="background-color:green">
+                <strong>@TempData["success"].ToString()</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+        @if (TempData["error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>@TempData["error"].ToString()</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+@*        <div class="callout callout-info">
+            <h5><i class="fas fa-info"></i> Note:</h5>
+            This page has been enhanced for printing. Click the print button at the bottom of the invoice to test.
+        </div>*@
+
+        <div class="card">
+            <form class="formPurchaseOrderInvestasi" method="post" asp-action="approvalPurchaseOrderInvestasi" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
+            @Html.AntiForgeryToken()
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tabelDetailPencairanInvestasi" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th class="text-center">Nama Barang</th>
+                                <th class="text-center">Merk</th>
+                                <th class="text-center">Harga Satuan</th>
+                                <th class="text-center">Jumlah</th>
+                                <th class="text-center">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody> 
+                            @foreach (var DetailPencairanInvestasi in Model.detailPencairanInvestasi) { 
+                            <tr>
+                                <td>@DetailPencairanInvestasi.ID_DETAIL_PENCAIRAN_INVESTASI</td>
+                                <td>@DetailPencairanInvestasi.NAMA_PENGADAAN</td>
+                                <td>@DetailPencairanInvestasi.MERK</td>
+                                <td>Rp @DetailPencairanInvestasi.HARGA_SATUAN</td>
+                                <td class="text-center">@DetailPencairanInvestasi.JUMLAH</td>
+                                <td>Rp @(DetailPencairanInvestasi.JUMLAH * DetailPencairanInvestasi.HARGA_SATUAN)</td>
+                            </tr> 
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th></th>
+                                <th class="text-center">Nama Barang</th>
+                                <th class="text-center">Merk</th>
+                                <th class="text-center">Harga Satuan</th>
+                                <th class="text-center">Jumlah</th>
+                                <th class="text-center">Total</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts{  
+    <!-- Select -->
+    <script src="~/lib/datatables-select/js/dataTables.select.min.js"></script>    
+    <!-- CheckBox -->
+    <script src="~/lib/jquery-datatables-checkboxes-1.2.12/js/dataTables.checkboxes.min.js"></script>
+    <!-- InputMask -->
+    <script src="~/lib/moment/moment.min.js"></script>
+    <script src="~/lib/inputmask/jquery.inputmask.min.js"></script>
+    <!-- date-range-picker -->
+    <script src="~/lib/daterangepicker/daterangepicker.js"></script>
+    <!-- Tempusdominus Bootstrap 4 -->
+    <script src="~/lib/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+
+    <script>
+        var tabelDetailPencairanInvestasi;
+        refreshTabelDetailPencairanInvestasi();
+
+        $('#reservationdate').datetimepicker({
+            format: 'L'
+        });
+        
+        var tabel      = $('#tabelDetailPencairanInvestasi').DataTable();
+        var totalDetailPencairanInvestasi = 0;
+        var idDetailPencairanInvestasiArray = [];
+
+        tabel
+            .on( 'select', function ( e, dt, type, indexes ) {
+                var selectID = tabel.cells( indexes, 0 ).data().toArray();
+                var addTotal   = tabel.cells( indexes, 5 ).data().sum();
+
+                totalDetailPencairanInvestasi += addTotal;
+
+                idDetailPencairanInvestasiArray.push(...selectID);
+
+                $('#idDetailPencairanInvestasi').val(idDetailPencairanInvestasiArray);
+                $('#totalPO').val("Rp " +totalDetailPencairanInvestasi);
+
+                //$('#idDetailPencairanInvestasi').val(idDetailPencairanInvestasi);
+                //$('#totalPO').val("Rp " +totalDetailPencairanInvestasi);
+
+                //var rowData = tabel.rows( indexes ).data().toArray();
+                //console.log( 'Row Selection ' +rowData[0][0] );
+            } )
+            .on( 'deselect', function ( e, dt, type, indexes ) {
+                var deselectIDArray = tabel.cells( indexes, 0 ).data().toArray();
+                var minTotal   = tabel.cells( indexes, 5 ).data().sum();
+
+                //console.log('Selected : ' +JSON.stringify(idDetailPencairanInvestasiArray) );
+                //console.log('Deselect : ' +JSON.stringify(deselectIDArray) );
+
+                idDetailPencairanInvestasiArray = idDetailPencairanInvestasiArray.filter(a => !deselectIDArray.includes(a));
+                totalDetailPencairanInvestasi   -= minTotal;
+
+                $('#idDetailPencairanInvestasi').val(idDetailPencairanInvestasiArray);
+                $('#totalPO').val("Rp " +totalDetailPencairanInvestasi);
+            } );
+
+        function refreshTabelDetailPencairanInvestasi() {
+            tabelPencairanInvestasi = $("#tabelDetailPencairanInvestasi").DataTable({
+                columnDefs: [ {
+                    targets     :   0,
+                    checkboxes  : {
+                        selectRow: true
+                    }
+                } ],
+                select: {
+                    style       : 'multi'
+                },
+                paging: true,
+                lengthChange: false,
+                searching: true,
+                ordering: false,
+                info: true,
+                autoWidth: false,
+                responsive: true,
+            }).buttons().container().appendTo('#tabelDetailPencairanInvestasi_wrapper .col-md-6:eq(0)');
+        }
+
+        jQuery.fn.dataTable.Api.register( 'sum()', function ( ) {
+	        return this.flatten().reduce( function ( a, b ) {
+		        if ( typeof a === 'string' ) {
+			        a = a.replace(/[^\d.-]/g, '') * 1;
+		        }
+		        if ( typeof b === 'string' ) {
+			        b = b.replace(/[^\d.-]/g, '') * 1;
+		        }
+
+		        return a + b;
+	        }, 0 );
+        } );
+    </script>
+}

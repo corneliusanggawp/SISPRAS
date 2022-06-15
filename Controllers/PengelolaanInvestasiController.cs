@@ -81,6 +81,26 @@ namespace SISPRA.Controllers
             return View(myObj);
         }
 
+        [Authorize(Roles = "KPSP")]
+        public IActionResult PurchaseOrderInvestasi()
+        {
+            var id_unit = User.Claims.Where(c => c.Type == "id_unit").Select(c => c.Value).ToString();
+            var id_role = User.Claims.Where(c => c.Type == "id_role").Select(c => c.Value).ToArray();
+
+            var detailPencairanInvestasi = mainDAO.getDetailPencairanInvestasi();
+            myObj.status = (!detailPencairanInvestasi.status) ? detailPencairanInvestasi.pesan : "";
+            myObj.detailPencairanInvestasi = detailPencairanInvestasi.data;
+
+            myObj.unit              = masterDAO.getAllUnit();
+            myObj.tahun             = masterDAO.getAllTahunAnggaran();
+            myObj.tahunAnggaran     = masterDAO.getAllTahunAnggaran();
+            myObj.bulanPengadaan    = "";
+            myObj.supplier          = mainDAO.getAllSupplier();
+
+            return View(myObj);
+        }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult addPencairanInvestasi(DetailRencanaPengadaanAset DTLRPA)
@@ -160,6 +180,8 @@ namespace SISPRA.Controllers
 
             return RedirectToAction("ApprovalPencairanInvestasi");
         }
+
+
 
         public JsonResult ajaxGetDetailRencanaKhususInvestasi(int id)
         {
