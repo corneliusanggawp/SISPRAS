@@ -1,7 +1,11 @@
-﻿
+﻿@using System;
+@using System.Globalization;
+
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Purchase Order Investasi";
+
+    CultureInfo culture = new CultureInfo("id-ID");
 }
 
 @section Header{
@@ -19,7 +23,7 @@
             <div class="card-body">
                 <div class="form-group">
                     <label>Tahun</label>
-                    <select class="form-control" style="width: 100%;">
+                    <select class="form-control select2bs4" style="width: 100%;">
                         <option value="" style="display: none;" disabled selected>Pilih tahun</option>
                         @foreach (var tahun in Model.tahun)
                         {
@@ -30,7 +34,7 @@
 
                 <div class="form-group">
                     <label>Bulan</label>
-                    <select class="form-control" style="width: 100%;">
+                    <select class="form-control select2bs4" style="width: 100%;">
                         <option value="" style="display: none;" disabled selected>Pilih unit</option>
                         <option value="Januari">Januari</option>
                         <option value="Februari">Februari</option>
@@ -54,7 +58,7 @@
     </div>
 
     <div class="col-md-9">
-        <form class="formDetailPencairanInvestasi" method="post" asp-action="approvalPurchaseOrder" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
+        <form class="formPurchaseOrder" method="post" asp-action="addPurchaseOrder" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
             @Html.AntiForgeryToken()
             <div class="card card-primary">
                 <div class="card-header">
@@ -62,13 +66,25 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-6">
+                        <div class="col-4">
                             <div class="form-group">
                                 <label>Nomor PO</label>
-                                <input id="noPO" name="noPO" type="number" class="form-control" placeholder="Masukan Nomor PO..." required>
+                                <input id="nomorPO" name="nomorPO" type="number" class="form-control" placeholder="Masukan Nomor PO..." required>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Supplier</label>
+                                <select id="IDSupplier" name="IDSupplier" class="form-control select2bs4" required>
+                                    <option value="" style="display: none;" disabled selected>Pilih supplier...</option>
+                                    @foreach (var supplier in Model.supplier)
+                                    {
+                                    <option value="@supplier.ID_SUPPLIER">@supplier.NAMA_SUPPLIER</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-4">
                             <div class="form-group">
                                 <label>Tanggal PO</label>
                                 <div class="input-group date" id="reservationdate" data-target-input="nearest">
@@ -80,13 +96,13 @@
                             </div>
                         </div>
                     </div>
-                    <input id="idDetailPencairanInvestasi" name="idDetailPencairanInvestasi" type="hidden" class="form-control" required>
+                    <input id="IDDetailPencairanInvestasi" name="IDDetailPencairanInvestasi" type="hidden" class="form-control" readonly="readonly" required>
                     <div class="form-group">
                         <label>Total PO</label>
                         <div class="input-group">
-                            <input id="totalPO" type="text" class="form-control" placeholder="Rp 0" disabled required>
+                            <input id="totalPO" name="totalPO" type="text" class="form-control" placeholder="0" readonly="readonly" required>
                             <span class="input-group-append">
-                                <button id="btnProsesPO" type="submit" class="btn btn-primary">Proses</button>
+                                <button id="btnProsesPO" type="submit" class="btn btn-primary" disabled>Proses</button>
                             </span>
                         </div>
                     </div>
@@ -117,53 +133,46 @@
                 </button>
             </div>
         }
-@*        <div class="callout callout-info">
-            <h5><i class="fas fa-info"></i> Note:</h5>
-            This page has been enhanced for printing. Click the print button at the bottom of the invoice to test.
-        </div>*@
 
         <div class="card">
-            <form class="formPurchaseOrderInvestasi" method="post" asp-action="approvalPurchaseOrderInvestasi" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
-            @Html.AntiForgeryToken()
-                <!-- /.card-header -->
-                <div class="card-body">
-                    <table id="tabelDetailPencairanInvestasi" class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th class="text-center">Nama Barang</th>
-                                <th class="text-center">Merk</th>
-                                <th class="text-center">Harga Satuan</th>
-                                <th class="text-center">Jumlah</th>
-                                <th class="text-center">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody> 
-                            @foreach (var DetailPencairanInvestasi in Model.detailPencairanInvestasi) { 
-                            <tr>
-                                <td>@DetailPencairanInvestasi.ID_DETAIL_PENCAIRAN_INVESTASI</td>
-                                <td>@DetailPencairanInvestasi.NAMA_PENGADAAN</td>
-                                <td>@DetailPencairanInvestasi.MERK</td>
-                                <td>Rp @DetailPencairanInvestasi.HARGA_SATUAN</td>
-                                <td class="text-center">@DetailPencairanInvestasi.JUMLAH</td>
-                                <td>Rp @(DetailPencairanInvestasi.JUMLAH * DetailPencairanInvestasi.HARGA_SATUAN)</td>
-                            </tr> 
-                            }
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <th></th>
-                                <th class="text-center">Nama Barang</th>
-                                <th class="text-center">Merk</th>
-                                <th class="text-center">Harga Satuan</th>
-                                <th class="text-center">Jumlah</th>
-                                <th class="text-center">Total</th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-                <!-- /.card-body -->
-            </form>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <table id="tabelDetailPencairanInvestasi" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th class="text-center">Nama Barang</th>
+                            <th class="text-center">Merk</th>
+                            <th class="text-center">Harga Satuan</th>
+                            <th class="text-center">Jumlah</th>
+                            <th class="text-center">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var DetailPencairanInvestasi in Model.detailPencairanInvestasi) {
+                        <tr>
+                            <td>@DetailPencairanInvestasi.ID_DETAIL_PENCAIRAN_INVESTASI</td>
+                            <td>@DetailPencairanInvestasi.NAMA_PENGADAAN</td>
+                            <td>@DetailPencairanInvestasi.MERK</td>
+                            <td>@((DetailPencairanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                            <td class="text-center">@DetailPencairanInvestasi.JUMLAH</td>
+                            <td>@((DetailPencairanInvestasi.JUMLAH * DetailPencairanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                        </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th class="text-center">Nama Barang</th>
+                            <th class="text-center">Merk</th>
+                            <th class="text-center">Harga Satuan</th>
+                            <th class="text-center">Jumlah</th>
+                            <th class="text-center">Total</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <!-- /.card-body -->
         </div>
     </div>
 </div>
@@ -189,41 +198,65 @@
             format: 'L'
         });
         
+        $('.select2bs4').select2({
+            theme: 'bootstrap4'
+        })  
+        
         var tabel      = $('#tabelDetailPencairanInvestasi').DataTable();
+        var rowIndex = [];
         var totalDetailPencairanInvestasi = 0;
         var idDetailPencairanInvestasiArray = [];
+        var formatRupiah = (number) => {
+           return new Intl.NumberFormat('id-ID',
+             { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }
+           ).format(number);
+        }
 
         tabel
             .on( 'select', function ( e, dt, type, indexes ) {
-                var selectID = tabel.cells( indexes, 0 ).data().toArray();
-                var addTotal   = tabel.cells( indexes, 5 ).data().sum();
+                var selectedRows = indexes.filter(x => !rowIndex.includes(x));
+                rowIndex.push(...selectedRows);
 
+                var selectedID  = tabel.cells( selectedRows, 0 ).data().toArray();
+                var addTotal    = tabel.cells( selectedRows, 5 ).data().sum();
+                
+                idDetailPencairanInvestasiArray.push(...selectedID);
                 totalDetailPencairanInvestasi += addTotal;
 
-                idDetailPencairanInvestasiArray.push(...selectID);
+                $('#IDDetailPencairanInvestasi').val(idDetailPencairanInvestasiArray);
+                $('#totalPO').val(formatRupiah(totalDetailPencairanInvestasi));
 
-                $('#idDetailPencairanInvestasi').val(idDetailPencairanInvestasiArray);
-                $('#totalPO').val("Rp " +totalDetailPencairanInvestasi);
-
-                //$('#idDetailPencairanInvestasi').val(idDetailPencairanInvestasi);
-                //$('#totalPO').val("Rp " +totalDetailPencairanInvestasi);
-
-                //var rowData = tabel.rows( indexes ).data().toArray();
-                //console.log( 'Row Selection ' +rowData[0][0] );
+                $('#btnProsesPO').prop('disabled', false);
             } )
             .on( 'deselect', function ( e, dt, type, indexes ) {
-                var deselectIDArray = tabel.cells( indexes, 0 ).data().toArray();
-                var minTotal   = tabel.cells( indexes, 5 ).data().sum();
+                rowIndex = rowIndex.filter(x => !indexes.includes(x));
 
-                //console.log('Selected : ' +JSON.stringify(idDetailPencairanInvestasiArray) );
-                //console.log('Deselect : ' +JSON.stringify(deselectIDArray) );
+                var deselectIDArray = tabel.cells( indexes, 0 ).data().toArray();
+                var minTotal        = tabel.cells( indexes, 5 ).data().sum();
 
                 idDetailPencairanInvestasiArray = idDetailPencairanInvestasiArray.filter(a => !deselectIDArray.includes(a));
                 totalDetailPencairanInvestasi   -= minTotal;
 
-                $('#idDetailPencairanInvestasi').val(idDetailPencairanInvestasiArray);
-                $('#totalPO').val("Rp " +totalDetailPencairanInvestasi);
+                $('#IDDetailPencairanInvestasi').val(idDetailPencairanInvestasiArray);
+                $('#totalPO').val(formatRupiah(totalDetailPencairanInvestasi));
+                
+                if(idDetailPencairanInvestasiArray.length == 0){
+                    $('#btnProsesPO').prop('disabled', true);
+                }
             } );
+
+        window.addEventListener('load', function () {
+            var forms = document.getElementsByClassName('formPurchaseOrder');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
 
         function refreshTabelDetailPencairanInvestasi() {
             tabelPencairanInvestasi = $("#tabelDetailPencairanInvestasi").DataTable({
@@ -249,10 +282,10 @@
         jQuery.fn.dataTable.Api.register( 'sum()', function ( ) {
 	        return this.flatten().reduce( function ( a, b ) {
 		        if ( typeof a === 'string' ) {
-			        a = a.replace(/[^\d.-]/g, '') * 1;
+			        a = a.replace(/[^\d]/g, '') * 1;
 		        }
 		        if ( typeof b === 'string' ) {
-			        b = b.replace(/[^\d.-]/g, '') * 1;
+			        b = b.replace(/[^\d]/g, '') * 1;
 		        }
 
 		        return a + b;

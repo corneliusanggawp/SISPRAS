@@ -6,6 +6,7 @@ using System;
 using System.Dynamic;
 using System.Linq;
 using System.Security.Claims;
+using System.Globalization;
 
 namespace SISPRA.Controllers
 {
@@ -14,6 +15,7 @@ namespace SISPRA.Controllers
         dynamic myObj;
         PengelolaanInvestasiDAO mainDAO;
         MasterDAO masterDAO;
+        CultureInfo culture = new CultureInfo("id-ID");
 
         public PengelolaanInvestasiController()
         {
@@ -58,7 +60,6 @@ namespace SISPRA.Controllers
             myObj.unit          = masterDAO.getAllUnit();
             myObj.tahun         = masterDAO.getAllTahunAnggaran();
             myObj.tahunAnggaran = masterDAO.getAllTahunAnggaran();
-            myObj.bulanPengadaan= "";
 
             return View(myObj);
         }
@@ -94,7 +95,6 @@ namespace SISPRA.Controllers
             myObj.unit              = masterDAO.getAllUnit();
             myObj.tahun             = masterDAO.getAllTahunAnggaran();
             myObj.tahunAnggaran     = masterDAO.getAllTahunAnggaran();
-            myObj.bulanPengadaan    = "";
             myObj.supplier          = mainDAO.getAllSupplier();
 
             return View(myObj);
@@ -103,9 +103,9 @@ namespace SISPRA.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult addPencairanInvestasi(DetailRencanaPengadaanAset DTLRPA)
+        public IActionResult addPencairanInvestasi(DetailPencairanInvestasi DTLRPA)
         {
-            RencanaPengadaanAset RPA = new RencanaPengadaanAset();
+            PencairanInvestasi RPA = new PencairanInvestasi();
 
             RPA.IDDetailRKA = DTLRPA.IDDetailRKA;
             RPA.tanggalPencairan = null;
@@ -114,7 +114,6 @@ namespace SISPRA.Controllers
             RPA.IPAddress = HttpContext.Connection.RemoteIpAddress.ToString();
             RPA.userID = User.Claims.Where(c => c.Type == "npp").Select(c => c.Value).SingleOrDefault();
             RPA.statusApproval = false;
-
 
             var inpPencairanInvestasi = mainDAO.addPencairanInvestasi(RPA);
 
@@ -144,27 +143,6 @@ namespace SISPRA.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult addDetailPencairanInvestasi(DetailRencanaPengadaanAset obj)
-        {
-            obj.imageBarang = null;
-            obj.isPO = 0;
-
-            var check = mainDAO.addDetailPencairanInvestasi(obj);
-
-            if (check.status == true)
-            {
-                TempData["success"] = "Berhasil merubah data event";
-            }
-            else
-            {
-                TempData["error"] = check.pesan;
-            }
-
-            return RedirectToAction("RencanaPengadaanAset");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult approvalPencairanInvestasi(int id)
         {
             var check = mainDAO.approvePencairanInvestasi(id);
@@ -181,7 +159,40 @@ namespace SISPRA.Controllers
             return RedirectToAction("ApprovalPencairanInvestasi");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult addPurchaseOrder(int nomorPO, int IDSupplier, String tanggalPO, String IDDetailPencairanInvestasi, String totalPO)
+        {
+            PurchaseOrderInvestasi POI = new PurchaseOrderInvestasi();
 
+            POI.nomorPO = nomorPO;
+            POI.tanggalPO = tanggalPO;
+            POI.totalTanpaPajak = decimal.Parse(totalPO, NumberStyles.Currency, culture.NumberFormat);
+            POI.pajak = POI.totalTanpaPajak;
+            POI.totalDenganPajak = POI.totalTanpaPajak + POI.pajak;
+            POI.userID  = User.Claims.Where(c => c.Type == "npp").Select(c => c.Value).SingleOrDefault();
+            POI.IPAddress   = HttpContext.Connection.RemoteIpAddress.ToString();
+            POI.insertDate  = DateTime.Now.ToString();
+            POI.IDSupplier = IDSupplier;
+            POI.isLunas = false;
+            POI.namaPO = "";
+
+            String test = IDDetailPencairanInvestasi;
+
+
+            //var check = mainDAO.approvePencairanInvestasi(nomorPO);
+
+            //if (check.status == true)
+            //{
+            //    TempData["success"] = "Berhasil memproses purchase order";
+            //}
+            //else
+            //{
+            //    TempData["error"] = check.pesan;
+            //}
+
+            return RedirectToAction("PurchaseOrderInvestasi");
+        }
 
         public JsonResult ajaxGetDetailRencanaKhususInvestasi(int id)
         {

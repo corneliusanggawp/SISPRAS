@@ -216,57 +216,23 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview">
-                                @foreach (var sub in subMenu)
-                               {
-                                       if(@sub.ID_SI_MENU == @main.ID_SI_MENU)
-                                        {
-                                            <li class="nav-item">
-                                                <a class="nav-link" asp-area="" asp-controller="@main.LINK" asp-action="@sub.LINK">
-                                                    <i class="far fa-circle nav-icon"></i>
-                                                    <p>@sub.DESKRIPSI</p>
-                                                </a>
-                                            </li>                                            
-                                        }
-                               }
+                            @foreach (var sub in subMenu)
+                            {
+                                if(@sub.ID_SI_MENU == @main.ID_SI_MENU)
+                                {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="@main.LINK" asp-action="@sub.LINK">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>@sub.DESKRIPSI</p>
+                                    </a>
+                                </li>                                            
+                                }
+                            }
                            </ul>
                         </li>                                         
                         }
                     </ul>
                 </nav>
-
-
-@*                <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                        <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="nav-icon fas fa-home"></i>
-                                <p> Beranda </p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-book"></i>
-                                <p> Pengelolaan Investasi <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-controller="PengelolaanInvestasi" asp-action="RencanaPengadaanAset">
-                                        <i class="far fa-plus-square nav-icon"></i>
-                                        <p>Rencana Pengadaan</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-controller="PengelolaanInvestasi" asp-action="ApprovalPencairanInvestasi">
-                                        <i class="far fa-plus-square nav-icon"></i>
-                                        <p>Approval Pencairan</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </nav>*@
                 <!-- /.sidebar-menu -->
             </div>
             <!-- /.sidebar -->
@@ -311,7 +277,7 @@
             <!-- To the right -->
 @*            <div class="float-right d-none d-sm-inline"> Anything you want </div>*@
             <!-- Default to the left -->
-            <strong>Copyright &copy; 2014-@DateTime.Now.Year.ToString() <a href="https://ksi.uajy.ac.id">Kantor Sistem Informasi</a>.</strong> All rights reserved.
+            <strong>Copyright &copy; 2022-@DateTime.Now.Year.ToString() <a href="https://ksi.uajy.ac.id">KSI UAJY</a>.</strong> All rights reserved.
         </footer>
     </div>
     <!-- ./wrapper -->

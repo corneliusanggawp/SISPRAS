@@ -1,7 +1,11 @@
-﻿
+﻿@using System;
+@using System.Globalization;
+
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Rencana Pengadaan Aset";
+
+    CultureInfo culture = new CultureInfo("id-ID");
 }
 
 <!-- Modal Dialog 1 -->
@@ -54,8 +58,9 @@
             <form class="formDetailRencanaPengadaanAset" method="post" asp-action="addPencairanInvestasi" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
             @Html.AntiForgeryToken()
                 <div class="modal-body">
-                    <input type="hidden" class="form-control" id="IDDetailRKA" name="IDDetailRKA" value="" required>
-                    <input type="hidden" class="form-control" id="IDKategori" name="IDKategori" value="" required>
+                    <input type="hidden" class="form-control" id="IDDetailRKA" name="IDDetailRKA" value="" readonly="readonly" required>
+                    <input type="hidden" class="form-control" id="IDKategori" name="IDKategori" value="" readonly="readonly" required>
+                    <input type="hidden" class="form-control" id="hargaSatuan" name="hargaSatuan" value="" readonly="readonly" required>
                     <div class="form-group">
                         <label>Kategori</label>
                         <select id="IDRefSK" name="IDRefSK" class="form-control" style="width: 100%;" onclick="getKategori(this.value)" required>
@@ -97,7 +102,7 @@
                     </div>
                     <div class="form-group">
                         <label>Harga Satuan</label>
-                        <input id="hargaSatuan" name="hargaSatuan" type="number" class="form-control" placeholder="Masukkan harga satuan aset..." required>
+                        <input id="inpHargaSatuan" type="text" class="form-control" oninput="formatHarga(this.value)" placeholder="Masukkan harga satuan aset..." required>
                     </div>
                     <div class="form-group">
                         <label>Spesifikasi</label>
@@ -127,7 +132,7 @@
                     <div class="col-4">
                          <div class="form-group">
                             <label>Tahun</label>
-                            <select class="form-control" style="width: 100%;">
+                            <select class="form-control select2bs4" style="width: 100%;">
                                 <option value="" style="display: none;" disabled selected>Pilih tahun...</option>
                                 @foreach (var tahun in Model.tahun)
                                 {
@@ -139,7 +144,7 @@
                     <div class="col-4">
                         <div class="form-group">
                             <label>Bulan</label>
-                            <select class="form-control" style="width: 100%;">
+                            <select class="form-control select2bs4" style="width: 100%;">
                                 <option value="" style="display: none;" disabled selected>Pilih bulan...</option>
                                 <option value="Januari">Januari</option>
                                 <option value="Februari">Februari</option>
@@ -159,7 +164,7 @@
                     <div class="col-4">
                         <div class="form-group">
                             <label>Unit</label>
-                            <select class="form-control" style="width: 100%;">
+                            <select class="form-control select2bs4" style="width: 100%;">
                                 <option value="" style="display: none;" disabled selected>Pilih unit...</option>
                                 @foreach (var unit in Model.unit)
                                {
@@ -242,10 +247,27 @@
         refreshTabelRencanaPengadaanAset();
         refreshTabelDetailRencanaKhususInvestasi();
 
-        $('.select2').select2();
-
         $('.select2bs4').select2({
             theme: 'bootstrap4'
+        });
+
+        var formatRupiah = (number) => {
+           return new Intl.NumberFormat('id-ID',{ 
+               style: 'currency', 
+               currency: 'IDR', 
+               minimumFractionDigits: 0 }
+           ).format(number);
+        }
+
+        function formatHarga(input) {
+            input = input.replace(/[^\d]/g, '') * 1;
+
+            $("#hargaSatuan").val(input);
+            $("#inpHargaSatuan").val(formatRupiah(input));
+        }
+
+        $("#inpHargaSatuan").on('change', function() {
+            console.log($(this).val());
         });
 
         $('#DetailRencanaPengadaanAset').on('hidden.bs.modal', function() {
@@ -312,9 +334,9 @@
 
                     for (var i = 0; i < dtlRencanaKhususInvestasi.length; i++) {
                         if(dtlRencanaKhususInvestasi[i].ID_DTL_RKA == null){
-                            str += '<tr> <td>' + dtlRencanaKhususInvestasi[i].NAMA_KEGIATAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].BULAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].VOLUME + '</td> <td>' + dtlRencanaKhususInvestasi[i].SATUAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].HARGA_SATUAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].SUBTOTAL + '</td> <td> <button onClick="addDetailRencanaPengadaanAset(' + dtlRencanaKhususInvestasi[i].DTL_RKA + ')" type="button" class="btn btn-secondary btn-block btn-sm"><i class="fa fa-plus"></i></button> </td> </tr>';
+                            str += '<tr> <td>' + dtlRencanaKhususInvestasi[i].NAMA_KEGIATAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].BULAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].VOLUME + '</td> <td>' + dtlRencanaKhususInvestasi[i].SATUAN + '</td> <td>' + formatRupiah(dtlRencanaKhususInvestasi[i].HARGA_SATUAN) + '</td> <td>' + formatRupiah(dtlRencanaKhususInvestasi[i].SUBTOTAL) + '</td> <td> <button onClick="addDetailRencanaPengadaanAset(' + dtlRencanaKhususInvestasi[i].DTL_RKA + ')" type="button" class="btn btn-secondary btn-block btn-sm"><i class="fa fa-plus"></i></button> </td> </tr>';
                         }else{
-                            str += '<tr> <td>' + dtlRencanaKhususInvestasi[i].NAMA_KEGIATAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].BULAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].VOLUME + '</td> <td>' + dtlRencanaKhususInvestasi[i].SATUAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].HARGA_SATUAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].SUBTOTAL + '</td> <td> <button onClick="updateDetailRencanaPengadaanAset(' + dtlRencanaKhususInvestasi[i].DTL_RKA + ')" type="button" class="btn btn-success btn-block btn-sm"> <i class="fa fa-edit"></i></button> </td> </tr>';
+                            str += '<tr> <td>' + dtlRencanaKhususInvestasi[i].NAMA_KEGIATAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].BULAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].VOLUME + '</td> <td>' + dtlRencanaKhususInvestasi[i].SATUAN + '</td> <td>' + formatRupiah(dtlRencanaKhususInvestasi[i].HARGA_SATUAN) + '</td> <td>' + formatRupiah(dtlRencanaKhususInvestasi[i].SUBTOTAL) + '</td> <td> <button onClick="updateDetailRencanaPengadaanAset(' + dtlRencanaKhususInvestasi[i].DTL_RKA + ')" type="button" class="btn btn-success btn-block btn-sm"> <i class="fa fa-edit"></i></button> </td> </tr>';
                         }
                     }
 
@@ -347,6 +369,7 @@
                     $('#merk').val(data.MERK);
                     $('#jumlah').val(data.JUMLAH);
                     $('#hargaSatuan').val(data.HARGA_SATUAN);
+                    $('#inpHargaSatuan').val(formatRupiah(data.HARGA_SATUAN));
                     $('#spesifikasi').val(data.SPESIFIKASI);
                 }
             })
@@ -364,7 +387,7 @@
             $('#satuan').val("");
             $('#merk').val("");
             $('#jumlah').val("");
-            $('#hargaSatuan').val("");
+            $('#inpHargaSatuan').val("");
             $('#spesifikasi').val("");
         }
 

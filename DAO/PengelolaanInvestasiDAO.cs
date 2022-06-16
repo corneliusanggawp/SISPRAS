@@ -158,7 +158,7 @@ namespace SISPRA.DAO
             }
         }
 
-        public DBOutput addPencairanInvestasi(RencanaPengadaanAset obj)
+        public DBOutput addPencairanInvestasi(PencairanInvestasi obj)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -203,7 +203,7 @@ namespace SISPRA.DAO
             }
         }
 
-        public DBOutput addDetailPencairanInvestasi(DetailRencanaPengadaanAset obj)
+        public DBOutput addDetailPencairanInvestasi(DetailPencairanInvestasi obj)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -538,6 +538,50 @@ namespace SISPRA.DAO
             }
         }
 
+        public DBOutput addPurchaseOrderInvestasi(PencairanInvestasi obj)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        if not exists(select ID_PENCAIRAN_INVESTASI from sispras.TBL_PENCAIRAN_INVESTASI where ID_DTL_RKA = @IDDetailRKA)
+	                        begin
+                                INSERT INTO sispras.TBL_PENCAIRAN_INVESTASI (ID_TAHUN_ANGGARAN, ID_UNIT, BULAN_PENGADAAN, TGL_PENCAIRAN, TOTAL_PENCAIRAN, INSERT_DATE, IP_ADDRESS, USER_ID, STATUS_APPROVAL, ID_DTL_RKA)
+                                OUTPUT INSERTED.ID_PENCAIRAN_INVESTASI
+                                SELECT      sikeu.TBL_RKA.ID_TAHUN_ANGGARAN, sikeu.TBL_RKA.ID_UNIT, sikeu.DTL_RKA.BULAN, @tanggalPencairan AS TGL_PENCAIRAN, @totalPencairan AS TOTAL_PENCAIRAN, @insertDate AS INSERT_DATE, @IPAddress AS IP_ADDRESS, @userID AS USER_ID, @statusApproval AS STATUS_APPROVAL, sikeu.DTL_RKA.ID_DTL_RKA
+                                FROM        sikeu.TBL_RKA
+                                INNER JOIN  sikeu.DTL_RKA ON sikeu.TBL_RKA.ID_RKA = sikeu.DTL_RKA.ID_RKA
+                                WHERE       (sikeu.DTL_RKA.ID_DTL_RKA = @IDDetailRKA)
+                            end
+                        else
+                            begin
+                                SELECT ID_PENCAIRAN_INVESTASI
+                                FROM sispras.TBL_PENCAIRAN_INVESTASI
+                                WHERE ID_DTL_RKA = @IDDetailRKA
+                            end";
+
+                    var data = conn.QueryFirstOrDefault<int>(query, obj);
+
+                    output.data = data;
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
 
     }
 }

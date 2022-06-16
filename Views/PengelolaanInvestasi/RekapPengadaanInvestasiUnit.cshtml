@@ -1,7 +1,10 @@
-﻿
+﻿@using System.Globalization;
+
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Rekap Pengadaan Investasi Unit";
+
+    CultureInfo culture = new CultureInfo("id-ID");
 }
 
 <div class="row">
@@ -17,7 +20,7 @@
                     <div class="col-4">
                          <div class="form-group">
                             <label>Tahun</label>
-                            <select class="form-control" style="width: 100%;">
+                            <select class="form-control select2bs4" style="width: 100%;">
                                 <option value="" style="display: none;" disabled selected>Pilih tahun...</option>
                                 @foreach (var tahun in Model.tahun)
                                 {
@@ -29,7 +32,7 @@
                     <div class="col-4">
                         <div class="form-group">
                             <label>Bulan</label>
-                            <select class="form-control" style="width: 100%;">
+                            <select class="form-control select2bs4" style="width: 100%;">
                                 <option value="" style="display: none;" disabled selected>Pilih bulan...</option>
                                 <option value="Januari">Januari</option>
                                 <option value="Februari">Februari</option>
@@ -49,7 +52,7 @@
                     <div class="col-4">
                         <div class="form-group">
                             <label>Unit</label>
-                            <select class="form-control" style="width: 100%;">
+                            <select class="form-control select2bs4" style="width: 100%;">
                                 <option value="" style="display: none;" disabled selected>Pilih unit...</option>
                                 @foreach (var unit in Model.unit)
                                {
@@ -108,9 +111,9 @@
                             <td>@RekapPengadaanInvestasi.SPESIFIKASI</td>
                             <td>@RekapPengadaanInvestasi.SUB_KATEGORI</td>
                             <td>@RekapPengadaanInvestasi.SATUAN</td>
-                            <td>Rp @RekapPengadaanInvestasi.HARGA_SATUAN</td>
+                            <td>@((RekapPengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
                             <td class="text-center">@RekapPengadaanInvestasi.JUMLAH</td>
-                            <td>Rp @(RekapPengadaanInvestasi.JUMLAH * RekapPengadaanInvestasi.HARGA_SATUAN)</td>
+                            <td>@((RekapPengadaanInvestasi.JUMLAH * RekapPengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
                             <td>
                                 @if(@RekapPengadaanInvestasi.IS_PO){
                                     <div class="custom-control custom-checkbox">
@@ -155,12 +158,9 @@
 
         refreshTabelRekapPengadaanInvestasi();
 
-        $('.select2').select2();
-
         $('.select2bs4').select2({
             theme: 'bootstrap4'
         });
-
 
         function refreshTabelRekapPengadaanInvestasi() {
             tabelRencanaPengadaanAset = $("#tabelRekapPengadaanInvestasi").DataTable({
