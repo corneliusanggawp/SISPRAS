@@ -6,7 +6,6 @@ using System;
 using System.Dynamic;
 using System.Linq;
 using System.Security.Claims;
-using System.Globalization;
 
 namespace SISPRA.Controllers
 {
@@ -15,7 +14,6 @@ namespace SISPRA.Controllers
         dynamic myObj;
         PengelolaanInvestasiDAO mainDAO;
         MasterDAO masterDAO;
-        CultureInfo culture = new CultureInfo("id-ID");
 
         public PengelolaanInvestasiController()
         {
@@ -161,13 +159,13 @@ namespace SISPRA.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult addPurchaseOrder(int nomorPO, int IDSupplier, String tanggalPO, String IDDetailPencairanInvestasi, String totalPO)
+        public IActionResult addPurchaseOrder(int nomorPO, int IDSupplier, String tanggalPO, String IDDetailPencairanInvestasi, decimal totalPO)
         {
             PurchaseOrderInvestasi POI = new PurchaseOrderInvestasi();
 
             POI.nomorPO = nomorPO;
             POI.tanggalPO = tanggalPO;
-            POI.totalTanpaPajak = decimal.Parse(totalPO, NumberStyles.Currency, culture.NumberFormat);
+            POI.totalTanpaPajak = totalPO;
             POI.pajak = POI.totalTanpaPajak;
             POI.totalDenganPajak = POI.totalTanpaPajak + POI.pajak;
             POI.userID  = User.Claims.Where(c => c.Type == "npp").Select(c => c.Value).SingleOrDefault();
@@ -177,19 +175,41 @@ namespace SISPRA.Controllers
             POI.isLunas = false;
             POI.namaPO = "";
 
-            String test = IDDetailPencairanInvestasi;
+            var IDDetailPencairanInvestasiPO = IDDetailPencairanInvestasi.Split(",").Select(Int32.Parse).ToArray();
+            
+            var checkPurchaseOrder = mainDAO.addPurchaseOrderInvestasi(POI);
 
+            if (checkPurchaseOrder.status == true)
+            {
+                var IDPurchaseOrder = checkPurchaseOrder.data;
+                var success = 0;
+                var failure = 0;
 
-            //var check = mainDAO.approvePencairanInvestasi(nomorPO);
+                foreach (int IDDetailPencairan in IDDetailPencairanInvestasiPO)
+                {
+                    var inpDetailPurchaseOrder = mainDAO.addDetailPurchaseOrder(IDPurchaseOrder, IDDetailPencairan);
 
-            //if (check.status == true)
-            //{
-            //    TempData["success"] = "Berhasil memproses purchase order";
-            //}
-            //else
-            //{
-            //    TempData["error"] = check.pesan;
-            //}
+                    if (inpDetailPurchaseOrder.status == true)
+                    {
+                        mainDAO.approvePurchaseOrder(IDDetailPencairan);
+                        success++;
+                    }
+                    else
+                    {
+                        TempData["error"] = inpDetailPurchaseOrder.pesan;
+                        failure++;
+                    }
+                }
+
+                if(success != 0)
+                {
+                    TempData["success"] = "Berhasil memproses " + success + " dari " + IDDetailPencairanInvestasiPO.Length + " purchase order";
+                }
+            }
+            else
+            {
+                TempData["error"] = checkPurchaseOrder.pesan;
+            }
 
             return RedirectToAction("PurchaseOrderInvestasi");
         }

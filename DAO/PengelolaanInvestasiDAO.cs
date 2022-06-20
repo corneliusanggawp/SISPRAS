@@ -491,7 +491,7 @@ namespace SISPRA.DAO
                     SELECT	sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.*
                     FROM	sispras.TBL_DETAIL_PENCAIRAN_INVESTASI
                     INNER JOIN	sispras.TBL_PENCAIRAN_INVESTASI ON sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.ID_PENCAIRAN_INVESTASI = sispras.TBL_PENCAIRAN_INVESTASI.ID_PENCAIRAN_INVESTASI
-                    WHERE (sispras.TBL_PENCAIRAN_INVESTASI.STATUS_APPROVAL = 1)
+                    WHERE (sispras.TBL_PENCAIRAN_INVESTASI.STATUS_APPROVAL = 1) AND (sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.IS_PO = 0)
                     ORDER BY sispras.TBL_PENCAIRAN_INVESTASI.INSERT_DATE DESC";
 
                     var data = conn.Query<dynamic>(query).ToList();
@@ -538,7 +538,7 @@ namespace SISPRA.DAO
             }
         }
 
-        public DBOutput addPurchaseOrderInvestasi(PencairanInvestasi obj)
+        public DBOutput addPurchaseOrderInvestasi(PurchaseOrderInvestasi obj)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -548,25 +548,87 @@ namespace SISPRA.DAO
                 try
                 {
                     string query = @"
-                        if not exists(select ID_PENCAIRAN_INVESTASI from sispras.TBL_PENCAIRAN_INVESTASI where ID_DTL_RKA = @IDDetailRKA)
+                        if not exists(select ID_PO_INVESTASI from sispras.TBL_PO_INVESTASI where NO_PO = @nomorPO)
 	                        begin
-                                INSERT INTO sispras.TBL_PENCAIRAN_INVESTASI (ID_TAHUN_ANGGARAN, ID_UNIT, BULAN_PENGADAAN, TGL_PENCAIRAN, TOTAL_PENCAIRAN, INSERT_DATE, IP_ADDRESS, USER_ID, STATUS_APPROVAL, ID_DTL_RKA)
-                                OUTPUT INSERTED.ID_PENCAIRAN_INVESTASI
-                                SELECT      sikeu.TBL_RKA.ID_TAHUN_ANGGARAN, sikeu.TBL_RKA.ID_UNIT, sikeu.DTL_RKA.BULAN, @tanggalPencairan AS TGL_PENCAIRAN, @totalPencairan AS TOTAL_PENCAIRAN, @insertDate AS INSERT_DATE, @IPAddress AS IP_ADDRESS, @userID AS USER_ID, @statusApproval AS STATUS_APPROVAL, sikeu.DTL_RKA.ID_DTL_RKA
-                                FROM        sikeu.TBL_RKA
-                                INNER JOIN  sikeu.DTL_RKA ON sikeu.TBL_RKA.ID_RKA = sikeu.DTL_RKA.ID_RKA
-                                WHERE       (sikeu.DTL_RKA.ID_DTL_RKA = @IDDetailRKA)
+                                INSERT INTO sispras.TBL_PO_INVESTASI (NO_PO, TGL_PO, TOTAL_PO_TANPA_PAJAK, PAJAK, TOTAL_DENGAN_PAJAK, USER_ID, IP_ADDRESS, INSERT_DATE, ID_SUPPLIER, NAMA_PO)
+                                OUTPUT INSERTED.ID_PO_INVESTASI
+                                VALUES (@nomorPO, @tanggalPO, @totalTanpaPajak, @pajak, @totalDenganPajak, @userID, @IPAddress, @insertDate, @IDSupplier, @namaPO)
                             end
                         else
                             begin
-                                SELECT ID_PENCAIRAN_INVESTASI
-                                FROM sispras.TBL_PENCAIRAN_INVESTASI
-                                WHERE ID_DTL_RKA = @IDDetailRKA
+                                SELECT  ID_PO_INVESTASI
+                                FROM    sispras.TBL_PO_INVESTASI
+                                WHERE   (NO_PO = @nomorPO)
                             end";
 
                     var data = conn.QueryFirstOrDefault<int>(query, obj);
 
                     output.data = data;
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public DBOutput addDetailPurchaseOrder(int IDPurchaseOrderInvestasi, int IDDetailPencairanInvestasi)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        INSERT INTO sispras.TBL_DETAIL_PO_INVESTASI (ID_PO_INVESTASI, MERK, SATUAN, NAMA_BARANG, SPESIFIKASI, HARGA_SATUAN, JUMLAH, ID_UNIT, ID_DETAIL_PENCAIRAN_INVESTASI)
+                        SELECT      @IDPurchaseOrderInvestasi, DPI.MERK, DPI.SATUAN, DPI.NAMA_PENGADAAN, DPI.SPESIFIKASI, DPI.HARGA_SATUAN, DPI.JUMLAH, PI.ID_UNIT, DPI.ID_DETAIL_PENCAIRAN_INVESTASI
+                        FROM        sispras.TBL_DETAIL_PENCAIRAN_INVESTASI DPI
+                        INNER JOIN  sispras.TBL_PENCAIRAN_INVESTASI PI ON DPI.ID_PENCAIRAN_INVESTASI = PI.ID_PENCAIRAN_INVESTASI
+                        WHERE       (DPI.ID_DETAIL_PENCAIRAN_INVESTASI = @IDDetailPencairanInvestasi)";
+
+                    output.data = conn.Execute(query, new { IDPurchaseOrderInvestasi = IDPurchaseOrderInvestasi, IDDetailPencairanInvestasi = IDDetailPencairanInvestasi });
+
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public DBOutput approvePurchaseOrder(int IDDetailPencairanInvestasi)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                         UPDATE sispras.TBL_DETAIL_PENCAIRAN_INVESTASI 
+                         SET IS_PO = 1
+                         WHERE ID_DETAIL_PENCAIRAN_INVESTASI = @IDDetailPencairanInvestasi";
+
+                    output.data = conn.Execute(query, new { IDDetailPencairanInvestasi = IDDetailPencairanInvestasi });
                     return output;
                 }
                 catch (Exception ex)

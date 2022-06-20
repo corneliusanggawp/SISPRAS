@@ -7,6 +7,28 @@
     CultureInfo culture = new CultureInfo("id-ID");
 }
 
+<!-- Modal Dialog 1 -->
+<div class="modal fade" id="SpesifikasiPengadaanInvestasiModal" tabindex="-1" role="dialog" style="overflow-y:scroll;" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Spesifikasi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <textarea id="spesifikasi" name="spesifikasi" class="form-control" rows="6" readonly="readonly" required></textarea>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Keluar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Dialog 1 End -->
+
+
 <div class="row">
     <div class="col-12">
         <div class="card card-primary">
@@ -108,25 +130,21 @@
                         <tr>
                             <td>@RekapPengadaanInvestasi.NAMA_PENGADAAN</td>
                             <td>@RekapPengadaanInvestasi.MERK</td>
-                            <td>@RekapPengadaanInvestasi.SPESIFIKASI</td>
+                            <td class="text-center">
+                                <a class="btn btn-primary btn-sm"> <i class="fas fa-eye"> </i> </a>
+                            </td>
                             <td>@RekapPengadaanInvestasi.SUB_KATEGORI</td>
                             <td>@RekapPengadaanInvestasi.SATUAN</td>
-                            <td>@((RekapPengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                            <td class="text-right">@((RekapPengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
                             <td class="text-center">@RekapPengadaanInvestasi.JUMLAH</td>
-                            <td>@((RekapPengadaanInvestasi.JUMLAH * RekapPengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                            <td class="text-right">@((RekapPengadaanInvestasi.JUMLAH * RekapPengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
                             <td>
                                 @if(@RekapPengadaanInvestasi.IS_PO){
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" checked disabled>
-                                        <label class="custom-control-label"></label>
-                                    </div>
+                                    <span class="badge badge-success">Sudah PO</span>
                                 }
                                 else
                                 {
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" unchecked disabled>
-                                        <label class="custom-control-label"></label>
-                                    </div>  
+                                    <span class="badge badge-success">Belum PO</span>
                                 }
                             </td>
                         </tr>
@@ -167,7 +185,7 @@
                 paging: true,
                 lengthChange: false,
                 searching: true,
-                ordering: true,
+                ordering: false,
                 info: true,
                 autoWidth: false,
                 responsive: true,
@@ -189,5 +207,10 @@
             })
         }
 
+        function showSpesifikasiPengadaanInvestasiModal(spesifikasi) {
+            $('#SpesifikasiPengadaanInvestasiModal').modal('show');
+
+            $('#spesifikasi').val(spesifikasi);
+        }
     </script>
 }

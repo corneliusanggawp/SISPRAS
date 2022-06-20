@@ -97,10 +97,11 @@
                         </div>
                     </div>
                     <input id="IDDetailPencairanInvestasi" name="IDDetailPencairanInvestasi" type="hidden" class="form-control" readonly="readonly" required>
+                    <input id="totalPO" name="totalPO" type="hidden" class="form-control" readonly="readonly" required>
                     <div class="form-group">
                         <label>Total PO</label>
                         <div class="input-group">
-                            <input id="totalPO" name="totalPO" type="text" class="form-control" placeholder="0" readonly="readonly" required>
+                            <input id="inpTotalPO" type="text" class="form-control" placeholder="Rp 0" readonly="readonly" required>
                             <span class="input-group-append">
                                 <button id="btnProsesPO" type="submit" class="btn btn-primary" disabled>Proses</button>
                             </span>
@@ -115,25 +116,6 @@
 
 
     <div class="col-12">
-        @if (TempData["success"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert" style="background-color:green">
-                <strong>@TempData["success"].ToString()</strong>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        }
-        @if (TempData["error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>@TempData["error"].ToString()</strong>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        }
-
         <div class="card">
             <!-- /.card-header -->
             <div class="card-body">
@@ -154,9 +136,9 @@
                             <td>@DetailPencairanInvestasi.ID_DETAIL_PENCAIRAN_INVESTASI</td>
                             <td>@DetailPencairanInvestasi.NAMA_PENGADAAN</td>
                             <td>@DetailPencairanInvestasi.MERK</td>
-                            <td>@((DetailPencairanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                            <td class="text-right">@((DetailPencairanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
                             <td class="text-center">@DetailPencairanInvestasi.JUMLAH</td>
-                            <td>@((DetailPencairanInvestasi.JUMLAH * DetailPencairanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                            <td class="text-right">@((DetailPencairanInvestasi.JUMLAH * DetailPencairanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
                         </tr>
                         }
                     </tbody>
@@ -190,6 +172,18 @@
     <!-- Tempusdominus Bootstrap 4 -->
     <script src="~/lib/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
 
+
+    @if (TempData["success"] != null){
+        <script type="text/javascript">
+            toastr.success('@TempData["success"].ToString()', 'Berhasil Memperoses');
+        </script>
+    }
+    @if (TempData["error"] != null){
+        <script type="text/javascript">
+            toastr.error('@TempData["error"].ToString()', 'Gagal Memperoses');
+        </script>
+    }
+
     <script>
         var tabelDetailPencairanInvestasi;
         refreshTabelDetailPencairanInvestasi();
@@ -200,17 +194,20 @@
         
         $('.select2bs4').select2({
             theme: 'bootstrap4'
-        })  
+        });
         
         var tabel      = $('#tabelDetailPencairanInvestasi').DataTable();
         var rowIndex = [];
         var totalDetailPencairanInvestasi = 0;
         var idDetailPencairanInvestasiArray = [];
+
         var formatRupiah = (number) => {
-           return new Intl.NumberFormat('id-ID',
-             { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }
-           ).format(number);
-        }
+           return new Intl.NumberFormat('id-ID', { 
+               style: 'currency', 
+               currency: 'IDR', 
+               minimumFractionDigits: 0 
+           }).format(number);
+        };
 
         tabel
             .on( 'select', function ( e, dt, type, indexes ) {
@@ -224,7 +221,8 @@
                 totalDetailPencairanInvestasi += addTotal;
 
                 $('#IDDetailPencairanInvestasi').val(idDetailPencairanInvestasiArray);
-                $('#totalPO').val(formatRupiah(totalDetailPencairanInvestasi));
+                $('#totalPO').val(totalDetailPencairanInvestasi);
+                $('#inpTotalPO').val(formatRupiah(totalDetailPencairanInvestasi));
 
                 $('#btnProsesPO').prop('disabled', false);
             } )
@@ -238,7 +236,8 @@
                 totalDetailPencairanInvestasi   -= minTotal;
 
                 $('#IDDetailPencairanInvestasi').val(idDetailPencairanInvestasiArray);
-                $('#totalPO').val(formatRupiah(totalDetailPencairanInvestasi));
+                $('#totalPO').val(totalDetailPencairanInvestasi);
+                $('#inpTotalPO').val(formatRupiah(totalDetailPencairanInvestasi));
                 
                 if(idDetailPencairanInvestasiArray.length == 0){
                     $('#btnProsesPO').prop('disabled', true);

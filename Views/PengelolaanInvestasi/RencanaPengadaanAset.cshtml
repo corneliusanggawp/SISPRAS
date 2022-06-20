@@ -207,7 +207,7 @@
                             <th class="text-center">Nama Unit:</th>
                             <th class="text-center">Program Kegiatan:</th>
                             <th class="text-center">Nama Program:</th>
-                            <th></th>
+                            <th class="text-center">Detail</th>
                         </tr>
                     </thead>
                     <tbody> 
@@ -217,8 +217,8 @@
                             <td>@RencanaPengadaanAset.NAMA_UNIT</td>
                             <td>@RencanaPengadaanAset.PROGRAM_KEGIATAN</td>
                             <td>@RencanaPengadaanAset.NAMA_PROGRAM</td>
-                            <td>
-                                <button onclick="showDetailRencanaKhususInvestasiModal(@RencanaPengadaanAset.ID_RKA)" type="button" class="btn btn-primary btn-block btn-sm"><i class="fa fa-eye"></i></button>
+                            <td class="text-center">
+                                <a onclick="showDetailRencanaKhususInvestasiModal(@RencanaPengadaanAset.ID_RKA)" class="btn btn-primary btn-sm"> <i class="fas fa-eye"> </i> </a>
                             </td>
                         </tr> 
                         }
