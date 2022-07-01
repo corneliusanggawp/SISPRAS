@@ -2,7 +2,7 @@
 
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    ViewData["Title"] = "Rekap Pengadaan Investasi Unit";
+    ViewData["Title"] = "Rekap Pengadaan Investasi";
 
     CultureInfo culture = new CultureInfo("id-ID");
 }
@@ -37,7 +37,7 @@
             <!-- /.card-header -->
             <div class="card-body">
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-4">
                          <div class="form-group">
                             <label>Tahun</label>
                             <select onchange="filterDataRekapPengadaanInvestasi()" id="tahun" class="form-control select2bs4" style="width: 100%;">
@@ -49,7 +49,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-6">
+                    <div class="col-4">
                         <div class="form-group">
                             <label>Bulan</label>
                             <select onchange="filterDataRekapPengadaanInvestasi()" id="bulan" class="form-control select2bs4" style="width: 100%;">
@@ -67,6 +67,18 @@
                                 <option value="November">November</option>
                                 <option value="Desember">Desember</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                         <div class="form-group">
+                            <label>Unit</label>
+                            <select onchange="filterDataRekapPengadaanInvestasi()" id="unit" class="form-control select2bs4" style="width: 100%;">
+                                <option value="" selected>Pilih unit...</option>
+                                @foreach (var unit in Model.unit)
+                                {
+                                    <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
+                                }
+                            </select>                            
                         </div>
                     </div>
                 </div>
@@ -109,6 +121,7 @@
                             <th>PO:</th>
                             <th>Tahun Anggaran:</th>
                             <th>Bulan Pengadaan:</th>
+                            <th>Unit:</th>
                         </tr>
                     </thead>
                     <tbody> 
@@ -134,6 +147,7 @@
                             </td>
                             <td>@RekapPengadaanInvestasi.TAHUN_ANGGARAN</td>
                             <td>@RekapPengadaanInvestasi.BULAN_PENGADAAN</td>
+                            <td>@RekapPengadaanInvestasi.ID_UNIT</td>
                         </tr>
                         }
                     </tbody>
@@ -183,9 +197,10 @@
         function filterDataRekapPengadaanInvestasi(){
             var tahun   = $('#tahun').val();
             var bulan   = $('#bulan').val();
+            var unit    = $('#unit').val();
 
             var tabel = $("#tabelRekapPengadaanInvestasi").DataTable();
-            tabel.column(9).search(tahun ? '^'+tahun+'$' : '', true, false).column(10).search(bulan ? '^'+bulan+'$' : '', true, false).order( [ 0, 'asc' ] ).draw();
+            tabel.column(9).search(tahun ? '^'+tahun+'$' : '', true, false).column(10).search(bulan ? '^'+bulan+'$' : '', true, false).column(11).search(unit ? '^'+unit+'$' : '', true, false).order( [ 0, 'asc' ] ).draw();
         }
 
         function refreshTabelRekapPengadaanInvestasi() {
@@ -194,7 +209,7 @@
                     url: "../json/datatables-id.json"
                 },
                 columnDefs: [ {
-                    targets     :   [9, 10],
+                    targets     :   [9, 10, 11],
                     visible     : false,
                     searchable  : true,
                 } ],

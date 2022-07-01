@@ -30,10 +30,10 @@ namespace SISPRA.Controllers
         [Authorize(Roles = "KPSP, Unit")]
         public IActionResult RencanaPengadaanAset()
         {
-            var id_unit    = User.Claims.Where(c => c.Type == "id_unit").Select(c => c.Value).ToString();
-            var id_role    = User.Claims.Where(c => c.Type == "id_role").Select(c => c.Value).ToArray();
+            var IDUnitUser    = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
+            var IDRoleUser    = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
 
-            var RKA = mainDAO.getRencanaPengadaanAset(id_unit, id_role);
+            var RKA = mainDAO.getRencanaPengadaanAset(IDUnitUser, IDRoleUser);
             myObj.status = (!RKA.status) ? RKA.pesan : "";
             myObj.RKA = RKA.data;
 
@@ -45,34 +45,16 @@ namespace SISPRA.Controllers
             return View(myObj);
         }
 
-        [Authorize(Roles = "KPSP")]
-        public IActionResult ApprovalPencairanInvestasi()
-        {
-            var id_unit = User.Claims.Where(c => c.Type == "id_unit").Select(c => c.Value).ToString();
-            var id_role = User.Claims.Where(c => c.Type == "id_role").Select(c => c.Value).ToArray();
-
-            var pencairanInvestasi = mainDAO.getPencairanInvestasi(id_unit, id_role);
-            myObj.status = (!pencairanInvestasi.status) ? pencairanInvestasi.pesan : "";
-            myObj.pencairanInvestasi = pencairanInvestasi.data;
-
-            myObj.unit          = masterDAO.getAllUnit();
-            myObj.tahun         = masterDAO.getAllTahunAnggaran();
-            myObj.tahunAnggaran = masterDAO.getAllTahunAnggaran();
-
-            return View(myObj);
-        }
-
         [Authorize(Roles = "Unit")]
         public IActionResult RekapPengadaanInvestasiUnit()
         {
-            var id_unit = User.Claims.Where(c => c.Type == "id_unit").Select(c => c.Value).ToString();
-            var id_role = User.Claims.Where(c => c.Type == "id_role").Select(c => c.Value).ToArray();
+            var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
+            var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
 
-            var RKI = mainDAO.getRekapPengadaanInvestasi(id_unit, id_role);
+            var RKI = mainDAO.getRekapPengadaanInvestasiUnit(IDUnitUser, IDRoleUser);
             myObj.status = (!RKI.status) ? RKI.pesan : "";
             myObj.RKI = RKI.data;
 
-            myObj.unit          = masterDAO.getAllUnit();
             myObj.tahun         = masterDAO.getAllTahunAnggaran();
             myObj.kategori      = mainDAO.getAllKategori();
             myObj.subKategori   = mainDAO.getAllSubKategori();
@@ -81,15 +63,43 @@ namespace SISPRA.Controllers
         }
 
         [Authorize(Roles = "KPSP")]
+        public IActionResult RekapPengadaanInvestasi()
+        {
+            var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
+            var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
+
+            var RKI = mainDAO.getRekapPengadaanInvestasiUnit(IDUnitUser, IDRoleUser);
+            myObj.status = (!RKI.status) ? RKI.pesan : "";
+            myObj.RKI = RKI.data;
+
+            myObj.unit = masterDAO.getAllUnit();
+            myObj.tahun = masterDAO.getAllTahunAnggaran();
+            myObj.kategori = mainDAO.getAllKategori();
+            myObj.subKategori = mainDAO.getAllSubKategori();
+
+            return View(myObj);
+        }
+
+        [Authorize(Roles = "KPSP")]
+        public IActionResult ApprovalPencairanInvestasi()
+        {
+            var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).ToString();
+            var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
+
+            var pencairanInvestasi = mainDAO.getPencairanInvestasi(IDUnitUser, IDRoleUser);
+            myObj.status = (!pencairanInvestasi.status) ? pencairanInvestasi.pesan : "";
+            myObj.pencairanInvestasi = pencairanInvestasi.data;
+
+            myObj.unit = masterDAO.getAllUnit();
+            myObj.tahun = masterDAO.getAllTahunAnggaran();
+            myObj.tahunAnggaran = masterDAO.getAllTahunAnggaran();
+
+            return View(myObj);
+        }
+
+        [Authorize(Roles = "KPSP")]
         public IActionResult PurchaseOrderInvestasi()
         {
-            var id_unit = User.Claims.Where(c => c.Type == "id_unit").Select(c => c.Value).ToString();
-            var id_role = User.Claims.Where(c => c.Type == "id_role").Select(c => c.Value).ToArray();
-
-            var detailPencairanInvestasi = mainDAO.getDetailPencairanInvestasi();
-            myObj.status = (!detailPencairanInvestasi.status) ? detailPencairanInvestasi.pesan : "";
-            myObj.detailPencairanInvestasi = detailPencairanInvestasi.data;
-
             myObj.unit              = masterDAO.getAllUnit();
             myObj.tahun             = masterDAO.getAllTahunAnggaran();
             myObj.tahunAnggaran     = masterDAO.getAllTahunAnggaran();
@@ -107,10 +117,10 @@ namespace SISPRA.Controllers
 
             RPA.IDDetailRKA = DTLRPA.IDDetailRKA;
             RPA.tanggalPencairan = null;
-            RPA.totalPencairan = DTLRPA.jumlah * DTLRPA.hargaSatuan;
+            RPA.totalPencairan = DTLRPA.jumlah * DTLRPA.hargaSatuan; 
             RPA.insertDate = DateTime.Now.ToString();
             RPA.IPAddress = HttpContext.Connection.RemoteIpAddress.ToString();
-            RPA.userID = User.Claims.Where(c => c.Type == "npp").Select(c => c.Value).SingleOrDefault();
+            RPA.userID = User.Claims.Where(c => c.Type == "NPP").Select(c => c.Value).SingleOrDefault();
             RPA.statusApproval = false;
 
             var inpPencairanInvestasi = mainDAO.addPencairanInvestasi(RPA);
@@ -168,7 +178,7 @@ namespace SISPRA.Controllers
             POI.totalTanpaPajak = totalPO;
             POI.pajak = POI.totalTanpaPajak;
             POI.totalDenganPajak = POI.totalTanpaPajak + POI.pajak;
-            POI.userID  = User.Claims.Where(c => c.Type == "npp").Select(c => c.Value).SingleOrDefault();
+            POI.userID  = User.Claims.Where(c => c.Type == "NPP").Select(c => c.Value).SingleOrDefault();
             POI.IPAddress   = HttpContext.Connection.RemoteIpAddress.ToString();
             POI.insertDate  = DateTime.Now.ToString();
             POI.IDSupplier = IDSupplier;
@@ -214,15 +224,21 @@ namespace SISPRA.Controllers
             return RedirectToAction("PurchaseOrderInvestasi");
         }
 
-        public JsonResult ajaxGetDetailRencanaKhususInvestasi(int id)
+        public JsonResult ajaxGetDetailPencairanInvestasiPO(string IDTahunAnggaran, string bulanPengadaan)
         {
-            var data = mainDAO.getDetailRencanaKhususInvestasi(id);
+            dynamic detailPencairanInvestasi = mainDAO.getDetailPencairanInvestasiPO(IDTahunAnggaran, bulanPengadaan);
+            return Json(detailPencairanInvestasi);
+        }
+
+        public JsonResult ajaxGetDetailRencanaKhususInvestasi(int IDRKA)
+        {
+            var data = mainDAO.getDetailRencanaKhususInvestasi(IDRKA);
             return Json(data);
         }
 
-        public JsonResult ajaxGetDetailRencanaPengadaanAset(int IDDetailRKA)
+        public JsonResult ajaxGetDetailRencanaPengadaanAset(int IDDetailPencairanInvestasi)
         {
-            var data = mainDAO.getDetailRencanaPengadaanAset(IDDetailRKA);
+            var data = mainDAO.getDetailRencanaPengadaanAset(IDDetailPencairanInvestasi);
             return Json(data);
         }
 

@@ -1,39 +1,41 @@
-﻿
+﻿@using System.Globalization;
+
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Approval Pencairan Investasi";
+
+    CultureInfo culture = new CultureInfo("id-ID");
 }
 
 @section Header{
     <link rel="stylesheet" href="~/lib/jquery-datatables-checkboxes-1.2.12/css/dataTables.checkboxes.css">
 }
 
-<!-- Modal Dialog 1 -->
-<div class="modal fade" id="DetailPencairanInvestasi" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+<!-- Modal Dialog 2 -->
+<div class="modal fade" id="DetailPencairanInvestasi" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Detail Pencairan Investasi</h5>
+                <h4 class="modal-title">Detail Pencairan Investasi</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="card-body table-responsive p-0">
-                    <table id="tabelDetailPencairanInvestasi" class="table table-bordered table-hover">
+                <div class="card-body">
+                    <table id="tabelDetailPencairanInvestasi" class="table table-hover table-head-fixed">
                         <thead>
                             <tr>
-                                <th>Kategori</th>
-                                <th>Sub Kategori</th>
-                                <th>Nama Pengadaan</th>
+                                <th>Pengadaan</th>
                                 <th>Merk</th>
                                 <th>Satuan</th>
-                                <th>Spesifikasi</th>
-                                <th>Harga Satuan</th>
                                 <th>Jumlah</th>
+                                <th>Harga</th>
+                                <th class="none">Kategori</th>
+                                <th class="none">Spesifikasi</th>
                             </tr>
                         </thead>
-                        <tbody id="tbodyDetailPencairanInvestasi"> 
+                        <tbody id="tbodyDetailPencairanInvestasi">
                         </tbody>
                     </table>
                 </div>
@@ -44,7 +46,31 @@
         </div>
     </div>
 </div>
+<!-- Modal Dialog 2 End -->
+
+<!-- Modal Dialog 1 -->
+<div class="modal fade" id="SpesifikasiDetailPencairanInvestasiModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Spesifikasi</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="spesifikasi"></p>
+                <div class="modal-footer" justify-content-between>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Modal Dialog 1 End -->
+
+
+<div class="row">
     <div class="col-12">
         <div class="card card-primary">
              <div class="card-header">
@@ -57,7 +83,7 @@
                     <div class="col-4">
                          <div class="form-group">
                             <label>Tahun</label>
-                            <select class="form-control" style="width: 100%;">
+                            <select class="form-control select2bs4" style="width: 100%;">
                                 <option value="" style="display: none;" disabled selected>Pilih tahun...</option>
                                 @foreach (var tahun in Model.tahun)
                                 {
@@ -69,7 +95,7 @@
                     <div class="col-4">
                         <div class="form-group">
                             <label>Bulan</label>
-                            <select class="form-control" style="width: 100%;">
+                            <select class="form-control select2bs4" style="width: 100%;">
                                 <option value="" style="display: none;" disabled selected>Pilih bulan...</option>
                                 <option value="Januari">Januari</option>
                                 <option value="Februari">Februari</option>
@@ -89,7 +115,7 @@
                     <div class="col-4">
                         <div class="form-group">
                             <label>Unit</label>
-                            <select class="form-control" style="width: 100%;">
+                            <select class="form-control select2bs4" style="width: 100%;">
                                 <option value="" style="display: none;" disabled selected>Pilih unit...</option>
                                 @foreach (var unit in Model.unit)
                                {
@@ -104,78 +130,56 @@
         </div>
         <!-- /.card -->
 
-        @if (TempData["success"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert" style="background-color:green">
-                <strong>@TempData["success"].ToString()</strong>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        }
-        @if (TempData["error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>@TempData["error"].ToString()</strong>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        }
-
         <div class="card">
-            <form class="formPencairanInvestasi" method="post" asp-action="approvalPencairanInvestasi" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
-                @Html.AntiForgeryToken()
-                <!-- /.card-header -->
-                <div class="card-body">
-                    <table id="tabelPencairanInvestasi" class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th class="text-center">Tahun</th>
-                                <th class="text-center">Bulan</th>
-                                <th class="text-center">Unit Pengaju</th>
-                                <th class="text-center">Tanggal</th>
-                                <th class="text-center">Jumlah</th>
-                                <th class="text-center"></th>
-                            </tr>
-                        </thead>
-                        <tbody> 
-                            @foreach (var PencairanInvestasi in Model.pencairanInvestasi) { 
-                            <tr>
-                                <td>@PencairanInvestasi.ID_PENCAIRAN_INVESTASI</td>
-                                <td>@PencairanInvestasi.TAHUN_ANGGARAN</td>
-                                <td>@PencairanInvestasi.BULAN_PENGADAAN</td>
-                                <td>@PencairanInvestasi.NAMA_UNIT</td>
-                                <td>@PencairanInvestasi.INSERT_DATE</td>
-                                <td>Rp @PencairanInvestasi.TOTAL_PENCAIRAN</td>
-                                <td class="text-center">
-                                    <button onclick="showDetailPencairanInvestasi(@PencairanInvestasi.ID_PENCAIRAN_INVESTASI)" type="button" class="btn btn-primary btn-block btn-sm"><i class="fa fa-eye"></i></button>
-                                </td>
-                            </tr> 
-                            }
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <th></th>
-                                <th>Tahun</th>
-                                <th>Bulan</th>
-                                <th>Unit Pengaju</th>
-                                <th>Tanggal</th>
-                                <th>Jumlah</th>
-                                <th></th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-                <!-- /.card-body -->
-            </form>
+            <div class="card-body">
+                <table id="tabelPencairanInvestasi" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Tahun</th>
+                            <th>Bulan</th>
+                            <th>Unit Pengaju</th>
+                            <th>Tanggal</th>
+                            <th>Total</th>
+                            <th class="text-center">Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var PencairanInvestasi in Model.pencairanInvestasi) {
+                        <tr>
+                            <td>@PencairanInvestasi.ID_PENCAIRAN_INVESTASI</td>
+                            <td>@PencairanInvestasi.TAHUN_ANGGARAN</td>
+                            <td>@PencairanInvestasi.BULAN_PENGADAAN</td>
+                            <td>@PencairanInvestasi.NAMA_UNIT</td>
+                            <td>@((PencairanInvestasi.INSERT_DATE).ToLongDateString())</td>
+                            <td>@((PencairanInvestasi.TOTAL_PENCAIRAN).ToString("C0", culture))</td>
+                            <td class="text-center"> 
+                                <a onclick="showDetailPencairanInvestasi(@PencairanInvestasi.ID_PENCAIRAN_INVESTASI)" class="btn btn-primary btn-sm"> <i class="fas fa-eye"> </i> </a>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>                
+            </div>
+            <!-- /.card-body -->
         </div>
     </div>
 </div>
 
+
 @section Scripts{
     <script src="~/lib/jquery-datatables-checkboxes-1.2.12/js/dataTables.checkboxes.min.js"></script>
+
+    @if (TempData["success"] != null){
+        <script type="text/javascript">
+            toastr.success('@TempData["success"].ToString()', 'Berhasil Memperoses');
+        </script>
+    }
+    @if (TempData["error"] != null){
+        <script type="text/javascript">
+            toastr.error('@TempData["error"].ToString()', 'Gagal Memperoses');
+        </script>
+    }
 
     <script> 
         var tabelPencairanInvestasi;
@@ -183,6 +187,14 @@
 
         refreshTabelPencairanInvestasi();
         refreshTabelDetailPencairanInvestasi();
+
+        var formatRupiah = (number) => {
+           return new Intl.NumberFormat('id-ID', { 
+               style: 'currency', 
+               currency: 'IDR', 
+               minimumFractionDigits: 0 
+           }).format(number);
+        };
 
         function refreshTabelPencairanInvestasi() {
             tabelPencairanInvestasi = $("#tabelPencairanInvestasi").DataTable({
@@ -234,12 +246,27 @@
             }).buttons().container().appendTo('#tabelPencairanInvestasi_wrapper .col-md-6:eq(0)');
         }
 
+        $('#tabelPencairanInvestasi tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = table.row(tr);
+ 
+            if (row.child.isShown()) {
+                row.child.hide();
+                tr.removeClass('shown');
+            }
+            else {
+                // Open this row
+                row.child(row.data()[6]).show();
+                tr.addClass('shown');
+            }
+        });
+
         function refreshTabelDetailPencairanInvestasi() {
             tabelDetailPencairanInvestasi = $("#tabelDetailPencairanInvestasi").DataTable({
                 paging: true,
                 lengthChange: false,
                 searching: true,
-                ordering: true,
+                ordering: false,
                 info: true,
                 autoWidth: false,
                 responsive: true,
@@ -247,26 +274,27 @@
         }
 
         function showDetailPencairanInvestasi(id) {
-            $('#DetailPencairanInvestasi').modal('show');
-
             $.ajax({
                 url: "/PengelolaanInvestasi/ajaxGetDetailPencairanInvestasi",
                 type: "POST",
                 data: { "id": id },
                 dataType: "json",
                 success: function (result) {
+
                     var dtlPencairanInvestasi = result.data;
                     var str = '';
 
                     for (var i = 0; i < dtlPencairanInvestasi.length; i++) {
-                        str += '<tr> <td>' + dtlPencairanInvestasi[i].KATEGORI + '</td> <td>' + dtlPencairanInvestasi[i].SUB_KATEGORI + '</td> <td>' + dtlPencairanInvestasi[i].NAMA_PENGADAAN + '</td> <td>' + dtlPencairanInvestasi[i].MERK + '</td> <td>' + dtlPencairanInvestasi[i].SATUAN + '</td> <td>' + dtlPencairanInvestasi[i].SPESIFIKASI + '</td> <td>' + dtlPencairanInvestasi[i].HARGA_SATUAN + '</td> <td>' + dtlPencairanInvestasi[i].JUMLAH + '</td> </tr>';
+                        str += '<tr> <td>' + dtlPencairanInvestasi[i].NAMA_PENGADAAN + '</td> <td>' + dtlPencairanInvestasi[i].MERK + '</td> <td>' + dtlPencairanInvestasi[i].SATUAN + '</td> <td class="text-center">' +dtlPencairanInvestasi[i].JUMLAH+ '</td> <td>' +formatRupiah(dtlPencairanInvestasi[i].HARGA_SATUAN)+ '</td> <td>' + dtlPencairanInvestasi[i].KATEGORI + ' - ' + dtlPencairanInvestasi[i].SUB_KATEGORI + '</td> <td> '+ dtlPencairanInvestasi[i].SPESIFIKASI +' </td> </tr>';
                     }
-                    [i]
+
                     tabelDetailPencairanInvestasi.destroy();
                     $("#tbodyDetailPencairanInvestasi").html(str);
                     refreshTabelDetailPencairanInvestasi();
                 }
             })
+
+            $('#DetailPencairanInvestasi').modal('show');
         }
     </script>
 }

@@ -6,11 +6,14 @@
     ViewData["Title"] = "Rencana Pengadaan Aset";
 
     CultureInfo culture = new CultureInfo("id-ID");
+    var IDUnitUser  = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
+    var IDRoleUser  = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
+    var namaUnit    = User.Claims.Where(c => c.Type == "namaUnit").Select(c => c.Value).Single();
 }
 
 <!-- Modal Dialog 1 -->
-<div class="modal fade" id="DetailRencanaKhususInvestasiModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+<div class="modal fade" id="DetailRencanaKhususInvestasiModal" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Detail Rencana Khusus Investasi</h5>
@@ -20,15 +23,15 @@
             </div>
             <div class="modal-body">
                 <div class="card-body table-responsive p-0">
-                    <table id="tabelDetailRencanaKhususInvestasi" class="table table-bordered table-hover">
+                    <table id="tabelDetailRencanaKhususInvestasi" class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Nama Kegiatan</th>
-                                <th>Bulan</th>
-                                <th>Jumlah</th>
-                                <th>Satuan</th>
-                                <th>Harga</th>
-                                <th>Total</th>
+                                <th>Nama Kegiatan:</th>
+                                <th>Bulan:</th>
+                                <th>Jumlah:</th>
+                                <th>Satuan:</th>
+                                <th>Harga:</th>
+                                <th>Total:</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -46,7 +49,7 @@
 <!-- Modal Dialog 1 End -->
 
 <!-- Modal Dialog 2 -->
-<div class="modal fade" id="DetailRencanaPengadaanAset" tabindex="-1" role="dialog" style="overflow-y:scroll;" aria-hidden="true">
+<div class="modal fade" id="DetailRencanaPengadaanAsetModal" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -58,52 +61,54 @@
             <form class="formDetailRencanaPengadaanAset" method="post" asp-action="addPencairanInvestasi" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
             @Html.AntiForgeryToken()
                 <div class="modal-body">
-                    <input type="hidden" class="form-control" id="IDDetailRKA" name="IDDetailRKA" value="" readonly="readonly" required>
+                    <input type="hidden" class="form-control" id="IDDetailPencairanInvestasi" name="IDDetailPencairanInvestasi" value="" readonly="readonly">
+                    <input type="hidden" class="form-control" id="IDDetailRKA" name="IDDetailRKA" value="" readonly="readonly">
                     <input type="hidden" class="form-control" id="IDKategori" name="IDKategori" value="" readonly="readonly" required>
                     <input type="hidden" class="form-control" id="hargaSatuan" name="hargaSatuan" value="" readonly="readonly" required>
-                    <div class="form-group">
-                        <label>Kategori</label>
-                        <select id="IDRefSK" name="IDRefSK" class="form-control" style="width: 100%;" onclick="getKategori(this.value)" required>
-                            <option value="" style="display: none;" disabled selected>Pilih kategori</option>
-                            @foreach (var kategori in Model.kategori)
-                            {
-                            <option value="" disabled>@kategori.DESKRIPSI</option>
-                                @foreach (var subKategori in Model.subKategori)
-                                {
-                                    if(@subKategori.ID_KATEGORI == @kategori.ID_KATEGORI)
-                                    {
-                                        <option value="@subKategori.ID_REF_SK">&emsp;@subKategori.DESKRIPSI</option>
-                                    }
-                                }
-                            }
-                        </select>
-                    </div>
                     <div class="row">
                         <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                <select id="IDRefSK" name="IDRefSK" class="form-control" style="width: 100%;" onclick="getKategori(this.value)" required>
+                                    <option value="" style="display: none;" disabled selected>Pilih kategori</option>
+                                    @foreach (var kategori in Model.kategori)
+                                    {
+                                    <option value="" disabled>@kategori.DESKRIPSI</option>
+                                        @foreach (var subKategori in Model.subKategori)
+                                        {
+                                            if(@subKategori.ID_KATEGORI == @kategori.ID_KATEGORI)
+                                            {
+                                                <option value="@subKategori.ID_REF_SK">&emsp;@subKategori.DESKRIPSI</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
                             <div class="form-group">
                                 <label>Nama</label>
                                 <input id="namaPengadaan" name="namaPengadaan" type="text" class="form-control" placeholder="Masukkan nama aset..." required>
                             </div>
                             <div class="form-group">
-                                <label>Satuan</label>
-                                <input id="satuan" name="satuan" type="text" class="form-control" placeholder="Masukan satuan aset..." required>
+                                <label>Harga Satuan</label>
+                                <input id="inpHargaSatuan" type="text" class="form-control" oninput="formatHarga(this.value)" placeholder="Masukkan harga satuan aset..." required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Merk</label>
                                 <input id="merk" name="merk" type="text" class="form-control" placeholder="Masukkan merek aset..." required>
+                            </div>  
+                            <div class="form-group">
+                                <label>Satuan</label>
+                                <input id="satuan" name="satuan" type="text" class="form-control" placeholder="Masukan satuan aset..." required>
                             </div>
                             <div class="form-group">
                                 <label>Jumlah</label>
                                 <input id="jumlah" name="jumlah" type="number" class="form-control" placeholder="Masukkan jumlah aset..." required>
                             </div>
-                        </div>                    
+                        </div>                
                     </div>
-                    <div class="form-group">
-                        <label>Harga Satuan</label>
-                        <input id="inpHargaSatuan" type="text" class="form-control" oninput="formatHarga(this.value)" placeholder="Masukkan harga satuan aset..." required>
-                    </div>
+
                     <div class="form-group">
                         <label>Spesifikasi</label>
                         <textarea id="spesifikasi" name="spesifikasi" class="form-control" rows="3" placeholder="Masukkan spesifikasi aset..." required></textarea>
@@ -129,47 +134,27 @@
             <!-- /.card-header -->
             <div class="card-body">
                 <div class="row">
-                    <div class="col-4">
+                    <div class="col-6">
                          <div class="form-group">
                             <label>Tahun</label>
-                            <select class="form-control select2bs4" style="width: 100%;">
-                                <option value="" style="display: none;" disabled selected>Pilih tahun...</option>
+                            <select onchange="filterDataRencanaPengadaanAset()" id="tahun" class="form-control select2bs4" style="width: 100%;">
+                                <option value="" selected>Pilih tahun...</option>
                                 @foreach (var tahun in Model.tahun)
                                 {
-                                <option value="@tahun.ID_TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
+                                <option value="@tahun.TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
                                 }
                             </select>
                         </div>
                     </div>
-                    <div class="col-4">
-                        <div class="form-group">
-                            <label>Bulan</label>
-                            <select class="form-control select2bs4" style="width: 100%;">
-                                <option value="" style="display: none;" disabled selected>Pilih bulan...</option>
-                                <option value="Januari">Januari</option>
-                                <option value="Februari">Februari</option>
-                                <option value="Maret">Maret</option>
-                                <option value="April">April</option>
-                                <option value="Mei">Mei</option>
-                                <option value="Juni">Juni</option>
-                                <option value="Juli">Juli</option>
-                                <option value="Agustus">Agustus</option>
-                                <option value="September">September</option>
-                                <option value="Oktober">Oktober</option>
-                                <option value="November">November</option>
-                                <option value="Desember">Desember</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-4">
+                    <div class="col-6">
                         <div class="form-group">
                             <label>Unit</label>
-                            <select class="form-control select2bs4" style="width: 100%;">
-                                <option value="" style="display: none;" disabled selected>Pilih unit...</option>
+                            <select onchange="filterDataRencanaPengadaanAset()" id="unit" class="form-control select2bs4" style="width: 100%;">
+                                <option value="" selected>Pilih unit...</option>
                                 @foreach (var unit in Model.unit)
-                               {
-                                <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
-                               }
+                                {
+                                    <option value="@unit.NAMA_UNIT">@unit.NAMA_UNIT</option>
+                                }
                             </select>
                         </div>
                     </div>
@@ -179,35 +164,16 @@
         </div>
         <!-- /.card -->
 
-        @if (TempData["success"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert" style="background-color:green">
-                <strong>@TempData["success"].ToString()</strong>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        }
-        @if (TempData["error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>@TempData["error"].ToString()</strong>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        }
-
         <div class="card">
             <div class="card-body">
-                <table id="tabelRencanaPengadaanAset" class="table table-bordered table-hover">
+                <table id="tabelRencanaPengadaanAset" class="table table-hover">
                     <thead>
                         <tr>
-                            <th class="text-center">Tahun:</th>
-                            <th class="text-center">Nama Unit:</th>
-                            <th class="text-center">Program Kegiatan:</th>
-                            <th class="text-center">Nama Program:</th>
-                            <th class="text-center">Detail</th>
+                            <th>Tahun:</th>
+                            <th>Nama Unit:</th>
+                            <th>Program Kegiatan:</th>
+                            <th>Nama Program:</th>
+                            <th>Detail</th>
                         </tr>
                     </thead>
                     <tbody> 
@@ -218,20 +184,11 @@
                             <td>@RencanaPengadaanAset.PROGRAM_KEGIATAN</td>
                             <td>@RencanaPengadaanAset.NAMA_PROGRAM</td>
                             <td class="text-center">
-                                <a onclick="showDetailRencanaKhususInvestasiModal(@RencanaPengadaanAset.ID_RKA)" class="btn btn-primary btn-sm"> <i class="fas fa-eye"> </i> </a>
+                                <a data-toggle="modal" href="#DetailRencanaKhususInvestasiModal" onclick="showDetailRencanaKhususInvestasi(@RencanaPengadaanAset.ID_RKA)" class="btn btn-primary btn-sm"> <i class="fas fa-eye"> </i> </a>
                             </td>
                         </tr> 
                         }
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <th>Tahun</th>
-                            <th>Nama Unit</th>
-                            <th>Program Kegiatan</th>
-                            <th>Nama Program</th>
-                            <th></th>
-                        </tr>
-                    </tfoot>
                 </table>
             </div>
             <!-- /.card-body -->
@@ -240,6 +197,25 @@
 </div>
 
 @section Scripts{
+
+    @if(TempData["success"] != null){
+        <script type="text/javascript">
+            toastr.success('@TempData["success"].ToString()', 'Berhasil Memperoses');
+        </script>
+    }
+    @if(TempData["error"] != null){
+        <script type="text/javascript">
+            toastr.error('@TempData["error"].ToString()', 'Gagal Memperoses');
+        </script>
+    }
+
+    @if(Array.IndexOf(IDRoleUser, "9") != -1 && Array.IndexOf(IDRoleUser, "13") != -1 && Array.IndexOf(IDRoleUser, "14") != -1 || IDUnitUser != "0"){
+        <script type="text/javascript">
+            $('#unit').prop("disabled", true);
+            $('#unit').val('@namaUnit');
+        </script>
+    }
+
     <script> 
         var tabelRencanaPengadaanAset;
         var tabelDetailRencanaKhususInvestasi;
@@ -259,6 +235,10 @@
            ).format(number);
         }
 
+        var formatString = (value) => {
+           return "'" + value + "'";
+        };
+
         function formatHarga(input) {
             input = input.replace(/[^\d]/g, '') * 1;
 
@@ -266,14 +246,18 @@
             $("#inpHargaSatuan").val(formatRupiah(input));
         }
 
+        $(document).on('show.bs.modal', '.modal', function() {
+            var zIndex = 1040 + 10 * $('.modal:visible').length;
+            $(this).css('z-index', zIndex);
+            setTimeout(() => $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack'));
+        }); 
+
+
         $("#inpHargaSatuan").on('change', function() {
             console.log($(this).val());
         });
 
-        $('#DetailRencanaPengadaanAset').on('hidden.bs.modal', function() {
-            $('#DetailRencanaPengadaanAset').modal('hide');
-            $('#DetailRencanaKhususInvestasiModal').modal('show');
-
+        $('#DetailRencanaPengadaanAsetModal').on('hidden.bs.modal', function() {
             var forms = document.getElementsByClassName('formDetailRencanaPengadaanAset');
             var validation = Array.prototype.filter.call(forms, function (form) {
                 form.classList.remove('was-validated');
@@ -295,6 +279,9 @@
 
         function refreshTabelRencanaPengadaanAset() {
             tabelRencanaPengadaanAset = $("#tabelRencanaPengadaanAset").DataTable({
+                language: {
+                    url: "../json/datatables-id.json"
+                },
                 paging: true,
                 lengthChange: false,
                 searching: true,
@@ -303,91 +290,104 @@
                 autoWidth: false,
                 responsive: true,
                 buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
-            }).buttons().container().appendTo('#tabelRencanaPengadaanAset_wrapper .col-md-6:eq(0)');
+                columnDefs: [
+                    { targets: 4, orderable: false}
+                ],
+                initComplete: function () {
+                    setTimeout( function () {
+                        tabelRencanaPengadaanAset.buttons().container().appendTo('#tabelRencanaPengadaanAset_wrapper .col-md-6:eq(0)')
+                    }, 10 );
+                }
+            });
         }
 
         function refreshTabelDetailRencanaKhususInvestasi() {
             tabelDetailRencanaKhususInvestasi = $("#tabelDetailRencanaKhususInvestasi").DataTable({
+                language: {
+                    url: "../json/datatables-id.json"
+                },
                 paging: true,
                 pageLength: 3,
-                lengthChange: false,
+                lengthChange: true,
                 searching: true,
                 ordering: true,
                 info: true,
                 autoWidth: false,
                 responsive: true,
+                columnDefs: [
+                    { targets: 6, orderable: false}
+                ]
             });
         }
 
-        function showDetailRencanaKhususInvestasiModal(id) {
-            $('#DetailRencanaKhususInvestasiModal').modal('show');
-            $('#DetailRencanaPengadaanAset').modal('hide');
+        function filterDataRencanaPengadaanAset(){
+            var tahun   = $('#tahun').val();
+            var unit    = $('#unit').val();
+
+            var tabel = $("#tabelRencanaPengadaanAset").DataTable();
+            tabel.column(0).search(tahun ? '^'+tahun+'$' : '', true, false).column(1).search(unit ? '^'+unit+'$' : '', true, false).order( [ 0, 'asc' ] ).draw();
+        }
+
+        function showDetailRencanaKhususInvestasi(IDRKA) {
+            var tabelDetail = $('#tabelDetailRencanaKhususInvestasi').DataTable();
 
             $.ajax({
                 url: "/PengelolaanInvestasi/ajaxGetDetailRencanaKhususInvestasi",
                 type: "POST",
-                data: { "id": id },
+                data: { "IDRKA": IDRKA },
                 dataType: "json",
                 success: function (result) {
-                    var dtlRencanaKhususInvestasi = result.data;
-                    var str = '';
-
-                    for (var i = 0; i < dtlRencanaKhususInvestasi.length; i++) {
-                        if(dtlRencanaKhususInvestasi[i].ID_DTL_RKA == null){
-                            str += '<tr> <td>' + dtlRencanaKhususInvestasi[i].NAMA_KEGIATAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].BULAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].VOLUME + '</td> <td>' + dtlRencanaKhususInvestasi[i].SATUAN + '</td> <td>' + formatRupiah(dtlRencanaKhususInvestasi[i].HARGA_SATUAN) + '</td> <td>' + formatRupiah(dtlRencanaKhususInvestasi[i].SUBTOTAL) + '</td> <td> <button onClick="addDetailRencanaPengadaanAset(' + dtlRencanaKhususInvestasi[i].DTL_RKA + ')" type="button" class="btn btn-secondary btn-block btn-sm"><i class="fa fa-plus"></i></button> </td> </tr>';
+                    tabelDetail.clear().draw();
+                    for (var i = 0; i < result.data.length; i++) {
+                        if(result.data[i].ID_PENCAIRAN_INVESTASI == null){
+                            tabelDetail.row.add([result.data[i].NAMA_KEGIATAN, result.data[i].BULAN, result.data[i].VOLUME, result.data[i].SATUAN, formatRupiah(result.data[i].HARGA_SATUAN), formatRupiah(result.data[i].SUBTOTAL), '<a data-toggle="modal" href="#DetailRencanaPengadaanAsetModal" onClick="addDetailRencanaPengadaanAset(' + result.data[i].ID_DTL_RKA + ',' + result.data[i].VOLUME + ',' + result.data[i].HARGA_SATUAN + ',' + formatString(result.data[i].SATUAN) + ')" type="button" class="btn btn-secondary btn-sm"><i class="fa fa-plus"></i></a>' ]).draw();
                         }else{
-                            str += '<tr> <td>' + dtlRencanaKhususInvestasi[i].NAMA_KEGIATAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].BULAN + '</td> <td>' + dtlRencanaKhususInvestasi[i].VOLUME + '</td> <td>' + dtlRencanaKhususInvestasi[i].SATUAN + '</td> <td>' + formatRupiah(dtlRencanaKhususInvestasi[i].HARGA_SATUAN) + '</td> <td>' + formatRupiah(dtlRencanaKhususInvestasi[i].SUBTOTAL) + '</td> <td> <button onClick="updateDetailRencanaPengadaanAset(' + dtlRencanaKhususInvestasi[i].DTL_RKA + ')" type="button" class="btn btn-success btn-block btn-sm"> <i class="fa fa-edit"></i></button> </td> </tr>';
+                            tabelDetail.row.add([result.data[i].NAMA_KEGIATAN, result.data[i].BULAN, result.data[i].VOLUME, result.data[i].SATUAN, formatRupiah(result.data[i].HARGA_SATUAN), formatRupiah(result.data[i].SUBTOTAL), '<a data-toggle="modal" href="#DetailRencanaPengadaanAsetModal" onClick="updateDetailRencanaPengadaanAset(' + result.data[i].ID_DETAIL_PENCAIRAN_INVESTASI + ')" type="button" class="btn btn-success btn-sm"><i class="fa fa-edit"></i></a>' ]).draw();
                         }
                     }
-
-                    tabelDetailRencanaKhususInvestasi.destroy();
-                    $("#tbodyDetailRencanaKhususInvestasi").html(str);
-                    refreshTabelDetailRencanaKhususInvestasi();
                 }
             })
         }
 
-        function updateDetailRencanaPengadaanAset(IDDetailRKA) {
-            $('#DetailRencanaPengadaanAset').modal('show');
-            $('#DetailRencanaKhususInvestasiModal').modal('hide');
+        function updateDetailRencanaPengadaanAset(IDDetailPencairanInvestasi) {
             $('#btnDetailRencanaPengadaanAset').html('Perbarui');
-            $('#IDDetailRKA').val(IDDetailRKA);
-            $('#IDRefSK').prop( "disabled", false );
+
+            $('#IDDetailPencairanInvestasi').val(IDDetailPencairanInvestasi);
+            $('#IDDetailRKA').val("");
 
             $.ajax({
                 url: "/PengelolaanInvestasi/ajaxGetDetailRencanaPengadaanAset",
                 type: "POST",
-                data: { "IDDetailRKA": IDDetailRKA},
+                data: { "IDDetailPencairanInvestasi": IDDetailPencairanInvestasi},
                 dataType: "json",
                 success: function (result) {
-                    var data = result.data;
-
-                    $('#IDKategori').val(data.ID_KATEGORI);
-                    $('#IDRefSK').val(data.ID_REF_SK);
-                    $('#namaPengadaan').val(data.NAMA_PENGADAAN);
-                    $('#satuan').val(data.SATUAN);
-                    $('#merk').val(data.MERK);
-                    $('#jumlah').val(data.JUMLAH);
-                    $('#hargaSatuan').val(data.HARGA_SATUAN);
-                    $('#inpHargaSatuan').val(formatRupiah(data.HARGA_SATUAN));
-                    $('#spesifikasi').val(data.SPESIFIKASI);
+                    $('#IDKategori').val(result.data.ID_KATEGORI);
+                    $('#IDRefSK').val(result.data.ID_REF_SK);
+                    $('#namaPengadaan').val(result.data.NAMA_PENGADAAN);
+                    $('#satuan').val(result.data.SATUAN);
+                    $('#merk').val(result.data.MERK);
+                    $('#jumlah').val(result.data.JUMLAH);
+                    $('#hargaSatuan').val(result.data.HARGA_SATUAN);
+                    $('#inpHargaSatuan').val(formatRupiah(result.data.HARGA_SATUAN));
+                    $('#spesifikasi').val(result.data.SPESIFIKASI);
                 }
             })
         }
 
-        function addDetailRencanaPengadaanAset(IDDetailRKA) {
-            $('#DetailRencanaPengadaanAset').modal('show');
-            $('#DetailRencanaKhususInvestasiModal').modal('hide');
+        function addDetailRencanaPengadaanAset(IDDetailRKA, volume, hargaSatuan, satuan) {
             $('#btnDetailRencanaPengadaanAset').html('Tambah');
 
+            $('#IDDetailPencairanInvestasi').val("");
             $('#IDDetailRKA').val(IDDetailRKA);
+
             $('#IDKategori').val("");
             $('#IDRefSK').val("");
             $('#namaPengadaan').val("");
-            $('#satuan').val("");
+            $('#satuan').val(satuan);
             $('#merk').val("");
-            $('#jumlah').val("");
-            $('#inpHargaSatuan').val("");
+            $('#jumlah').val(volume);
+            $('#inpHargaSatuan').val(formatRupiah(hargaSatuan));
+            $("#hargaSatuan").val(hargaSatuan);
             $('#spesifikasi').val("");
         }
 
@@ -398,9 +398,7 @@
                 data: { "IDRefSK": IDRefSK },
                 dataType: "json",
                 success: function (result) {
-                    var IDKategori = result.data;
-
-                    $("#IDKategori").val(IDKategori);
+                    $("#IDKategori").val(result.data);
                 }
             })
         }

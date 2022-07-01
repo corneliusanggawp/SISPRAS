@@ -6,11 +6,12 @@
 @{
     MasterDAO masterDAO = new MasterDAO();
 
-    var role    =  User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray();
-    var id_role =  User.Claims.Where(c => c.Type == "id_role").Select(c => c.Value).ToArray();
+    var RoleUser    =  User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray();
+    var IDRoleUser  =  User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
+    var namaUnit    = User.Claims.Where(c => c.Type == "namaUnit").Select(c => c.Value).Single();
 
-    var mainMenu    = masterDAO.getAllMenu(id_role);
-    var subMenu     = masterDAO.getAllSubMenu(id_role);
+    var mainMenu    = masterDAO.getAllMenu(IDRoleUser);
+    var subMenu     = masterDAO.getAllSubMenu(IDRoleUser);
 }
 
 <!DOCTYPE html>
@@ -42,6 +43,12 @@
     <!-- daterange picker -->
     <link rel="stylesheet" href="~/lib/daterangepicker/daterangepicker.css">
     @RenderSection("Header", required: false)
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -182,7 +189,7 @@
                     </div>
                     <div class="info">  
                         <a href="" class="d-block">@User.Identity.Name</a>
-                        <a>@string.Join(", ", role)</a>
+                        <a>@string.Join(", ", RoleUser) - @namaUnit</a>
                     </div>
                 </div>
                 <!-- SidebarSearch Form -->
