@@ -71,23 +71,22 @@
 
 
 <div class="row">
-    <div class="col-12">
+	<div class="col-md-8">
         <div class="card card-primary">
-             <div class="card-header">
+            <div class="card-header">
                 <h3 class="card-title">Filter</h3>
             </div>
-            
             <!-- /.card-header -->
             <div class="card-body">
                 <div class="row">
                     <div class="col-4">
                          <div class="form-group">
                             <label>Tahun</label>
-                            <select class="form-control select2bs4" style="width: 100%;">
-                                <option value="" style="display: none;" disabled selected>Pilih tahun...</option>
+                            <select onchange="filterDataPencairanInvestasi()" id="tahun" class="form-control select2bs4" style="width: 100%;">
+                                <option value="" selected>Semua tahun...</option>
                                 @foreach (var tahun in Model.tahun)
                                 {
-                                <option value="@tahun.ID_TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
+                                <option value="@tahun.TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
                                 }
                             </select>
                         </div>
@@ -95,8 +94,8 @@
                     <div class="col-4">
                         <div class="form-group">
                             <label>Bulan</label>
-                            <select class="form-control select2bs4" style="width: 100%;">
-                                <option value="" style="display: none;" disabled selected>Pilih bulan...</option>
+                            <select onchange="filterDataPencairanInvestasi()" id="bulan" class="form-control select2bs4" style="width: 100%;">
+                                <option value="" selected>Semua bulan...</option>
                                 <option value="Januari">Januari</option>
                                 <option value="Februari">Februari</option>
                                 <option value="Maret">Maret</option>
@@ -113,23 +112,50 @@
                         </div>
                     </div>
                     <div class="col-4">
-                        <div class="form-group">
+                         <div class="form-group">
                             <label>Unit</label>
-                            <select class="form-control select2bs4" style="width: 100%;">
-                                <option value="" style="display: none;" disabled selected>Pilih unit...</option>
+                            <select onchange="filterDataPencairanInvestasi()" id="unit" class="form-control select2bs4" style="width: 100%;">
+                                <option value="" selected>Semua unit...</option>
                                 @foreach (var unit in Model.unit)
-                               {
-                                <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
-                               }
-                            </select>
+                                {
+                                    <option value="@unit.NAMA_UNIT">@unit.NAMA_UNIT</option>
+                                }
+                            </select>                            
                         </div>
                     </div>
                 </div>
             </div>
             <!-- /.card-body -->
         </div>
-        <!-- /.card -->
+        <!-- /.card -->	
+	</div>
 
+	<div class="col-md-4">
+        <form id="formApprovalPencairanInvestasi" method="post" asp-action="approvalPencairanInvestasi" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
+            @Html.AntiForgeryToken()
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h3 class="card-title"> Approval Pencairan Investasi *</h3>
+                </div>
+                <div class="card-body">
+                    <input id="IDPencairanInvestasi" name="IDPencairanInvestasi" type="hidden" class="form-control" readonly="readonly" required>
+                    <div class="form-group">
+                        <label>Total Pencairan</label>
+                        <div class="input-group">
+                            <input id="totalPencairan" type="text" class="form-control" placeholder="Rp 0" readonly="readonly">
+                            <span class="input-group-append">
+                                <button id="btnProsesApproval" type="submit" class="btn btn-primary" disabled>Setujui (<b id="selectedPencairan">0</b>)</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </form>
+	</div>
+
+    <div class="col-12">    
         <div class="card">
             <div class="card-body">
                 <table id="tabelPencairanInvestasi" class="table table-hover">
@@ -147,7 +173,7 @@
                     <tbody>
                         @foreach (var PencairanInvestasi in Model.pencairanInvestasi) {
                         <tr>
-                            <td>@PencairanInvestasi.ID_PENCAIRAN_INVESTASI</td>
+                            <td style="color:transparent;">@PencairanInvestasi.ID_PENCAIRAN_INVESTASI</td>
                             <td>@PencairanInvestasi.TAHUN_ANGGARAN</td>
                             <td>@PencairanInvestasi.BULAN_PENGADAAN</td>
                             <td>@PencairanInvestasi.NAMA_UNIT</td>
@@ -168,16 +194,20 @@
 
 
 @section Scripts{
+    <!-- Select -->
+    <script src="~/lib/datatables-select/js/dataTables.select.min.js"></script>  
+    <!-- CheckBox -->
     <script src="~/lib/jquery-datatables-checkboxes-1.2.12/js/dataTables.checkboxes.min.js"></script>
+
 
     @if (TempData["success"] != null){
         <script type="text/javascript">
-            toastr.success('@TempData["success"].ToString()', 'Berhasil Memperoses');
+            toastr.success('@TempData["success"].ToString()', 'Berhasil');
         </script>
     }
     @if (TempData["error"] != null){
         <script type="text/javascript">
-            toastr.error('@TempData["error"].ToString()', 'Gagal Memperoses');
+            toastr.error('@TempData["error"].ToString()', 'Gagal');
         </script>
     }
 
@@ -188,6 +218,16 @@
         refreshTabelPencairanInvestasi();
         refreshTabelDetailPencairanInvestasi();
 
+        var tabelMain   = $('#tabelPencairanInvestasi').DataTable();
+        var tabelDetail = $('#tabelDetailPencairanInvestasi').DataTable();
+        var rowIndex = [];
+        var totalPencairanInvestasi = 0;
+        var idPencairanInvestasiArray = [];
+
+        $('.select2bs4').select2({
+            theme: 'bootstrap4'
+        });
+
         var formatRupiah = (number) => {
            return new Intl.NumberFormat('id-ID', { 
                style: 'currency', 
@@ -196,76 +236,97 @@
            }).format(number);
         };
 
+        $("#formApprovalPencairanInvestasi").on("submit", function(e){
+            e.preventDefault();
+            var formApprovalPencairanInvestasi = this;
+            
+            Swal.fire({
+                title: 'Lanjutkan Proses Approval?',
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                text: "Mohon pastikan semua pencairan yang dipilih sudah sesuai",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#007bff',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, lanjutkan!',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    formApprovalPencairanInvestasi.submit();
+                }
+            })
+        });
+
+        tabelMain
+            .on( 'select', function ( e, dt, type, indexes ) {
+                var selectedRows = indexes.filter(x => !rowIndex.includes(x));
+                rowIndex.push(...selectedRows);
+
+                var selectedID  = tabelMain.cells( selectedRows, 0 ).data().toArray();
+                var addTotal    = tabelMain.cells( selectedRows, 5 ).data().sum();
+                
+                idPencairanInvestasiArray.push(...selectedID);
+                totalPencairanInvestasi += addTotal;
+
+                $('#IDPencairanInvestasi').val(idPencairanInvestasiArray);
+                $('#totalPencairan').val(formatRupiah(totalPencairanInvestasi));
+                $('#selectedPencairan').html(rowIndex.length);
+
+                $('#btnProsesApproval').prop('disabled', false);
+            } )
+            .on( 'deselect', function ( e, dt, type, indexes ) {
+                rowIndex = rowIndex.filter(x => !indexes.includes(x));
+
+                var deselectIDArray = tabelMain.cells( indexes, 0 ).data().toArray();
+                var minTotal        = tabelMain.cells( indexes, 5 ).data().sum();
+
+                idPencairanInvestasiArray = idPencairanInvestasiArray.filter(a => !deselectIDArray.includes(a));
+                totalPencairanInvestasi   -= minTotal;
+
+                $('#IDPencairanInvestasi').val(idPencairanInvestasiArray);
+                $('#totalPencairan').val(formatRupiah(totalPencairanInvestasi));
+                $('#selectedPencairan').html(idPencairanInvestasiArray.length);
+                
+                if(idPencairanInvestasiArray.length == 0){
+                    $('#btnProsesApproval').prop('disabled', true);
+                }
+            } );
+
         function refreshTabelPencairanInvestasi() {
             tabelPencairanInvestasi = $("#tabelPencairanInvestasi").DataTable({
-                columnDefs: [ {
-                    targets     :   0,
-                    checkboxes  : {
-                        selectRow: true
+                language: {
+                    url: "../json/datatables-id.json"
+                },
+                columnDefs: [ 
+                    {
+                        targets     :   0,
+                        checkboxes  : {
+                            selectRow: true
+                        }
                     }
-                } ],
+                ],
                 select: {
                     style       : 'multi'
                 },
                 paging: true,
-                lengthChange: false,
+                lengthChange: true,
                 searching: true,
                 ordering: false,
                 info: true,
                 autoWidth: false,
-                responsive: true,
-                buttons: {
-                    buttons: [
-                        {
-                            text: 'Approve',
-                            action: function (e) {
-                            var conf = confirm("Apakah anda yakin akan menyetujui pencairan investasi");
-                                        if (confirm) {
-                                            var form = document.getElementsByClassName('formPencairanInvestasi');
-                                            var table = $("#tabelPencairanInvestasi").DataTable();
-
-                                            var rows_selected = table.column(0).checkboxes.selected();
-
-                                            $.each(rows_selected, function(index, rowId){
-                                                 $(form).append(
-                                                     $('<input>')
-                                                        .attr('type', 'hidden')
-                                                        .attr('name', 'id[]')
-                                                        .val(rowId)
-                                                 );
-                                                 $(form).submit();
-                                            });
-                                            $('input[name="id\[\]"]', form).remove();
-
-                                             e.preventDefault();
-                                        }
-                            }
-                        }
-                    ]
-                },
+                responsive: true
             }).buttons().container().appendTo('#tabelPencairanInvestasi_wrapper .col-md-6:eq(0)');
         }
 
-        $('#tabelPencairanInvestasi tbody').on('click', 'td.details-control', function () {
-            var tr = $(this).closest('tr');
-            var row = table.row(tr);
- 
-            if (row.child.isShown()) {
-                row.child.hide();
-                tr.removeClass('shown');
-            }
-            else {
-                // Open this row
-                row.child(row.data()[6]).show();
-                tr.addClass('shown');
-            }
-        });
-
         function refreshTabelDetailPencairanInvestasi() {
             tabelDetailPencairanInvestasi = $("#tabelDetailPencairanInvestasi").DataTable({
+                language: {
+                    url: "../json/datatables-id.json"
+                },
                 paging: true,
                 lengthChange: false,
-                searching: true,
+                searching: false,
                 ordering: false,
                 info: true,
                 autoWidth: false,
@@ -273,28 +334,43 @@
             });
         }
 
-        function showDetailPencairanInvestasi(id) {
+        function showDetailPencairanInvestasi(IDPencairanInvestasi) {
             $.ajax({
-                url: "/PengelolaanInvestasi/ajaxGetDetailPencairanInvestasi",
+                url: "/PengelolaanInvestasi/ajaxGetDetailPencairanInvestasiApproval",
                 type: "POST",
-                data: { "id": id },
+                data: { "IDPencairanInvestasi": IDPencairanInvestasi },
                 dataType: "json",
                 success: function (result) {
+                    tabelDetail.clear().draw();
 
-                    var dtlPencairanInvestasi = result.data;
-                    var str = '';
-
-                    for (var i = 0; i < dtlPencairanInvestasi.length; i++) {
-                        str += '<tr> <td>' + dtlPencairanInvestasi[i].NAMA_PENGADAAN + '</td> <td>' + dtlPencairanInvestasi[i].MERK + '</td> <td>' + dtlPencairanInvestasi[i].SATUAN + '</td> <td class="text-center">' +dtlPencairanInvestasi[i].JUMLAH+ '</td> <td>' +formatRupiah(dtlPencairanInvestasi[i].HARGA_SATUAN)+ '</td> <td>' + dtlPencairanInvestasi[i].KATEGORI + ' - ' + dtlPencairanInvestasi[i].SUB_KATEGORI + '</td> <td> '+ dtlPencairanInvestasi[i].SPESIFIKASI +' </td> </tr>';
+                    for (var i = 0; i < result.data.length; i++) {
+                        tabelDetail.row.add([result.data[i].NAMA_PENGADAAN, result.data[i].MERK, result.data[i].SATUAN, result.data[i].JUMLAH, formatRupiah(result.data[i].HARGA_SATUAN), result.data[i].KATEGORI, result.data[i].SUB_KATEGORI, result.data[i].SPESIFIKASI ]).draw();
                     }
-
-                    tabelDetailPencairanInvestasi.destroy();
-                    $("#tbodyDetailPencairanInvestasi").html(str);
-                    refreshTabelDetailPencairanInvestasi();
                 }
             })
 
             $('#DetailPencairanInvestasi').modal('show');
         }
+
+        function filterDataPencairanInvestasi(){
+            var tahun   = $('#tahun').val();
+            var bulan   = $('#bulan').val();
+            var unit    = $('#unit').val();
+
+            tabelMain.column(1).search(tahun ? '^'+tahun+'$' : '', true, false).column(2).search(bulan ? '^'+bulan+'$' : '', true, false).column(3).search(unit ? '^'+unit+'$' : '', true, false).order( [ 0, 'asc' ] ).draw();
+        }
+
+        jQuery.fn.dataTable.Api.register( 'sum()', function ( ) {
+	        return this.flatten().reduce( function ( a, b ) {
+		        if ( typeof a === 'string' ) {
+			        a = a.replace(/[^\d]/g, '') * 1;
+		        }
+		        if ( typeof b === 'string' ) {
+			        b = b.replace(/[^\d]/g, '') * 1;
+		        }
+
+		        return a + b;
+	        }, 0 );
+        } );
     </script>
 }

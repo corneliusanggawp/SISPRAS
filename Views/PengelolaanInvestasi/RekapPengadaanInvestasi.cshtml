@@ -41,7 +41,7 @@
                          <div class="form-group">
                             <label>Tahun</label>
                             <select onchange="filterDataRekapPengadaanInvestasi()" id="tahun" class="form-control select2bs4" style="width: 100%;">
-                                <option value="" selected>Pilih tahun...</option>
+                                <option value="" selected>Semua tahun...</option>
                                 @foreach (var tahun in Model.tahun)
                                 {
                                 <option value="@tahun.TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
@@ -53,7 +53,7 @@
                         <div class="form-group">
                             <label>Bulan</label>
                             <select onchange="filterDataRekapPengadaanInvestasi()" id="bulan" class="form-control select2bs4" style="width: 100%;">
-                                <option value="" selected>Pilih bulan...</option>
+                                <option value="" selected>Semua bulan...</option>
                                 <option value="Januari">Januari</option>
                                 <option value="Februari">Februari</option>
                                 <option value="Maret">Maret</option>
@@ -199,8 +199,11 @@
             var bulan   = $('#bulan').val();
             var unit    = $('#unit').val();
 
-            var tabel = $("#tabelRekapPengadaanInvestasi").DataTable();
+            var tabel           = $("#tabelRekapPengadaanInvestasi").DataTable();
             tabel.column(9).search(tahun ? '^'+tahun+'$' : '', true, false).column(10).search(bulan ? '^'+bulan+'$' : '', true, false).column(11).search(unit ? '^'+unit+'$' : '', true, false).order( [ 0, 'asc' ] ).draw();
+ 
+            var totalPengadaan = tabel.column( 7, {page:'current'} ).data().sum();
+            $('#totalPengadaan').val(formatRupiah(totalPengadaan)); 
         }
 
         function refreshTabelRekapPengadaanInvestasi() {
@@ -208,11 +211,17 @@
                 language: {
                     url: "../json/datatables-id.json"
                 },
-                columnDefs: [ {
-                    targets     :   [9, 10, 11],
-                    visible     : false,
-                    searchable  : true,
-                } ],
+                columnDefs: [ 
+                    {
+                        targets     :   [9, 10, 11],
+                        visible     : false,
+                        searchable  : true,
+                    },
+                    {   
+                        targets: 8, 
+                        orderable: false
+                    }
+                ],
                 paging: true,
                 lengthChange: false,
                 searching: true,

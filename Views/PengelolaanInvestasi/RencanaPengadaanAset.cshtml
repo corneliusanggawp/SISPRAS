@@ -32,7 +32,7 @@
                                 <th>Satuan:</th>
                                 <th>Harga:</th>
                                 <th>Total:</th>
-                                <th></th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="tbodyDetailRencanaKhususInvestasi"> 
@@ -62,6 +62,7 @@
             @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <input type="hidden" class="form-control" id="IDDetailPencairanInvestasi" name="IDDetailPencairanInvestasi" value="" readonly="readonly">
+                    <input type="hidden" class="form-control" id="IDPencairanInvestasi" name="IDPencairanInvestasi" value="" readonly="readonly">
                     <input type="hidden" class="form-control" id="IDDetailRKA" name="IDDetailRKA" value="" readonly="readonly">
                     <input type="hidden" class="form-control" id="IDKategori" name="IDKategori" value="" readonly="readonly" required>
                     <input type="hidden" class="form-control" id="hargaSatuan" name="hargaSatuan" value="" readonly="readonly" required>
@@ -69,8 +70,8 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Kategori</label>
-                                <select id="IDRefSK" name="IDRefSK" class="form-control" style="width: 100%;" onclick="getKategori(this.value)" required>
-                                    <option value="" style="display: none;" disabled selected>Pilih kategori</option>
+                                <select id="IDRefSK" name="IDRefSK" class="form-control select2bs4" onchange="getKategori(this.value)" required>
+                                    <option value="" disabled selected>Pilih kategori</option>
                                     @foreach (var kategori in Model.kategori)
                                     {
                                     <option value="" disabled>@kategori.DESKRIPSI</option>
@@ -138,7 +139,7 @@
                          <div class="form-group">
                             <label>Tahun</label>
                             <select onchange="filterDataRencanaPengadaanAset()" id="tahun" class="form-control select2bs4" style="width: 100%;">
-                                <option value="" selected>Pilih tahun...</option>
+                                <option value="" selected>Semua tahun...</option>
                                 @foreach (var tahun in Model.tahun)
                                 {
                                 <option value="@tahun.TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
@@ -150,7 +151,7 @@
                         <div class="form-group">
                             <label>Unit</label>
                             <select onchange="filterDataRencanaPengadaanAset()" id="unit" class="form-control select2bs4" style="width: 100%;">
-                                <option value="" selected>Pilih unit...</option>
+                                <option value="" selected>Semua unit...</option>
                                 @foreach (var unit in Model.unit)
                                 {
                                     <option value="@unit.NAMA_UNIT">@unit.NAMA_UNIT</option>
@@ -200,12 +201,12 @@
 
     @if(TempData["success"] != null){
         <script type="text/javascript">
-            toastr.success('@TempData["success"].ToString()', 'Berhasil Memperoses');
+            toastr.success('@TempData["success"].ToString()', 'Berhasil');
         </script>
     }
     @if(TempData["error"] != null){
         <script type="text/javascript">
-            toastr.error('@TempData["error"].ToString()', 'Gagal Memperoses');
+            toastr.error('@TempData["error"].ToString()', 'Gagal');
         </script>
     }
 
@@ -342,7 +343,13 @@
                         if(result.data[i].ID_PENCAIRAN_INVESTASI == null){
                             tabelDetail.row.add([result.data[i].NAMA_KEGIATAN, result.data[i].BULAN, result.data[i].VOLUME, result.data[i].SATUAN, formatRupiah(result.data[i].HARGA_SATUAN), formatRupiah(result.data[i].SUBTOTAL), '<a data-toggle="modal" href="#DetailRencanaPengadaanAsetModal" onClick="addDetailRencanaPengadaanAset(' + result.data[i].ID_DTL_RKA + ',' + result.data[i].VOLUME + ',' + result.data[i].HARGA_SATUAN + ',' + formatString(result.data[i].SATUAN) + ')" type="button" class="btn btn-secondary btn-sm"><i class="fa fa-plus"></i></a>' ]).draw();
                         }else{
-                            tabelDetail.row.add([result.data[i].NAMA_KEGIATAN, result.data[i].BULAN, result.data[i].VOLUME, result.data[i].SATUAN, formatRupiah(result.data[i].HARGA_SATUAN), formatRupiah(result.data[i].SUBTOTAL), '<a data-toggle="modal" href="#DetailRencanaPengadaanAsetModal" onClick="updateDetailRencanaPengadaanAset(' + result.data[i].ID_DETAIL_PENCAIRAN_INVESTASI + ')" type="button" class="btn btn-success btn-sm"><i class="fa fa-edit"></i></a>' ]).draw();
+                            if(result.data[i].STATUS_APPROVAL){
+                                tabelDetail.row.add([result.data[i].NAMA_KEGIATAN, result.data[i].BULAN, result.data[i].VOLUME, result.data[i].SATUAN, formatRupiah(result.data[i].HARGA_SATUAN), formatRupiah(result.data[i].SUBTOTAL), '<a data-toggle="modal" href="#DetailRencanaPengadaanAsetModal" onClick="showDetailRencanaPengadaanAset(' + result.data[i].ID_DETAIL_PENCAIRAN_INVESTASI + ')" type="button" class="btn btn-success btn-sm"><i class="fa fa-eye"></i></a>' ]).draw();
+                            }
+                            else
+                            {
+                                tabelDetail.row.add([result.data[i].NAMA_KEGIATAN, result.data[i].BULAN, result.data[i].VOLUME, result.data[i].SATUAN, formatRupiah(result.data[i].HARGA_SATUAN), formatRupiah(result.data[i].SUBTOTAL), '<a data-toggle="modal" href="#DetailRencanaPengadaanAsetModal" onClick="updateDetailRencanaPengadaanAset(' + result.data[i].ID_DETAIL_PENCAIRAN_INVESTASI + ')" type="button" class="btn btn-success btn-sm"><i class="fa fa-edit"></i></a>' ]).draw();
+                            }
                         }
                     }
                 }
@@ -351,6 +358,7 @@
 
         function updateDetailRencanaPengadaanAset(IDDetailPencairanInvestasi) {
             $('#btnDetailRencanaPengadaanAset').html('Perbarui');
+            formDisable(false);
 
             $('#IDDetailPencairanInvestasi').val(IDDetailPencairanInvestasi);
             $('#IDDetailRKA').val("");
@@ -361,8 +369,9 @@
                 data: { "IDDetailPencairanInvestasi": IDDetailPencairanInvestasi},
                 dataType: "json",
                 success: function (result) {
+                    $('#IDPencairanInvestasi').val(result.data.ID_PENCAIRAN_INVESTASI);
                     $('#IDKategori').val(result.data.ID_KATEGORI);
-                    $('#IDRefSK').val(result.data.ID_REF_SK);
+                    $('#IDRefSK').val(result.data.ID_REF_SK).trigger('change');
                     $('#namaPengadaan').val(result.data.NAMA_PENGADAAN);
                     $('#satuan').val(result.data.SATUAN);
                     $('#merk').val(result.data.MERK);
@@ -376,12 +385,14 @@
 
         function addDetailRencanaPengadaanAset(IDDetailRKA, volume, hargaSatuan, satuan) {
             $('#btnDetailRencanaPengadaanAset').html('Tambah');
+            formDisable(false);
 
             $('#IDDetailPencairanInvestasi').val("");
             $('#IDDetailRKA').val(IDDetailRKA);
 
+            $('#IDPencairanInvestasi').val("");
             $('#IDKategori').val("");
-            $('#IDRefSK').val("");
+            $('#IDRefSK').val("").trigger('change');
             $('#namaPengadaan').val("");
             $('#satuan').val(satuan);
             $('#merk').val("");
@@ -389,6 +400,52 @@
             $('#inpHargaSatuan').val(formatRupiah(hargaSatuan));
             $("#hargaSatuan").val(hargaSatuan);
             $('#spesifikasi').val("");
+        }
+
+        function showDetailRencanaPengadaanAset(IDDetailPencairanInvestasi) {
+            $('#btnDetailRencanaPengadaanAset').html('Perbarui');
+            formDisable(true);
+
+            $('#IDDetailPencairanInvestasi').val(IDDetailPencairanInvestasi);
+            $('#IDDetailRKA').val("");
+
+            $.ajax({
+                url: "/PengelolaanInvestasi/ajaxGetDetailRencanaPengadaanAset",
+                type: "POST",
+                data: { "IDDetailPencairanInvestasi": IDDetailPencairanInvestasi},
+                dataType: "json",
+                success: function (result) {
+                    $('#IDPencairanInvestasi').val(result.data.ID_PENCAIRAN_INVESTASI);
+                    $('#IDKategori').val(result.data.ID_KATEGORI);
+                    $('#IDRefSK').val(result.data.ID_REF_SK).trigger('change');
+                    $('#namaPengadaan').val(result.data.NAMA_PENGADAAN);
+                    $('#satuan').val(result.data.SATUAN);
+                    $('#merk').val(result.data.MERK);
+                    $('#jumlah').val(result.data.JUMLAH);
+                    $('#hargaSatuan').val(result.data.HARGA_SATUAN);
+                    $('#inpHargaSatuan').val(formatRupiah(result.data.HARGA_SATUAN));
+                    $('#spesifikasi').val(result.data.SPESIFIKASI);
+                }
+            })
+        }
+
+        function formDisable(bool) {
+            $('#btnDetailRencanaPengadaanAset').prop('disabled', bool);
+
+            $('#IDDetailPencairanInvestasi').attr('readonly', bool);
+            $('#IDDetailRKA').attr('readonly', bool);
+
+            $('#IDPencairanInvestasi').attr('readonly', bool);;
+
+            $('#IDKategori').attr('readonly', bool);
+            $('#IDRefSK').prop("disabled", bool);
+            $('#namaPengadaan').attr('readonly', bool);
+            $('#satuan').attr('readonly', bool);
+            $('#merk').attr('readonly', bool);;
+            $('#jumlah').attr('readonly', bool);
+            $('#inpHargaSatuan').attr('readonly', bool);
+            $("#hargaSatuan").attr('readonly', bool);
+            $('#spesifikasi').attr('readonly', bool);
         }
 
         function getKategori(IDRefSK){

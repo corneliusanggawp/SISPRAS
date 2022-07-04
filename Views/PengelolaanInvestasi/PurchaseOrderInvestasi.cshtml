@@ -23,19 +23,19 @@
             <div class="card-body">
                 <div class="form-group">
                     <label>Tahun</label>
-                    <select onchange="showDetailPencairanInvestasi()" id="tahunAnggaran" class="form-control select2bs4" style="width: 100%;">
-                        <option value="" style="display: none;" disabled selected>Pilih tahun</option>
+                    <select onchange="filterDataDetailPencairanInvestasi()" id="tahun" class="form-control select2bs4" style="width: 100%;">
+                        <option value="" selected>Semua tahun</option>
                         @foreach (var tahun in Model.tahun)
                         {
-                        <option value="@tahun.ID_TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
+                        <option value="@tahun.TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
                         }
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label>Bulan</label>
-                    <select onchange="showDetailPencairanInvestasi()" id="bulanPengadaan" class="form-control select2bs4" style="width: 100%;">
-                        <option value="" style="display: none;" disabled selected>Pilih bulan</option>
+                    <select onchange="filterDataDetailPencairanInvestasi()" id="bulan" class="form-control select2bs4" style="width: 100%;">
+                        <option value="" selected>Semua bulan</option>
                         <option value="Januari">Januari</option>
                         <option value="Februari">Februari</option>
                         <option value="Maret">Maret</option>
@@ -58,7 +58,7 @@
     </div>
 
     <div class="col-md-9">
-        <form class="formPurchaseOrder" method="post" asp-action="addPurchaseOrder" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
+        <form id="formPurchaseOrder" method="post" asp-action="addPurchaseOrder" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
             @Html.AntiForgeryToken()
             <div class="card card-primary">
                 <div class="card-header">
@@ -69,7 +69,7 @@
                         <div class="col-4">
                             <div class="form-group">
                                 <label>Nomor PO</label>
-                                <input id="nomorPO" name="nomorPO" type="number" class="form-control" placeholder="Masukan Nomor PO..." required>
+                                <input id="nomorPO" name="nomorPO" type="text" class="form-control" placeholder="Masukan Nomor PO..." required>
                             </div>
                         </div>
                         <div class="col-4">
@@ -128,9 +128,23 @@
                             <th>Harga Satuan</th>
                             <th>Jumlah</th>
                             <th>Total</th>
+                            <th>Tahun</th>
+                            <th>Bulan</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach (var DetailPencairanInvestasi in Model.detailPencairanInvestasi) {
+                        <tr>
+                            <td style="color:transparent;">@DetailPencairanInvestasi.ID_DETAIL_PENCAIRAN_INVESTASI</td>
+                            <td>@DetailPencairanInvestasi.NAMA_PENGADAAN</td>
+                            <td>@DetailPencairanInvestasi.MERK</td>
+                            <td>@((DetailPencairanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                            <td>@DetailPencairanInvestasi.JUMLAH</td>
+                            <td>@((DetailPencairanInvestasi.JUMLAH * DetailPencairanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                            <td>@DetailPencairanInvestasi.TAHUN_ANGGARAN</td>
+                            <td>@DetailPencairanInvestasi.BULAN_PENGADAAN</td>
+                        </tr>
+                        }
                     </tbody>
                 </table>
             </div>
@@ -155,12 +169,12 @@
 
     @if (TempData["success"] != null){
         <script type="text/javascript">
-            toastr.success('@TempData["success"].ToString()', 'Berhasil Memperoses');
+            toastr.success('@TempData["success"].ToString()', 'Berhasil');
         </script>
     }
     @if (TempData["error"] != null){
         <script type="text/javascript">
-            toastr.error('@TempData["error"].ToString()', 'Gagal Memperoses');
+            toastr.error('@TempData["error"].ToString()', 'Gagal');
         </script>
     }
 
@@ -188,6 +202,28 @@
                minimumFractionDigits: 0 
            }).format(number);
         };
+
+        $("#formPurchaseOrder").on("submit", function(e){
+            e.preventDefault();
+            var formApprovalPencairanInvestasi = this;
+            
+            Swal.fire({
+                title: 'Lanjutkan Proses PO?',
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                text: "Mohon pastikan semua barang yang dipilih sudah sesuai",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#007bff',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, lanjutkan!',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    formApprovalPencairanInvestasi.submit();
+                }
+            })
+        });
 
         tabel
             .on( 'select', function ( e, dt, type, indexes ) {
@@ -225,7 +261,7 @@
             } );
 
         window.addEventListener('load', function () {
-            var forms = document.getElementsByClassName('formPurchaseOrder');
+            var forms = $('#formPurchaseOrder');
             var validation = Array.prototype.filter.call(forms, function (form) {
                 form.addEventListener('submit', function (event) {
                     if (form.checkValidity() === false) {
@@ -239,17 +275,26 @@
 
         function refreshTabelDetailPencairanInvestasi() {
             tabelPencairanInvestasi = $("#tabelDetailPencairanInvestasi").DataTable({
-                columnDefs: [ {
-                    targets     :   0,
-                    checkboxes  : {
-                        selectRow: true
+                language: {
+                    url: "../json/datatables-id.json"
+                },
+                columnDefs: [
+                    {
+                        targets     :   0,
+                        checkboxes  : {
+                            selectRow: true
+                        }
+                    },
+                    {
+                        targets: [6,7],
+                        visible: false
                     }
-                } ],
+                ],
                 select: {
                     style       : 'multi'
                 },
                 paging: true,
-                lengthChange: false,
+                lengthChange: true,
                 searching: true,
                 ordering: false,
                 info: true,
@@ -258,24 +303,12 @@
             }).buttons().container().appendTo('#tabelDetailPencairanInvestasi_wrapper .col-md-6:eq(0)');
         }
 
-        function showDetailPencairanInvestasi(){
-            var IDTahunAnggaran = $("#tahunAnggaran").val();
-            var bulanPengadaan  = $("#bulanPengadaan").val();
+        function filterDataDetailPencairanInvestasi(){
+            var tahun = $("#tahun").val();
+            var bulan  = $("#bulan").val();
 
-            $.ajax({
-                url: "/PengelolaanInvestasi/ajaxGetDetailPencairanInvestasiPO",
-                type: "POST",
-                data: { "IDTahunAnggaran": IDTahunAnggaran, "bulanPengadaan": bulanPengadaan},
-                dataType: "json",
-                success: function (result) {
-                    tabel.clear().draw();
-
-                    for (var i = 0; i < result.data.length; i++) {
-                        tabel.row.add([result.data[i].ID_DETAIL_PENCAIRAN_INVESTASI, result.data[i].NAMA_PENGADAAN , result.data[i].MERK, formatRupiah(result.data[i].HARGA_SATUAN), result.data[i].JUMLAH, formatRupiah(result.data[i].HARGA_SATUAN * result.data[i].JUMLAH)]).draw();
-                    }
-                }
-            })
-        }
+            tabel.column(6).search(tahun ? '^'+tahun+'$' : '', true, false).column(7).search(bulan ? '^'+bulan+'$' : '', true, false).order( [ 0, 'asc' ] ).draw();
+        }   
 
         jQuery.fn.dataTable.Api.register( 'sum()', function ( ) {
 	        return this.flatten().reduce( function ( a, b ) {

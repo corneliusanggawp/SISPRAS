@@ -30,12 +30,13 @@
         public string namaPengadaan { get; set; }
         public string merk { get; set; }
         public int IDDetailRKA { get; set; }
+        public decimal totalPencairan { get; set; }
     }
 
     public class PurchaseOrderInvestasi
     {
         public int IDPurchaseOrderInvestasi { get; set; }
-        public int nomorPO { get; set; }
+        public string nomorPO { get; set; }
         public string tanggalPO { get; set; }
         public decimal totalTanpaPajak { get; set; }
         public decimal pajak { get; set; }

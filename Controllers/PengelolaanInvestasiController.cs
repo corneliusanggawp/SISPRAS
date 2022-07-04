@@ -51,7 +51,7 @@ namespace SISPRA.Controllers
             var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
             var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
 
-            var RKI = mainDAO.getRekapPengadaanInvestasiUnit(IDUnitUser, IDRoleUser);
+            var RKI = mainDAO.getRekapPengadaanInvestasi(IDUnitUser, IDRoleUser);
             myObj.status = (!RKI.status) ? RKI.pesan : "";
             myObj.RKI = RKI.data;
 
@@ -68,7 +68,7 @@ namespace SISPRA.Controllers
             var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
             var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
 
-            var RKI = mainDAO.getRekapPengadaanInvestasiUnit(IDUnitUser, IDRoleUser);
+            var RKI = mainDAO.getRekapPengadaanInvestasi(IDUnitUser, IDRoleUser);
             myObj.status = (!RKI.status) ? RKI.pesan : "";
             myObj.RKI = RKI.data;
 
@@ -83,16 +83,12 @@ namespace SISPRA.Controllers
         [Authorize(Roles = "KPSP")]
         public IActionResult ApprovalPencairanInvestasi()
         {
-            var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).ToString();
-            var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
-
-            var pencairanInvestasi = mainDAO.getPencairanInvestasi(IDUnitUser, IDRoleUser);
+            var pencairanInvestasi = mainDAO.getPencairanInvestasiApproval();
             myObj.status = (!pencairanInvestasi.status) ? pencairanInvestasi.pesan : "";
             myObj.pencairanInvestasi = pencairanInvestasi.data;
 
             myObj.unit = masterDAO.getAllUnit();
             myObj.tahun = masterDAO.getAllTahunAnggaran();
-            myObj.tahunAnggaran = masterDAO.getAllTahunAnggaran();
 
             return View(myObj);
         }
@@ -100,9 +96,12 @@ namespace SISPRA.Controllers
         [Authorize(Roles = "KPSP")]
         public IActionResult PurchaseOrderInvestasi()
         {
+            var detailPencairanInvestasi = mainDAO.getDetailPencairanInvestasiPO();
+            myObj.status = (!detailPencairanInvestasi.status) ? detailPencairanInvestasi.pesan : "";
+            myObj.detailPencairanInvestasi = detailPencairanInvestasi.data;
+
             myObj.unit              = masterDAO.getAllUnit();
             myObj.tahun             = masterDAO.getAllTahunAnggaran();
-            myObj.tahunAnggaran     = masterDAO.getAllTahunAnggaran();
             myObj.supplier          = mainDAO.getAllSupplier();
 
             return View(myObj);
@@ -123,27 +122,45 @@ namespace SISPRA.Controllers
             RPA.userID = User.Claims.Where(c => c.Type == "NPP").Select(c => c.Value).SingleOrDefault();
             RPA.statusApproval = false;
 
-            var inpPencairanInvestasi = mainDAO.addPencairanInvestasi(RPA);
-
-            if (inpPencairanInvestasi.status == true)
+            if(DTLRPA.IDDetailPencairanInvestasi == 0)
             {
-                DTLRPA.IDPencairanInvestasi = inpPencairanInvestasi.data;
-                DTLRPA.isPO = 0;
+                var inpPencairanInvestasi = mainDAO.addPencairanInvestasi(RPA);
 
-                var inpDetailPencairanInvestasi = mainDAO.addDetailPencairanInvestasi(DTLRPA);
-
-                if(inpDetailPencairanInvestasi.status == true)
+                if(inpPencairanInvestasi.status == true)
                 {
-                    TempData["success"] = "Berhasil memperbarui data detail pengadaan investasi";
+                    DTLRPA.IDPencairanInvestasi = inpPencairanInvestasi.data;
+                    DTLRPA.isPO = 0;
+
+                    var inpDetailPencairanInvestasi = mainDAO.addDetailPencairanInvestasi(DTLRPA);
+
+                    if(inpDetailPencairanInvestasi.status == true)
+                    {
+                        TempData["success"] = "menambah pengadaan investasi";
+                    }
+                    else
+                    {
+                        TempData["error"] = inpDetailPencairanInvestasi.pesan;
+                    }
                 }
                 else
                 {
-                    TempData["error"] = inpDetailPencairanInvestasi.pesan;
+                    TempData["error"] = inpPencairanInvestasi.pesan;
                 }
             }
             else
             {
-                TempData["error"] = inpPencairanInvestasi.pesan;
+                DTLRPA.totalPencairan = DTLRPA.jumlah * DTLRPA.hargaSatuan;
+
+                var updateDetailPencairanInvestasi = mainDAO.updateDetailPencairanInvestasi(DTLRPA);
+
+                if(updateDetailPencairanInvestasi.status == true)
+                {
+                    TempData["success"] = "memperbarui detail pengadaan investasi";
+                }
+                else
+                {
+                    TempData["error"] = updateDetailPencairanInvestasi.pesan;
+                }
             }
 
             return RedirectToAction("RencanaPengadaanAset");
@@ -151,17 +168,28 @@ namespace SISPRA.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult approvalPencairanInvestasi(int id)
+        public IActionResult approvalPencairanInvestasi(string IDPencairanInvestasi)
         {
-            var check = mainDAO.approvePencairanInvestasi(id);
+            var IDPencairanInvestasiApproval = IDPencairanInvestasi.Split(",").Select(Int32.Parse).ToArray();
+            var success = 0;
 
-            if (check.status == true)
+            foreach (int IDPencairan in IDPencairanInvestasiApproval)
             {
-                TempData["success"] = "Berhasil menyetujui pencairan investasi";
+                var approvePencairan = mainDAO.approvePencairanInvestasi(IDPencairan);
+
+                if (approvePencairan.status == true)
+                {
+                    success++;
+                }
+                else
+                {
+                    TempData["error"] = approvePencairan.pesan;
+                }
             }
-            else
+
+            if (success != 0)
             {
-                TempData["error"] = check.pesan;
+                TempData["success"] = "menyetujui " + success + " dari " + IDPencairanInvestasiApproval.Length + " pencairan investasi";
             }
 
             return RedirectToAction("ApprovalPencairanInvestasi");
@@ -169,7 +197,7 @@ namespace SISPRA.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult addPurchaseOrder(int nomorPO, int IDSupplier, String tanggalPO, String IDDetailPencairanInvestasi, decimal totalPO)
+        public IActionResult addPurchaseOrder(string nomorPO, int IDSupplier, String tanggalPO, String IDDetailPencairanInvestasi, decimal totalPO)
         {
             PurchaseOrderInvestasi POI = new PurchaseOrderInvestasi();
 
@@ -193,7 +221,6 @@ namespace SISPRA.Controllers
             {
                 var IDPurchaseOrder = checkPurchaseOrder.data;
                 var success = 0;
-                var failure = 0;
 
                 foreach (int IDDetailPencairan in IDDetailPencairanInvestasiPO)
                 {
@@ -207,13 +234,12 @@ namespace SISPRA.Controllers
                     else
                     {
                         TempData["error"] = inpDetailPurchaseOrder.pesan;
-                        failure++;
                     }
                 }
 
                 if(success != 0)
                 {
-                    TempData["success"] = "Berhasil memproses " + success + " dari " + IDDetailPencairanInvestasiPO.Length + " purchase order";
+                    TempData["success"] = "memproses " + success + " dari " + IDDetailPencairanInvestasiPO.Length + " purchase order";
                 }
             }
             else
@@ -222,12 +248,6 @@ namespace SISPRA.Controllers
             }
 
             return RedirectToAction("PurchaseOrderInvestasi");
-        }
-
-        public JsonResult ajaxGetDetailPencairanInvestasiPO(string IDTahunAnggaran, string bulanPengadaan)
-        {
-            dynamic detailPencairanInvestasi = mainDAO.getDetailPencairanInvestasiPO(IDTahunAnggaran, bulanPengadaan);
-            return Json(detailPencairanInvestasi);
         }
 
         public JsonResult ajaxGetDetailRencanaKhususInvestasi(int IDRKA)
@@ -248,9 +268,9 @@ namespace SISPRA.Controllers
             return Json(data);
         }
 
-        public JsonResult ajaxGetDetailPencairanInvestasi(int id)
+        public JsonResult ajaxGetDetailPencairanInvestasiApproval(int IDPencairanInvestasi)
         {
-            var data = mainDAO.getDetailPencairanInvestasi(id);
+            var data = mainDAO.getDetailPencairanInvestasiApproval(IDPencairanInvestasi);
             return Json(data);
         }
     }
