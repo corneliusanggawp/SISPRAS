@@ -21,18 +21,20 @@ namespace SISPRAS.DAO
                 try
                 {
                     string query = @"
-                        SELECT		sikeu.TBL_RKA.ID_RKA, sikeu.TBL_TAHUN_ANGGARAN.TAHUN_ANGGARAN, siatmax.MST_UNIT.NAMA_UNIT, sikeu.TBL_MATA_ANGGARAN.PROGRAM_KEGIATAN, sikeu.TBL_RKA.NAMA_PROGRAM
-                        FROM		sikeu.TBL_RKA 
-                        INNER JOIN	sikeu.TBL_TAHUN_ANGGARAN ON sikeu.TBL_RKA.ID_TAHUN_ANGGARAN = sikeu.TBL_TAHUN_ANGGARAN.ID_TAHUN_ANGGARAN
-                        INNER JOIN	siatmax.MST_UNIT ON sikeu.TBL_RKA.ID_UNIT = siatmax.MST_UNIT.ID_UNIT 
+                        SELECT	sikeu.TBL_RKA.ID_RKA, sikeu.TBL_TAHUN_ANGGARAN.TAHUN_ANGGARAN, siatmax.MST_UNIT.NAMA_UNIT, sikeu.TBL_MATA_ANGGARAN.PROGRAM_KEGIATAN, sikeu.TBL_RPKA.NAMA_PROGRAM
+                        FROM	sikeu.TBL_RPKA
+                        INNER JOIN	siatmax.MST_UNIT ON sikeu.TBL_RPKA.ID_UNIT = siatmax.MST_UNIT.ID_UNIT
+                        INNER JOIN	sikeu.TBL_TAHUN_ANGGARAN ON sikeu.TBL_RPKA.ID_TAHUN_ANGGARAN = sikeu.TBL_TAHUN_ANGGARAN.ID_TAHUN_ANGGARAN 
+                        INNER JOIN	sikeu.TBL_RKA ON sikeu.TBL_RPKA.ID_RPKA = sikeu.TBL_RKA.ID_RPKA
                         INNER JOIN	sikeu.TBL_MATA_ANGGARAN ON sikeu.TBL_RKA.ID_MT_ANGGARAN = sikeu.TBL_MATA_ANGGARAN.ID_MT_ANGGARAN
-                        WHERE sikeu.TBL_TAHUN_ANGGARAN.IS_CURRENT = 1
+                        INNER JOIN	sikeu.REF_PROGRAM ON sikeu.TBL_MATA_ANGGARAN.ID_REF_PROGRAM = sikeu.REF_PROGRAM.ID_REF_PROGRAM
+                        WHERE       (sikeu.TBL_TAHUN_ANGGARAN.IS_CURRENT = 1) AND (sikeu.REF_PROGRAM.ID_REF_PROGRAM = 4)
                     ";
 
 
                     if (Array.IndexOf(IDRoleUser, "9") != -1 && Array.IndexOf(IDRoleUser, "13") != -1 && Array.IndexOf(IDRoleUser, "14") != -1 || IDUnitUser != "0")
                     {
-                        query += @" AND siatmax.MST_UNIT.ID_UNIT = @IDUnitUser";
+                        query += @" AND (siatmax.MST_UNIT.MST_ID_UNIT = @IDUnitUser)";
                     }
 
                     var data = conn.Query<dynamic>(query, new { IDUnitUser = IDUnitUser }).ToList();

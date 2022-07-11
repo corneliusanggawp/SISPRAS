@@ -1,0 +1,211 @@
+﻿@using System.Globalization;
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Controller"] = "Pengelolaan Investasi";
+    ViewData["Title"] = "Rekap Purchase Order Investasi";
+
+
+    CultureInfo culture = new CultureInfo("id-ID");
+}
+
+@section Header{
+    <link rel="stylesheet" href="~/lib/jquery-datatables-checkboxes-1.2.12/css/dataTables.checkboxes.css">
+}
+
+<!-- Modal Dialog 2 -->
+<div class="modal fade" id="DetailPencairanInvestasi" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Detail Pencairan Investasi</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card-body">
+                    <table id="tabelDetailPencairanInvestasi" class="table table-hover table-head-fixed">
+                        <thead>
+                            <tr>
+                                <th>Pengadaan</th>
+                                <th>Merk</th>
+                                <th>Satuan</th>
+                                <th>Jumlah</th>
+                                <th>Harga</th>
+                                <th class="none">Kategori</th>
+                                <th class="none">Spesifikasi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyDetailPencairanInvestasi">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Dialog 2 End -->
+
+<!-- Modal Dialog 1 -->
+<div class="modal fade" id="SpesifikasiDetailPencairanInvestasiModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Spesifikasi</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="spesifikasi"></p>
+                <div class="modal-footer" justify-content-between>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Dialog 1 End -->
+
+
+<div class="row">
+	<div class="col-md-12">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Filter</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4">
+                         <div class="form-group">
+                            <label>Tahun</label>
+                            <select onchange="filterDataPencairanInvestasi()" id="tahun" class="form-control select2bs4" style="width: 100%;">
+                                <option value="" selected>Semua tahun...</option>
+                                @foreach (var tahun in Model.tahun)
+                                {
+                                <option value="@tahun.TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label>Bulan</label>
+                            <select onchange="filterDataPencairanInvestasi()" id="bulan" class="form-control select2bs4" style="width: 100%;">
+                                <option value="" selected>Semua bulan...</option>
+                                <option value="Januari">Januari</option>
+                                <option value="Februari">Februari</option>
+                                <option value="Maret">Maret</option>
+                                <option value="April">April</option>
+                                <option value="Mei">Mei</option>
+                                <option value="Juni">Juni</option>
+                                <option value="Juli">Juli</option>
+                                <option value="Agustus">Agustus</option>
+                                <option value="September">September</option>
+                                <option value="Oktober">Oktober</option>
+                                <option value="November">November</option>
+                                <option value="Desember">Desember</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                         <div class="form-group">
+                            <label>Unit</label>
+                            <select onchange="filterDataPencairanInvestasi()" id="unit" class="form-control select2bs4" style="width: 100%;">
+                                <option value="" selected>Semua unit...</option>
+                                @foreach (var unit in Model.unit)
+                                {
+                                    <option value="@unit.NAMA_UNIT">@unit.NAMA_UNIT</option>
+                                }
+                            </select>                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->	
+	</div>
+
+    <div class="col-12">    
+        <div class="card">
+            <div class="card-body">
+                <table id="tabelRekapPurchaseOrderInvestasi" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Tahun</th>
+                            <th>Bulan</th>
+                            <th>Unit Pengaju</th>
+                            <th>Tanggal</th>
+                            <th>Total</th>
+                            <th class="text-center">Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>                
+            </div>
+            <!-- /.card-body -->
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <!-- Select -->
+    <script src="~/lib/datatables-select/js/dataTables.select.min.js"></script>  
+    <!-- CheckBox -->
+    <script src="~/lib/jquery-datatables-checkboxes-1.2.12/js/dataTables.checkboxes.min.js"></script>
+
+
+    @if (TempData["success"] != null){
+        <script type="text/javascript">
+            toastr.success('@TempData["success"].ToString()', 'Berhasil');
+        </script>
+    }
+    @if (TempData["error"] != null){
+        <script type="text/javascript">
+            toastr.error('@TempData["error"].ToString()', 'Gagal');
+        </script>
+    }
+
+    <script> 
+        var tabelRekapPurchaseOrderInvestasi;
+
+        refreshtabelRekapPurchaseOrderInvestasi();
+
+        $('.select2bs4').select2({
+            theme: 'bootstrap4'
+        });
+
+        var formatRupiah = (number) => {
+           return new Intl.NumberFormat('id-ID', { 
+               style: 'currency', 
+               currency: 'IDR', 
+               minimumFractionDigits: 0 
+           }).format(number);
+        };
+
+        function refreshRekapPurchaseOrderInvestasi() {
+            tabelRekapPurchaseOrderInvestasi = $("#tabelRekapPurchaseOrderInvestasi").DataTable({
+                language: {
+                    url: "../json/datatables-id.json"
+                },
+                paging: true,
+                lengthChange: true,
+                searching: true,
+                ordering: false,
+                info: true,
+                autoWidth: false,
+                responsive: true
+            }).buttons().container().appendTo('#tabelRekapPurchaseOrderInvestasi_wrapper .col-md-6:eq(0)');
+        }
+
+    </script>
+}

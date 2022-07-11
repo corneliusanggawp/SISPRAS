@@ -108,6 +108,20 @@ namespace SISPRAS.Controllers
         }
 
         [Authorize(Roles = "KPSP")]
+        public IActionResult RekapPurchaseOrderInvestasi()
+        {
+            var rekapPurchaseOrderInvestasi = mainDAO.getDetailPencairanInvestasiPO();
+            myObj.status = (!rekapPurchaseOrderInvestasi.status) ? rekapPurchaseOrderInvestasi.pesan : "";
+            myObj.detailPencairanInvestasi = rekapPurchaseOrderInvestasi.data;
+
+            myObj.unit = masterDAO.getAllUnit();
+            myObj.tahun = masterDAO.getAllTahunAnggaran();
+            myObj.supplier = mainDAO.getAllSupplier();
+
+            return View(myObj);
+        }
+
+        [Authorize(Roles = "KPSP")]
         public IActionResult PenerimaanBarangInvestasi()
         {
             return View(myObj);
