@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 
-namespace SISPRA.DAO
+namespace SISPRAS.DAO
 {
     public class MasterDAO
     {
@@ -17,7 +17,9 @@ namespace SISPRA.DAO
                     string query = @"
                         SELECT      ID_SI_MENU, ID_SISTEM_INFORMASI, DESKRIPSI, ISACTIVE, LINK, NO_URUT, ICON
                         FROM        siatmax.TBL_SI_MENU
-                        WHERE       ID_SISTEM_INFORMASI = 2 AND ISACTIVE = 1 ";
+                        WHERE       ID_SISTEM_INFORMASI = 2 AND ISACTIVE = 1
+                        ORDER BY	NO_URUT ASC
+                    ";
 
                     var data = conn.Query<dynamic>(query).ToList();
 
@@ -47,7 +49,8 @@ namespace SISPRA.DAO
                         FROM        siatmax.TBL_ROLE_SUBMENU 
                         INNER JOIN  siatmax.TBL_SI_SUBMENU ON siatmax.TBL_ROLE_SUBMENU.ID_SI_SUBMENU = siatmax.TBL_SI_SUBMENU.ID_SI_SUBMENU
                         INNER JOIN  siatmax.TBL_SI_MENU ON siatmax.TBL_SI_SUBMENU.ID_SI_MENU = siatmax.TBL_SI_MENU.ID_SI_MENU
-                        WHERE       siatmax.TBL_SI_MENU.ID_SISTEM_INFORMASI = 2 AND siatmax.TBL_SI_SUBMENU.ISACTIVE = 1";
+                        WHERE       siatmax.TBL_SI_MENU.ID_SISTEM_INFORMASI = 2 AND siatmax.TBL_SI_SUBMENU.ISACTIVE = 1 AND siatmax.TBL_SI_MENU.ISACTIVE = 1
+                    ";
 
                     if (Array.IndexOf(id_role, "9") != -1)
                     {
@@ -135,6 +138,59 @@ namespace SISPRA.DAO
                     ";
 
                     var data = conn.Query<dynamic>(query).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public List<dynamic> getAllProvinsi()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT *
+                        FROM siatmax.REF_PROPINSI
+                    ";
+
+                    var data = conn.Query<dynamic>(query).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public List<dynamic> getKabKodya(int IDProvinsi)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT *
+                        FROM siatmax.REF_KAB_KODYA
+                        WHERE ID_REF_PROPINSI = @IDProvinsi
+                    ";
+
+                    var data = conn.Query<dynamic>(query, new { IDProvinsi = IDProvinsi }).ToList();
 
                     return data;
                 }

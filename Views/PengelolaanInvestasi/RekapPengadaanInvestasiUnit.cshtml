@@ -2,6 +2,7 @@
 
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Controller"] = "Pengelolaan Investasi";
     ViewData["Title"] = "Rekap Pengadaan Investasi Unit";
 
     CultureInfo culture = new CultureInfo("id-ID");
@@ -98,6 +99,8 @@
                 <table id="tabelRekapPengadaanInvestasi" class="table table-hover">
                     <thead>
                         <tr>
+                            <th>Tahun Anggaran:</th>
+                            <th>Bulan Pengadaan:</th>
                             <th>Nama Barang:</th>
                             <th>Merk:</th>
                             <th class="none">Sub Kategori:</th>
@@ -107,14 +110,14 @@
                             <th>Harga Satuan:</th>
                             <th>Sub Total:</th>
                             <th>PO:</th>
-                            <th>Tahun Anggaran:</th>
-                            <th>Bulan Pengadaan:</th>
                         </tr>
                     </thead>
                     <tbody> 
                         @foreach (var RekapPengadaanInvestasi in Model.RKI)
                        {
                         <tr>
+                            <td>@RekapPengadaanInvestasi.TAHUN_ANGGARAN</td>
+                            <td>@RekapPengadaanInvestasi.BULAN_PENGADAAN</td>
                             <td>@RekapPengadaanInvestasi.NAMA_PENGADAAN</td>
                             <td>@RekapPengadaanInvestasi.MERK</td>
                             <td>@RekapPengadaanInvestasi.KATEGORI - @RekapPengadaanInvestasi.SUB_KATEGORI</td>
@@ -132,8 +135,6 @@
                                 <span class="badge badge-danger">Belum PO</span>
                                 }
                             </td>
-                            <td>@RekapPengadaanInvestasi.TAHUN_ANGGARAN</td>
-                            <td>@RekapPengadaanInvestasi.BULAN_PENGADAAN</td>
                         </tr>
                         }
                     </tbody>
@@ -186,9 +187,9 @@
 
             var tabel       = $("#tabelRekapPengadaanInvestasi").DataTable();
 
-            tabel.column(9).search(tahun ? '^'+tahun+'$' : '', true, false).column(10).search(bulan ? '^'+bulan+'$' : '', true, false).order( [ 0, 'asc' ] ).draw();
+            tabel.column(0).search(tahun ? '^'+tahun+'$' : '', true, false).column(1).search(bulan ? '^'+bulan+'$' : '', true, false).order( [ 0, 'asc' ] ).draw();
             
-            var totalPengadaan = tabel.column( 7, {page:'current'} ).data().sum();
+            var totalPengadaan = tabel.column( 9, {page:'current'} ).data().sum();
             $('#totalPengadaan').val(formatRupiah(totalPengadaan));
         }
 
@@ -199,7 +200,7 @@
                 },
                 columnDefs: [ 
                     {
-                        targets     :   [9, 10],
+                        targets     :   [0, 1],
                         visible     : false,
                         searchable  : true,
                     },

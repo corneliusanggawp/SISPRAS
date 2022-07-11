@@ -1,7 +1,7 @@
 ﻿@using System;
 @using System.Linq;
 @using System.Security.Claims
-@using SISPRA.DAO;
+@using SISPRAS.DAO;
 
 @{
     MasterDAO masterDAO = new MasterDAO();
@@ -22,7 +22,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@ViewBag.Title</title>
-    <!-- Google Font: Source Sans Pro -->
+    <!-- Google Font: Source Sans Pro, Poppins -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="~/lib/fontawesome-free/css/all.min.css">
@@ -47,14 +47,23 @@
     @RenderSection("Header", required: false)
 
     <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,700;1,400&display=swap');
+
         html {
             scroll-behavior: smooth;
         }
+/*        body {
+            font-family: 'Poppins', sans-serif;
+            font-size: 90%;
+        }*/
+/*        .main-sidebar { 
+            background-color: #435361 !important
+        }*/
     </style>
 </head>
 
 <body class="hold-transition sidebar-mini">
-    <div class="wrapper">
+    <div class="wrapper" style="height:100%;">
         <!-- Navbar -->
         <nav class="main-header navbar navbar-expand navbar-white navbar-light">
             <!-- Left navbar links -->
@@ -124,7 +133,7 @@
                         <a href="#" class="dropdown-item">
                             <!-- Message Start -->
                             <div class="media">
-                                <img src="~/img/user3-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
+                                <img src="~/img/user1-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
                                 <div class="media-body">
                                     <h3 class="dropdown-item-title"> Nora Silvester <span class="float-right text-sm text-warning"><i class="fas fa-star"></i></span>
                                     </h3>
@@ -176,28 +185,28 @@
         </nav>
         <!-- /.navbar -->
         <!-- Main Sidebar Container -->
-        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <aside class="main-sidebar sidebar-dark-primary elevation-4" style="position:fixed;">
             <!-- Brand Logo -->
-            <a href="index3.html" class="brand-link">
-                <img src="../img/AdminLTELogo.png" alt="SISPRA" class="brand-image img-circle elevation-3" style="opacity: .8">
-                <span class="brand-text font-weight-light">SISPRA</span>
+            <a class="brand-link" asp-area="" asp-controller="Home" asp-action="Index">
+                <img src="../img/UAJYLogo.png" alt="SISPRAS" class="brand-image img-circle elevation-3">
+                <span class="brand-text font-weight-light">SISPRAS</span>
             </a>
             <!-- Sidebar -->
             <div class="sidebar">
                 <!-- Sidebar user panel (optional) -->
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                    <div class="image">
+                    <div class="image justify-content-center align-self-center">
                         <img src="../img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">  
                         <a href="" class="d-block">@User.Identity.Name</a>
-                        <a>@string.Join(", ", RoleUser)</a>
+                        <a >@string.Join(", ", RoleUser)</a>
                     </div>
                 </div>
                 <!-- SidebarSearch Form -->
                 <div class="form-inline">
                     <div class="input-group" data-widget="sidebar-search">
-                        <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+                        <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Cari menu">
                         <div class="input-group-append">
                             <button class="btn btn-sidebar">
                                 <i class="fas fa-search fa-fw"></i>
@@ -217,7 +226,7 @@
                         @foreach (var main in mainMenu)
                         {
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="" asp-action="">
+                            <a class="nav-link" asp-area="" asp-controller="@main.LINK" asp-action="Index">
                                 <i class="nav-icon @main.ICON"></i>
                                 <p> 
                                     @main.DESKRIPSI
@@ -257,8 +266,8 @@
                         </div><!-- /.col -->
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                                <li class="breadcrumb-item active">Starter Page</li>
+                                <li class="breadcrumb-item"><a href="#">@ViewData["Controller"]</a></li>
+                                <li class="breadcrumb-item active">@ViewData["Title"]</li>
                             </ol>
                         </div><!-- /.col -->
                     </div><!-- /.row -->
@@ -267,7 +276,9 @@
             <!-- /.content-header -->
             <!-- Main content -->
             <div class="content">
-                <div class="container-fluid"> @RenderBody() </div>
+                <div class="container-fluid"> 
+                    @RenderBody() 
+                </div>
             </div>
             <!-- /.content -->
         </div>
@@ -282,11 +293,9 @@
         </aside>
         <!-- /.control-sidebar -->
         <!-- Main Footer -->
-        <footer class="main-footer">
-            <!-- To the right -->
-@*            <div class="float-right d-none d-sm-inline"> Anything you want </div>*@
+        <footer class="main-footer">    
             <!-- Default to the left -->
-            <strong>Copyright &copy; 2022-@DateTime.Now.Year.ToString() <a href="https://ksi.uajy.ac.id">KSI UAJY</a>.</strong> All rights reserved.
+            <strong>Copyright &copy;@DateTime.Now.Year.ToString() <a href="https://ksi.uajy.ac.id">KSI UAJY</a>.</strong> All rights reserved.
         </footer>
     </div>
     <!-- ./wrapper -->
@@ -321,6 +330,18 @@
     <script src="~/lib/select2/js/select2.full.min.js"></script>
 
     <script>
+        var url = window.location;
+
+        // for sidebar menu entirely but not cover treeview
+        $('ul.nav-sidebar a').filter(function() {
+            return this.href == url;
+        }).addClass('active');
+
+        // for treeview
+        $('ul.nav-treeview a').filter(function() {
+            return this.href == url;
+        }).parentsUntil(".nav-sidebar > .nav-treeview").addClass('menu-open').prev('a').addClass('active');
+
         toastr.options = {
           "closeButton": false,
           "debug": false,

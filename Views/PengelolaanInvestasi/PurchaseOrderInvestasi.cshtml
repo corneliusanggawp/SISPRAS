@@ -3,6 +3,7 @@
 
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Controller"] = "Pengelolaan Investasi";
     ViewData["Title"] = "Purchase Order Investasi";
 
     CultureInfo culture = new CultureInfo("id-ID");
@@ -203,28 +204,6 @@
            }).format(number);
         };
 
-        $("#formPurchaseOrder").on("submit", function(e){
-            e.preventDefault();
-            var formApprovalPencairanInvestasi = this;
-            
-            Swal.fire({
-                title: 'Lanjutkan Proses PO?',
-                showClass: { popup: 'animate__animated animate__fadeInDown' },
-                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-                text: "Mohon pastikan semua barang yang dipilih sudah sesuai",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#007bff',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, lanjutkan!',
-                cancelButtonText: 'Batal',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    formApprovalPencairanInvestasi.submit();
-                }
-            })
-        });
-
         tabel
             .on( 'select', function ( e, dt, type, indexes ) {
                 var selectedRows = indexes.filter(x => !rowIndex.includes(x));
@@ -267,6 +246,25 @@
                     if (form.checkValidity() === false) {
                         event.preventDefault();
                         event.stopPropagation();
+                    }else{
+                        event.preventDefault();
+
+                        Swal.fire({
+                            title: 'Lanjutkan Proses PO?',
+                            showClass: { popup: 'animate__animated animate__fadeInDown' },
+                            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                            text: "Mohon pastikan semua barang yang dipilih sudah sesuai",
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: '#007bff',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Ya, lanjutkan!',
+                            cancelButtonText: 'Batal',
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                form.submit();
+                            }
+                        })
                     }
                     form.classList.add('was-validated');
                 }, false);

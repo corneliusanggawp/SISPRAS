@@ -1,5 +1,5 @@
 ﻿using Dapper;
-using SISPRA.Models;
+using SISPRAS.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 
-namespace SISPRA.DAO
+namespace SISPRAS.DAO
 {
     public class PengelolaanInvestasiDAO
     {
@@ -30,12 +30,12 @@ namespace SISPRA.DAO
                     ";
 
 
-                    if(Array.IndexOf(IDRoleUser, "9") != -1 && Array.IndexOf(IDRoleUser, "13") != -1 && Array.IndexOf(IDRoleUser, "14") != -1 || IDUnitUser != "0")
+                    if (Array.IndexOf(IDRoleUser, "9") != -1 && Array.IndexOf(IDRoleUser, "13") != -1 && Array.IndexOf(IDRoleUser, "14") != -1 || IDUnitUser != "0")
                     {
                         query += @" AND siatmax.MST_UNIT.ID_UNIT = @IDUnitUser";
                     }
 
-                    var data    = conn.Query<dynamic>(query, new { IDUnitUser = IDUnitUser }).ToList();
+                    var data = conn.Query<dynamic>(query, new { IDUnitUser = IDUnitUser }).ToList();
 
                     output.data = data;
                     return output;
@@ -437,7 +437,7 @@ namespace SISPRA.DAO
                 try
                 {
                     string query = @"
-                        SELECT	sikeu.TBL_TAHUN_ANGGARAN.TAHUN_ANGGARAN, sispras.TBL_PENCAIRAN_INVESTASI.BULAN_PENGADAAN, sispras.TBL_PENCAIRAN_INVESTASI.ID_UNIT, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.NAMA_PENGADAAN, sispras.REF_KATEGORI.DESKRIPSI AS KATEGORI, sispras.REF_SUB_KATEGORI.DESKRIPSI AS SUB_KATEGORI, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.SPESIFIKASI, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.MERK, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.JUMLAH, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.SATUAN, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.HARGA_SATUAN, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.IS_PO, sikeu.TBL_TAHUN_ANGGARAN.IS_CURRENT
+                        SELECT	sikeu.TBL_TAHUN_ANGGARAN.TAHUN_ANGGARAN, sispras.TBL_PENCAIRAN_INVESTASI.BULAN_PENGADAAN, siatmax.MST_UNIT.NAMA_UNIT, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.NAMA_PENGADAAN, sispras.REF_KATEGORI.DESKRIPSI AS KATEGORI, sispras.REF_SUB_KATEGORI.DESKRIPSI AS SUB_KATEGORI, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.SPESIFIKASI, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.MERK, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.JUMLAH, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.SATUAN, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.HARGA_SATUAN, sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.IS_PO, sikeu.TBL_TAHUN_ANGGARAN.IS_CURRENT
                         FROM	sispras.TBL_DETAIL_PENCAIRAN_INVESTASI
                         INNER JOIN sispras.REF_KATEGORI ON sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.ID_KATEGORI = sispras.REF_KATEGORI.ID_KATEGORI
                         INNER JOIN sispras.REF_SUB_KATEGORI ON sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.ID_REF_SK = sispras.REF_SUB_KATEGORI.ID_REF_SK
@@ -625,7 +625,8 @@ namespace SISPRA.DAO
                     string query = @"
                          UPDATE sispras.TBL_DETAIL_PENCAIRAN_INVESTASI 
                          SET IS_PO = 1
-                         WHERE ID_DETAIL_PENCAIRAN_INVESTASI = @IDDetailPencairanInvestasi";
+                         WHERE ID_DETAIL_PENCAIRAN_INVESTASI = @IDDetailPencairanInvestasi
+                    ";
 
                     output.data = conn.Execute(query, new { IDDetailPencairanInvestasi = IDDetailPencairanInvestasi });
                     return output;
@@ -644,32 +645,40 @@ namespace SISPRA.DAO
             }
         }
 
-        public dynamic getSpesifikasiDetailPencairanInvestasi(int IDDetailPencairanInvestasi)
+        public DBOutput getDetailPurchaseOrderPenerimaanBarang(string nomorPO)
         {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
             using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
             {
                 try
                 {
                     string query = @"
-                        SELECT SPESIFIKASI
-                        FROM sispras.TBL_DETAIL_PENCAIRAN_INVESTASI
-                        WHERE ID_DETAIL_PENCAIRAN_INVESTASI = @IDDetailPencairanInvestasi
+                        SELECT  sispras.TBL_DETAIL_PO_INVESTASI.*
+                        FROM	sispras.TBL_DETAIL_PO_INVESTASI
+                        INNER JOIN	sispras.TBL_PO_INVESTASI ON sispras.TBL_DETAIL_PO_INVESTASI.ID_PO_INVESTASI = sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI
+                        WHERE	sispras.TBL_PO_INVESTASI.NO_PO = @nomorPO
                     ";
 
-                    var data = conn.QuerySingleOrDefault<dynamic>(query, new { IDDetailPencairanInvestasi = IDDetailPencairanInvestasi });
+                    var data = conn.Query<dynamic>(query, new { nomorPO = nomorPO }).ToList();
 
-                    return data;
+                    output.data = data;
+                    return output;
                 }
                 catch (Exception ex)
                 {
-                    return null;
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
                 }
                 finally
                 {
                     conn.Dispose();
                 }
             }
-        }
 
+        }
     }
 }

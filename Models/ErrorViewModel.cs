@@ -1,6 +1,6 @@
 using System;
 
-namespace SISPRA.Models
+namespace SISPRAS.Models
 {
     public class ErrorViewModel
     {

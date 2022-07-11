@@ -2,7 +2,9 @@
 
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Controller"] = "Pengelolaan Investasi";
     ViewData["Title"] = "Approval Pencairan Investasi";
+
 
     CultureInfo culture = new CultureInfo("id-ID");
 }
@@ -271,7 +273,7 @@
 
                 $('#IDPencairanInvestasi').val(idPencairanInvestasiArray);
                 $('#totalPencairan').val(formatRupiah(totalPencairanInvestasi));
-                $('#selectedPencairan').html(rowIndex.length);
+                $('#selectedPencairan').html(idPencairanInvestasiArray.length);
 
                 $('#btnProsesApproval').prop('disabled', false);
             } )

@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SISPRA.DAO;
-using SISPRA.Models;
+using SISPRAS.DAO;
+using SISPRAS.Models;
 using System;
 using System.Dynamic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace SISPRA.Controllers
+namespace SISPRAS.Controllers
 {
     public class PengelolaanInvestasiController : Controller
     {
@@ -107,6 +107,11 @@ namespace SISPRA.Controllers
             return View(myObj);
         }
 
+        [Authorize(Roles = "KPSP")]
+        public IActionResult PenerimaanBarangInvestasi()
+        {
+            return View(myObj);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -271,6 +276,12 @@ namespace SISPRA.Controllers
         public JsonResult ajaxGetDetailPencairanInvestasiApproval(int IDPencairanInvestasi)
         {
             var data = mainDAO.getDetailPencairanInvestasiApproval(IDPencairanInvestasi);
+            return Json(data);
+        }
+
+        public JsonResult ajaxGetDetailPurchaseOrderPenerimaanBarang(string nomorPO)
+        {
+            var data = mainDAO.getDetailPurchaseOrderPenerimaanBarang(nomorPO);
             return Json(data);
         }
     }

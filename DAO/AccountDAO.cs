@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SISPRA.DAO
+namespace SISPRAS.DAO
 {
     public class AccountDAO
     {

@@ -1,0 +1,465 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Controller"] = "Master Referensi";
+    ViewData["Title"] = "Kelola Referensi";
+}
+
+<!-- Modal Dialog 1 -->
+<div class="modal fade" id="SupplierModal" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Supplier</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form class="formSupplier" method="post" asp-action="addUpdateSupplier" asp-controller="MasterReferensi" enctype="multipart/form-data" novalidate>
+            @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" class="form-control" id="IDSupplier" name="IDSupplier" value="" readonly="readonly">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Nama Supplier</label>
+                                <input id="namaSupplier" name="namaSupplier" type="text" class="form-control" placeholder="Masukkan nama supplier..." required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Kontak Person</label>
+                                <input id="kontakPerson" name="kontakPerson" type="text" class="form-control" placeholder="Masukkan nama kontak person..." required>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Nomor Telepon</label>
+                                <input id="noTelp" name="noTelp" type="text" class="form-control" placeholder="Masukkan no telp..." required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Nomor HP</label>
+                                <input id="noHP" name="noHP" type="text" class="form-control" placeholder="Masukan no hp..." required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Nomor Fax</label>
+                                <input id="noFax" name="noFax"  type="text" class="form-control" placeholder="Masukkan no fax..." required>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Negara</label>
+                                <input id="negara" name="negara"  type="text" class="form-control" placeholder="Masukkan nengara..." required>
+                            </div>  
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                <select id="IDProvinsi" name="IDProvinsi" onchange="showKabKodya(this.value)" class="form-control select2bs4" required>
+                                    <option value="" selected>Pilih Provinsi</option>
+                                    @foreach (var Provinsi in Model.provinsi)
+                                    {
+                                    <option value="@Provinsi.ID_REF_PROPINSI">@Provinsi.DESKRIPSI</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Kab/Kodya</label>
+                                <select id="IDKabKodya" name="IDKabKodya" class="form-control select2bs4" required>
+                                    <option value="" selected>Pilih Kab/Kodya</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Alamat</label>
+                                <textarea id="alamat" name="alamat" class="form-control" rows="3" placeholder="Masukkan alamat supplier..." required></textarea>
+                            </div>   
+                        </div>
+                    </div>   
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Keluar</button>
+                    <button id="btnSupplier" type="submit" class="btn btn-primary"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Modal Dialog 1 End -->
+
+<!-- Modal Dialog 2 -->
+<div class="modal fade" id="KategoriModal" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kategori</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form class="formKategori" method="post" asp-action="addUpdateKategori" asp-controller="MasterReferensi" enctype="multipart/form-data" novalidate>
+            @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" class="form-control" id="IDKategori" name="IDKategori" value="" readonly="readonly">
+                    <div class="form-group">
+                        <label>Deskripsi Kategori</label>
+                        <input id="deskripsiKategori" name="deskripsi" type="text" class="form-control" placeholder="Masukkan deskripsi kategori..." required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Keluar</button>
+                    <button id="btnKategori" type="submit" class="btn btn-primary"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Modal Dialog 2 End -->
+
+<div class="row">
+    <div class="col-12">
+        <div class="card card-primary card-outline">
+            <div class="card-header p-2">
+                <ul class="nav nav-pills">
+                    <li class="nav-item"><a class="nav-link active" href="#supplier" data-toggle="tab">Supplier</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#kategori" data-toggle="tab">Kategori</a></li>
+                </ul>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <div class="tab-content">
+                    <div class="active tab-pane" id="supplier">
+                        <table id="tabelSupplier" class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Supplier 
+                                        <a data-toggle="modal" href="#SupplierModal" onclick="addSupplier()" class="btn btn-primary btn-sm"> <i class="fas fa-plus"></i> </a>
+                                    </th>
+                                    <th>Nama:</th>
+                                    <th class="none">No Telp:</th>
+                                    <th class="none">No Hp:</th>
+                                    <th class="none">No Fax:</th>
+                                    <th class="none">Negara:</th>
+                                    <th class="none">Provinsi:</th>
+                                    <th class="none">Kabupaten/Kodya:</th>
+                                    <th class="none">Alamat:</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>            
+                    </div>
+                    <div class="tab-pane" id="kategori">
+                        <table id="tabelKategori" class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Kategori
+                                        <a data-toggle="modal" href="#KategoriModal" onclick="addKategori()" class="btn btn-primary btn-sm"> <i class="fas fa-plus"></i> </a>
+                                    </th>
+                                    <th>Sub Kategori</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /.tab-content -->
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+</div>
+
+@section Scripts{
+    @if (TempData["success"] != null){
+        <script type="text/javascript">
+            toastr.success('@TempData["success"].ToString()', 'Berhasil');
+        </script>
+    }
+    @if (TempData["error"] != null){
+        <script type="text/javascript">
+            toastr.error('@TempData["error"].ToString()', 'Gagal');
+        </script>
+    }
+
+    <script> 
+        var tabelSupplier;
+        var tabelKategori;
+
+        refreshTabelSupplier();
+        refreshTabelKategori();
+
+        $("#IDKabKodya").prop('disabled', true);
+
+        $('.select2bs4').select2({
+            theme: 'bootstrap4'
+        });
+
+        $('#SupplierModal').on('hidden.bs.modal', function() {
+            var forms = document.getElementsByClassName('formSupplier');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.classList.remove('was-validated');
+            });
+        });
+
+        window.addEventListener('load', function () {
+            var forms = document.getElementsByClassName('formSupplier');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }else{
+                        form.submit();
+                        $('#tabelSupplier').DataTable().ajax.reload();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+
+        function showKabKodya(IDProvinsi){
+            $("#IDKabKodya").empty();
+
+            if(IDProvinsi == 0){
+                $("#IDKabKodya").prop('disabled', true);
+            }else{
+                $.ajax({
+                    url: "/MasterReferensi/ajaxGetKabKodya",
+                    type: "POST",
+                    data: { "IDProvinsi": IDProvinsi},
+                    dataType: "json",
+                    success: function (result) {
+                        for (var i = 0; i < result.length; i++) {
+                            $('#IDKabKodya').append('<option value="' +result[i].ID_REF_KAB_KODYA+ '">' +result[i].DESKRIPSI+ '</option>');
+                        }
+                    }
+                })
+
+                $("#IDKabKodya").prop('disabled', false);
+            }
+        }
+
+        function refreshTabelSupplier() {
+            tabelSupplier = $("#tabelSupplier").DataTable({
+                ajax: {
+                    url: '/MasterReferensi/ajaxGetSupplier',
+                    dataSrc: 'data'
+                },
+                columns: [
+                    { data: 'NAMA_SUPPLIER' },
+                    { data: 'KONTAK_PERSON' },
+                    { data: 'NO_TELPON' },
+                    { data: 'NO_HP_KONTAK' },
+                    { data: 'NO_FAX' },
+                    { data: 'NEGARA' },
+                    { data: 'PROVINSI' },
+                    { data: 'KABUPATEN' },
+                    { data: 'ALAMAT' },
+                    { data: "ID_SUPPLIER" , render : function ( data, type, row, meta ) {
+                        return type === 'display'  ?
+                        '<a data-toggle="modal" href="#SupplierModal" onclick="updateSupplier(' + data + ')" class="btn btn-success btn-sm"> <i class="fas fa-edit"> </i> </a>  <a onclick="deleteSupplier(' + data + ')" id="btnDeleteSupplier" class="btn btn-danger btn-sm"> <i class="fas fa-trash"> </i> </a>' : data;
+                    }},
+                ],
+                language: {
+                    url: "../json/datatables-id.json"
+                },
+                columnDefs: [ 
+                    {
+                        targets    : 9,
+                        orderable  : false,
+                    }
+                ],
+                paging: true,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true  
+            });
+        }
+
+        function refreshTabelKategori() {
+            tabelKategori = $("#tabelKategori").DataTable({
+                ajax: {
+                    url: '/MasterReferensi/ajaxGetKategori',
+                    dataSrc: 'data'
+                },
+                columns: [
+                    { data: 'DESKRIPSI' },
+                    { data: "ID_KATEGORI" , render : function ( data, type, row, meta ) {
+                        return type === 'display'  ?
+                        '<a data-toggle="modal" href="#SubKategoriModal" onclick="showSubKategori(' + data + ')" class="btn btn-primary btn-sm"> <i class="fas fa-eye"> </i> </a> ' : data;
+                    }},
+                    { data: "ID_KATEGORI" , render : function ( data, type, row, meta ) {
+                        return type === 'display'  ?
+                        '<a data-toggle="modal" href="#KategoriModal" onclick="updateKategori(' + data + ')" class="btn btn-success btn-sm"> <i class="fas fa-edit"> </i> </a>  <a onclick="deleteKategori(' + data + ')" id="btnDeleteKategori" class="btn btn-danger btn-sm"> <i class="fas fa-trash"> </i> </a>' : data;
+                    }},
+                ],
+                language: {
+                    url: "../json/datatables-id.json"
+                },
+                columnDefs: [ 
+                    {
+                        targets    : [1,2],
+                        orderable  : false,
+                    }
+                ],
+                paging: true,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true
+            });
+        }
+
+        function updateSupplier(IDSupplier){
+            $('#btnSupplier').html('Perbarui');
+
+            $('#IDSupplier').val(IDSupplier);
+
+            $.ajax({
+                url: "/MasterReferensi/ajaxGetDetailSupplier",
+                type: "POST",
+                data: { "IDSupplier": IDSupplier},
+                dataType: "json",
+                success: function (result) {
+                    showKabKodya(result.data.ID_REF_PROPINSI);
+                    $('#namaSupplier').val(result.data.NAMA_SUPPLIER);
+                    $('#alamat').val(result.data.ALAMAT);
+                    $('#negara').val(result.data.NEGARA);
+                    $('#kontakPerson').val(result.data.KONTAK_PERSON);
+                    $('#noTelp').val(result.data.NO_TELPON);
+                    $('#noHP').val(result.data.NO_HP_KONTAK);
+                    $('#noFax').val(result.data.NO_FAX);
+                    $('#IDProvinsi').val(result.data.ID_REF_PROPINSI).trigger('change');
+                    $('#IDKabKodya').val(result.data.ID_REF_KAB_KODYA).trigger('change');
+                }
+            })
+        }
+
+        function addSupplier(IDSupplier){
+            $('#btnSupplier').html('Tambah');
+
+            $('#IDSupplier').val(IDSupplier);
+            $('#namaSupplier').val("");
+            $('#alamat').val("");
+            $('#negara').val("");
+            $('#kontakPerson').val("");
+            $('#noTelp').val("");
+            $('#noHP').val("");
+            $('#noFax').val("");
+            $('#IDProvinsi').val("").trigger('change');
+            $('#IDKabKodya').val("").trigger('change');
+            $("#IDKabKodya").prop('disabled', true);
+        }
+
+        function deleteSupplier(IDSupplier){
+            Swal.fire({
+                title: 'Lanjutkan Hapus Supplier?',
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                text: "Mohon pastikan supplier yang dipilih sudah sesuai",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#007bff',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, lanjutkan!',
+                cancelButtonText: 'Batal',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "/MasterReferensi/ajaxDeleteSupplier",
+                            type: "POST",
+                            data: { "IDSupplier": IDSupplier },
+                            dataType: "json",
+                            success: function (result) {
+                                if(result.status){
+                                     toastr.success('menghapus data supplier', 'Berhasil');
+                                }else{
+                                    toastr.error(result.pesan, 'Gagal');
+                                }
+                                $('#tabelSupplier').DataTable().ajax.reload();
+                            }
+                        })
+                    }
+                })
+        }
+
+        function updateKategori(IDKategori){
+            $('#btnKategori').html('Perbarui');
+
+            $('#IDKategori').val(IDKategori);
+
+            $.ajax({
+                url: "/MasterReferensi/ajaxGetDetailKategori",
+                type: "POST",
+                data: { "IDKategori": IDKategori},
+                dataType: "json",
+                success: function (result) {
+                    $('#deskripsiKategori').val(result.data.DESKRIPSI);
+                }
+            })
+        }
+
+        function addKategori(IDKategori){
+            $('#btnKategori').html('Tambah');
+
+            $('#IDKategori').val(IDKategori);
+            $('#deskripsiKategori').val("");
+        }
+
+        function deleteKategori(IDKategori){
+            Swal.fire({
+                title: 'Lanjutkan Hapus Kategori?',
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                text: "Mohon pastikan kategori yang dipilih sudah sesuai",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#007bff',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, lanjutkan!',
+                cancelButtonText: 'Batal',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "/MasterReferensi/ajaxDeleteKategori",
+                            type: "POST",
+                            data: { "IDKategori": IDKategori },
+                            dataType: "json",
+                            success: function (result) {
+                                if(result.status){
+                                     toastr.success('menghapus kategori', 'Berhasil');
+                                }else{
+                                    toastr.error(result.pesan, 'Gagal');
+                                }
+                                $('#tabelKategori').DataTable().ajax.reload();
+                            }
+                        })
+                    }
+                })
+        }
+    </script>
+}

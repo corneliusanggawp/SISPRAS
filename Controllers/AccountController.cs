@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using SISPRA.DAO;
+using SISPRAS.DAO;
 using System;
 using System.Security.Claims;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace SISPRA.Controllers
+namespace SISPRAS.Controllers
 {
     public class AccountController : Controller
     {
@@ -42,11 +42,6 @@ namespace SISPRA.Controllers
                 {
                     var userRole    = dao.getUserRole(userData.NPP);
                     bool isAdmin = false;
-                    //if (Array.IndexOf(IDRoleUser, "9") != -1 && Array.IndexOf(IDRoleUser, "13") != -1 && Array.IndexOf(IDRoleUser, "14") != -1)
-                    //{
-                    //    IDUnit = "0";
-                    //    namaUnit = "-";
-                    //}
 
                     isAuthenticated = true;
                     identity = new ClaimsIdentity(new[] {

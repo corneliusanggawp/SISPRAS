@@ -1,4 +1,4 @@
-﻿namespace SISPRA.DAO
+﻿namespace SISPRAS.DAO
 {
     public class DBConnection
     {

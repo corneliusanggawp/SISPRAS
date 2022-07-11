@@ -1,4 +1,4 @@
-﻿namespace SISPRA.Models
+﻿namespace SISPRAS.Models
 {
     public class PencairanInvestasi
     {

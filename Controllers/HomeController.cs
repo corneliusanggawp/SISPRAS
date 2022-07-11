@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using SISPRA.Models;
+using SISPRAS.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SISPRA.Controllers
+namespace SISPRAS.Controllers
 {
     [Authorize]
     public class HomeController : Controller
