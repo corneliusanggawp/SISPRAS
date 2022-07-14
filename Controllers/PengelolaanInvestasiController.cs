@@ -27,11 +27,11 @@ namespace SISPRAS.Controllers
             return View();
         }
 
-        [Authorize(Roles = "KPSP, Unit")]
+        [Authorize(Roles = "KPSP, Unit")] 
         public IActionResult RencanaPengadaanAset()
         {
             var IDUnitUser    = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
-            var IDRoleUser    = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
+            var IDRoleUser    = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).Single();
 
             var RKA = mainDAO.getRencanaPengadaanAset(IDUnitUser, IDRoleUser);
             myObj.status = (!RKA.status) ? RKA.pesan : "";
@@ -45,34 +45,34 @@ namespace SISPRAS.Controllers
             return View(myObj);
         }
 
-        [Authorize(Roles = "Unit")]
-        public IActionResult RekapPengadaanInvestasiUnit()
-        {
-            var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
-            var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
-
-            var RKI = mainDAO.getRekapPengadaanInvestasi(IDUnitUser, IDRoleUser);
-            myObj.status = (!RKI.status) ? RKI.pesan : "";
-            myObj.RKI = RKI.data;
-
-            myObj.tahun         = masterDAO.getAllTahunAnggaran();
-            myObj.kategori      = mainDAO.getAllKategori();
-            myObj.subKategori   = mainDAO.getAllSubKategori();
-
-            return View(myObj);
-        }
-
         [Authorize(Roles = "KPSP")]
         public IActionResult RekapPengadaanInvestasi()
         {
             var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
-            var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
+            var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).Single();
 
             var RKI = mainDAO.getRekapPengadaanInvestasi(IDUnitUser, IDRoleUser);
             myObj.status = (!RKI.status) ? RKI.pesan : "";
             myObj.RKI = RKI.data;
 
             myObj.unit = masterDAO.getAllUnit();
+            myObj.tahun = masterDAO.getAllTahunAnggaran();
+            myObj.kategori = mainDAO.getAllKategori();
+            myObj.subKategori = mainDAO.getAllSubKategori();
+
+            return View(myObj);
+        }
+
+        [Authorize(Roles = "Unit")]
+        public IActionResult RekapPengadaanInvestasiUnit()
+        {
+            var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
+            var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).Single();
+
+            var RKI = mainDAO.getRekapPengadaanInvestasi(IDUnitUser, IDRoleUser);
+            myObj.status = (!RKI.status) ? RKI.pesan : "";
+            myObj.RKI = RKI.data;
+
             myObj.tahun = masterDAO.getAllTahunAnggaran();
             myObj.kategori = mainDAO.getAllKategori();
             myObj.subKategori = mainDAO.getAllSubKategori();
@@ -131,18 +131,18 @@ namespace SISPRAS.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult addPencairanInvestasi(DetailPencairanInvestasi DTLRPA)
         {
-            PencairanInvestasi RPA = new PencairanInvestasi();
-
-            RPA.IDDetailRKA = DTLRPA.IDDetailRKA;
-            RPA.tanggalPencairan = null;
-            RPA.totalPencairan = DTLRPA.jumlah * DTLRPA.hargaSatuan; 
-            RPA.insertDate = DateTime.Now.ToString();
-            RPA.IPAddress = HttpContext.Connection.RemoteIpAddress.ToString();
-            RPA.userID = User.Claims.Where(c => c.Type == "NPP").Select(c => c.Value).SingleOrDefault();
-            RPA.statusApproval = false;
-
             if(DTLRPA.IDDetailPencairanInvestasi == 0)
             {
+                PencairanInvestasi RPA = new PencairanInvestasi();
+
+                RPA.IDDetailRKA = DTLRPA.IDDetailRKA;
+                RPA.tanggalPencairan = null;
+                RPA.totalPencairan = DTLRPA.jumlah * DTLRPA.hargaSatuan;
+                RPA.insertDate = DateTime.Now.ToString();
+                RPA.IPAddress = HttpContext.Connection.RemoteIpAddress.ToString();
+                RPA.userID = User.Claims.Where(c => c.Type == "NPP").Select(c => c.Value).SingleOrDefault();
+                RPA.statusApproval = false;
+
                 var inpPencairanInvestasi = mainDAO.addPencairanInvestasi(RPA);
 
                 if(inpPencairanInvestasi.status == true)

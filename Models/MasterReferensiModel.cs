@@ -26,6 +26,5 @@
         public string IDKategori { get; set; }
         public string deskripsi { get; set; }
         public string kodeBarang { get; set; }
-
     }
 }

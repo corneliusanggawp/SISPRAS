@@ -33,7 +33,7 @@
 	<div class="col-md-8">
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class="card-title">Filter</h3>
+                <h3 class="card-title">Filter Rekap Berdasarkan:</h3>
             </div>
             <!-- /.card-header -->
             <div class="card-body">
@@ -80,7 +80,7 @@
 	<div class="col-md-4">
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class="card-title">Rencana Pengadaan</h3>
+                <h3 class="card-title">Rencana Pengadaan:</h3>
             </div>
             <div class="card-body">
                 <div class="form-group">
@@ -169,7 +169,7 @@
         var tabel           = $('#tabelRekapPengadaanInvestasi').DataTable();
         
         $( document ).ready(function() {
-            var totalPengadaan = tabel.column( 7 ).data().sum();
+            var totalPengadaan = tabel.column( 9 ).data().sum();
             $('#totalPengadaan').val(formatRupiah(totalPengadaan));
         });
 
@@ -238,20 +238,20 @@
             })
         }
 
-        function showSpesifikasiPengadaanInvestasiModal(IDDetailPencairanInvestasi) {
-            $.ajax({
-                url: "/PengelolaanInvestasi/ajaxGetSpesifikasiDetailPencairanInvestasi",
-                type: "POST",
-                data: { "IDDetailPencairanInvestasi": IDDetailPencairanInvestasi },
-                dataType: "json",
-                success: function (result) {
-                    var spesifikasi = result.SPESIFIKASI;
-                    $('#spesifikasi').html(spesifikasi);
-                }
-            })
+        //function showSpesifikasiPengadaanInvestasiModal(IDDetailPencairanInvestasi) {
+        //    $.ajax({
+        //        url: "/PengelolaanInvestasi/ajaxGetSpesifikasiDetailPencairanInvestasi",
+        //        type: "POST",
+        //        data: { "IDDetailPencairanInvestasi": IDDetailPencairanInvestasi },
+        //        dataType: "json",
+        //        success: function (result) {
+        //            var spesifikasi = result.SPESIFIKASI;
+        //            $('#spesifikasi').html(spesifikasi);
+        //        }
+        //    })
 
-            $('#SpesifikasiPengadaanInvestasiModal').modal('show');
-        }
+        //    $('#SpesifikasiPengadaanInvestasiModal').modal('show');
+        //}
 
         function showRekapPengadaanInvestasi(){
             var IDTahunAnggaran = $("#tahunAnggaran").val();

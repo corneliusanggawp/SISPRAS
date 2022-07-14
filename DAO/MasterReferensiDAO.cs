@@ -349,9 +349,10 @@ namespace SISPRAS.DAO
                 try
                 {
                     string query = @"
-                        SELECT  ID_REF_SK, ID_KATEGORI, DESKRIPSI, KODE_BARANG
-                        FROM    sispras.REF_SUB_KATEGORI
-                        WHERE   (ID_KATEGORI = @IDKategori)
+                        SELECT      sispras.REF_SUB_KATEGORI.ID_REF_SK, sispras.REF_KATEGORI.DESKRIPSI AS KATEGORI, sispras.REF_SUB_KATEGORI.DESKRIPSI, sispras.REF_SUB_KATEGORI.KODE_BARANG
+                        FROM        sispras.REF_SUB_KATEGORI
+                        INNER JOIN  sispras.REF_KATEGORI ON sispras.REF_SUB_KATEGORI.ID_KATEGORI = sispras.REF_KATEGORI.ID_KATEGORI
+                        WHERE       (sispras.REF_SUB_KATEGORI.ID_KATEGORI = @IDKategori)
                     ";
 
                     var data = conn.Query<dynamic>(query, new { IDKategori = IDKategori }).ToList();

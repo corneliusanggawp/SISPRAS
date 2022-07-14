@@ -6,9 +6,9 @@
 @{
     MasterDAO masterDAO = new MasterDAO();
 
-    var RoleUser    =  User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray();
-    var IDRoleUser  =  User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
-    var namaUnit    = User.Claims.Where(c => c.Type == "namaUnit").Select(c => c.Value).Single();
+    var RoleUser    =  User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).Single();
+    var IDRoleUser  =  User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).Single();
+    var namaUnit    =  User.Claims.Where(c => c.Type == "namaUnit").Select(c => c.Value).Single();
 
     var mainMenu    = masterDAO.getAllMenu(IDRoleUser);
     var subMenu     = masterDAO.getAllSubMenu(IDRoleUser);
@@ -47,7 +47,7 @@
     @RenderSection("Header", required: false)
 
     <style>
-        @@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,700;1,400&display=swap');
+/*        @@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,700;1,400&display=swap');*/
 
         html {
             scroll-behavior: smooth;
@@ -200,7 +200,14 @@
                     </div>
                     <div class="info">  
                         <a href="" class="d-block">@User.Identity.Name</a>
-                        <a >@string.Join(", ", RoleUser)</a>
+                        @if(@RoleUser == "Unit")
+                        {
+                            <a>@RoleUser - @namaUnit</a>
+                        }
+                        else
+                        {
+                            <a>@RoleUser</a>
+                        }
                     </div>
                 </div>
                 <!-- SidebarSearch Form -->

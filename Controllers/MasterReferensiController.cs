@@ -38,17 +38,21 @@ namespace SISPRAS.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult addUpdateSupplier(Supplier supplier)
         {
-            if(supplier.IDSupplier == 0)
+            DBOutput data = new DBOutput();
+
+            if (supplier.IDSupplier == 0)
             {
                 var addSupplier = mainDAO.addSupplier(supplier);
 
                 if (addSupplier.status == true)
                 {
-                    TempData["success"] = "menambah data supplier";
+                    data.status = true;
+                    data.pesan = "menambah data supplier";
                 }
                 else
                 {
-                    TempData["error"] = addSupplier.pesan;
+                    data.status = false;
+                    data.pesan = addSupplier.pesan;
                 }
             }
             else
@@ -57,15 +61,17 @@ namespace SISPRAS.Controllers
 
                 if (updateSupplier.status == true)
                 {
-                    TempData["success"] = "memperbarui data supplier";
+                    data.status = true;
+                    data.pesan = "memperbarui data supplier";
                 }
                 else
                 {
-                    TempData["error"] = updateSupplier.pesan;
+                    data.status = false;
+                    data.pesan =  updateSupplier.pesan;
                 }
             }
 
-            return RedirectToAction("KelolaReferensi");
+            return Json(data);
         }
 
         public JsonResult ajaxGetSupplier()
@@ -96,17 +102,21 @@ namespace SISPRAS.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult addUpdateKategori(Kategori kategori)
         {
+            DBOutput data = new DBOutput();
+
             if (kategori.IDKategori == 0)
             {
                 var addKategori = mainDAO.addKategori(kategori);
 
                 if (addKategori.status == true)
                 {
-                    TempData["success"] = "menambah data supplier";
+                    data.status = true;
+                    data.pesan = "menambah data kategori";
                 }
                 else
                 {
-                    TempData["error"] = addKategori.pesan;
+                    data.status = false;
+                    data.pesan = addKategori.pesan;
                 }
             }
             else
@@ -115,15 +125,17 @@ namespace SISPRAS.Controllers
 
                 if (updateKategori.status == true)
                 {
-                    TempData["success"] = "memperbarui data supplier";
+                    data.status = true;
+                    data.pesan = "memperbarui data kategori";
                 }
                 else
                 {
-                    TempData["error"] = updateKategori.pesan;
+                    data.status = false;
+                    data.pesan = updateKategori.pesan;
                 }
             }
 
-            return RedirectToAction("KelolaReferensi");
+            return Json(data);
         }
 
         public JsonResult ajaxGetKategori()

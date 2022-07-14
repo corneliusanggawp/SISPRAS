@@ -11,7 +11,7 @@ namespace SISPRAS.DAO
 {
     public class PengelolaanInvestasiDAO
     {
-        public DBOutput getRencanaPengadaanAset(string IDUnitUser, Array IDRoleUser)
+        public DBOutput getRencanaPengadaanAset(string IDUnitUser, string IDRoleUser)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -31,8 +31,7 @@ namespace SISPRAS.DAO
                         WHERE       (sikeu.TBL_TAHUN_ANGGARAN.IS_CURRENT = 1) AND (sikeu.REF_PROGRAM.ID_REF_PROGRAM = 4)
                     ";
 
-
-                    if (Array.IndexOf(IDRoleUser, "9") != -1 && Array.IndexOf(IDRoleUser, "13") != -1 && Array.IndexOf(IDRoleUser, "14") != -1 || IDUnitUser != "0")
+                    if (IDRoleUser != "9")
                     {
                         query += @" AND (siatmax.MST_UNIT.MST_ID_UNIT = @IDUnitUser)";
                     }
@@ -140,8 +139,9 @@ namespace SISPRAS.DAO
 	                        begin
                                 INSERT INTO sispras.TBL_PENCAIRAN_INVESTASI (ID_TAHUN_ANGGARAN, ID_UNIT, BULAN_PENGADAAN, TGL_PENCAIRAN, TOTAL_PENCAIRAN, INSERT_DATE, IP_ADDRESS, USER_ID, STATUS_APPROVAL, ID_DTL_RKA)
                                 OUTPUT INSERTED.ID_PENCAIRAN_INVESTASI
-                                SELECT      sikeu.TBL_RKA.ID_TAHUN_ANGGARAN, sikeu.TBL_RKA.ID_UNIT, sikeu.DTL_RKA.BULAN, @tanggalPencairan AS TGL_PENCAIRAN, @totalPencairan AS TOTAL_PENCAIRAN, @insertDate AS INSERT_DATE, @IPAddress AS IP_ADDRESS, @userID AS USER_ID, @statusApproval AS STATUS_APPROVAL, sikeu.DTL_RKA.ID_DTL_RKA
-                                FROM        sikeu.TBL_RKA
+                                SELECT      sikeu.TBL_RPKA.ID_TAHUN_ANGGARAN, sikeu.TBL_RPKA.ID_UNIT, sikeu.DTL_RKA.BULAN, @tanggalPencairan AS TGL_PENCAIRAN, @totalPencairan AS TOTAL_PENCAIRAN, @insertDate AS INSERT_DATE, @IPAddress AS IP_ADDRESS, @userID AS USER_ID, @statusApproval AS STATUS_APPROVAL, sikeu.DTL_RKA.ID_DTL_RKA
+                                FROM        sikeu.TBL_RPKA
+                                INNER JOIN	sikeu.TBL_RKA ON sikeu.TBL_RPKA.ID_RPKA = sikeu.TBL_RKA.ID_RPKA
                                 INNER JOIN  sikeu.DTL_RKA ON sikeu.TBL_RKA.ID_RKA = sikeu.DTL_RKA.ID_RKA
                                 WHERE       (sikeu.DTL_RKA.ID_DTL_RKA = @IDDetailRKA)
                             end
@@ -429,7 +429,7 @@ namespace SISPRAS.DAO
             }
         }
 
-        public DBOutput getRekapPengadaanInvestasi(string IDUnitUser, Array IDRoleUser)
+        public DBOutput getRekapPengadaanInvestasi(string IDUnitUser, string IDRoleUser)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -449,9 +449,9 @@ namespace SISPRAS.DAO
                         WHERE	(sikeu.TBL_TAHUN_ANGGARAN.IS_CURRENT = 1)
                     ";
 
-                    if (Array.IndexOf(IDRoleUser, "9") != -1 && Array.IndexOf(IDRoleUser, "13") != -1 && Array.IndexOf(IDRoleUser, "14") != -1 || IDUnitUser != "0")
+                    if (IDRoleUser != "9")
                     {
-                        query += @" AND (sispras.TBL_PENCAIRAN_INVESTASI.ID_UNIT = @IDUnitUser)";
+                        query += @" AND (siatmax.MST_UNIT.MST_ID_UNIT = @IDUnitUser)";
                     }
 
                     query += @" ORDER BY sispras.TBL_PENCAIRAN_INVESTASI.INSERT_DATE DESC";

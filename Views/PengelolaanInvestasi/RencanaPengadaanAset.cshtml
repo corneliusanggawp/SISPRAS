@@ -152,10 +152,23 @@
                         <div class="form-group">
                             <label>Unit</label>
                             <select onchange="filterDataRencanaPengadaanAset()" id="unit" class="form-control select2bs4" style="width: 100%;">
-                                <option value="" selected>Semua unit...</option>
-                                @foreach (var unit in Model.unit)
+                                @if(Array.IndexOf(IDRoleUser, "7") != -1 ){
+                                    <option value="" selected>@namaUnit</option>
+                                    foreach (var unit in Model.unit)
+                                    {
+                                        if(@unit.MST_ID_UNIT == Int32.Parse(IDUnitUser))
+                                        {
+                                            <option value="@unit.NAMA_UNIT">@unit.NAMA_UNIT</option>
+                                        }
+                                    }
+                                }
+                                else
                                 {
-                                    <option value="@unit.NAMA_UNIT">@unit.NAMA_UNIT</option>
+                                    <option value="" selected>Semua unit...</option>
+                                    @foreach (var unit in Model.unit)
+                                    {
+                                        <option value="@unit.NAMA_UNIT">@unit.NAMA_UNIT</option>
+                                    }                                   
                                 }
                             </select>
                         </div>
@@ -208,13 +221,6 @@
     @if(TempData["error"] != null){
         <script type="text/javascript">
             toastr.error('@TempData["error"].ToString()', 'Gagal');
-        </script>
-    }
-
-    @if(Array.IndexOf(IDRoleUser, "9") != -1 && Array.IndexOf(IDRoleUser, "13") != -1 && Array.IndexOf(IDRoleUser, "14") != -1 || IDUnitUser != "0"){
-        <script type="text/javascript">
-            $('#unit').prop("disabled", true);
-            $('#unit').val('@namaUnit');
         </script>
     }
 
@@ -309,7 +315,7 @@
                     url: "../json/datatables-id.json"
                 },
                 paging: true,
-                pageLength: 3,
+                pageLength: 5,
                 lengthChange: true,
                 searching: true,
                 ordering: true,
@@ -328,6 +334,7 @@
 
             var tabel = $("#tabelRencanaPengadaanAset").DataTable();
             tabel.column(0).search(tahun ? '^'+tahun+'$' : '', true, false).column(1).search(unit ? '^'+unit+'$' : '', true, false).order( [ 0, 'asc' ] ).draw();
+        
         }
 
         function showDetailRencanaKhususInvestasi(IDRKA) {

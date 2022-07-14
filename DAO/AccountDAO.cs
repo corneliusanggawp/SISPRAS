@@ -16,17 +16,15 @@ namespace SISPRAS.DAO
                 try
                 {
                     string query = @"
-                        SELECT simka.MST_KARYAWAN.NPP, simka.MST_KARYAWAN.NAMA, simka.MST_KARYAWAN.FILE_FOTO, simka.MST_KARYAWAN.PASSWORD, simka.MST_KARYAWAN.ID_UNIT, siatmax.MST_UNIT.NAMA_UNIT
-                        FROM simka.MST_KARYAWAN
-                        INNER JOIN siatmax.TBL_USER_ROLE ON simka.MST_KARYAWAN.NPP = siatmax.TBL_USER_ROLE.NPP
-                        INNER JOIN siatmax.MST_UNIT ON simka.MST_KARYAWAN.ID_UNIT = siatmax.MST_UNIT.ID_UNIT
-                        WHERE USERNAME = @username
-                        AND siatmax.TBL_USER_ROLE.ID_SISTEM_INFORMASI = 2
-                        AND siatmax.TBL_USER_ROLE.IS_ACTIVE = 1
+                        SELECT      simka.MST_KARYAWAN.NPP, simka.MST_KARYAWAN.NAMA, simka.MST_KARYAWAN.FILE_FOTO, simka.MST_KARYAWAN.PASSWORD, simka.MST_KARYAWAN.ID_UNIT, siatmax.MST_UNIT.NAMA_UNIT
+                        FROM        simka.MST_KARYAWAN
+                        INNER JOIN  siatmax.TBL_USER_ROLE ON simka.MST_KARYAWAN.NPP = siatmax.TBL_USER_ROLE.NPP
+                        LEFT JOIN   siatmax.MST_UNIT ON simka.MST_KARYAWAN.ID_UNIT = siatmax.MST_UNIT.ID_UNIT
+                        WHERE       siatmax.TBL_USER_ROLE.ID_SISTEM_INFORMASI = 2 AND siatmax.TBL_USER_ROLE.IS_ACTIVE = 1
+                        AND         simka.MST_KARYAWAN.USERNAME = @username
                     ";
-                        
-                    var param = new {username = username};
-                    var data  = conn.QueryFirstOrDefault<dynamic>(query, param);
+
+                    var data  = conn.QueryFirstOrDefault<dynamic>(query, new { username = username });
 
                     return data;
                 }
@@ -48,11 +46,12 @@ namespace SISPRAS.DAO
                 try
                 {
                     string query = @"
-                        SELECT siatmax.REF_ROLE.ID_ROLE, siatmax.REF_ROLE.DESKRIPSI
-                        FROM siatmax.TBL_USER_ROLE
-                        INNER JOIN siatmax.REF_ROLE ON siatmax.TBL_USER_ROLE.ID_ROLE = siatmax.REF_ROLE.ID_ROLE
-                        WHERE NPP = @npp
-                        AND siatmax.TBL_USER_ROLE.ID_SISTEM_INFORMASI = 2
+                        SELECT DISTINCT siatmax.REF_ROLE.ID_ROLE, siatmax.REF_ROLE.DESKRIPSI
+                        FROM            siatmax.TBL_USER_ROLE
+                        INNER JOIN      siatmax.REF_ROLE ON siatmax.TBL_USER_ROLE.ID_ROLE = siatmax.REF_ROLE.ID_ROLE
+                        WHERE           siatmax.TBL_USER_ROLE.ID_SISTEM_INFORMASI = 2 AND siatmax.REF_ROLE.ID_ROLE IN (7,9)
+                        AND             siatmax.TBL_USER_ROLE.NPP = @npp
+                        ORDER BY siatmax.REF_ROLE.ID_ROLE DESC
                     ";
 
                     var data = conn.Query<dynamic>(query, new { npp = npp }).ToList();

@@ -4,7 +4,7 @@
     {
         public int IDPencairanInvestasi { get; set; }
         public int IDTahunAnggaran { get; set; }
-        public int IDUnit { get; set; }
+        public string IDUnit { get; set; }
         public string bulanPengadaan { get; set; }
         public string tanggalPencairan { get; set; }
         public decimal totalPencairan { get; set; }

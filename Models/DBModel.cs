@@ -1,9 +1,5 @@
 ﻿namespace SISPRAS.Models
 {
-    public class DBModel
-    {
-    }
-
     public class DBOutput
     {
         public bool status { get; set; }
