@@ -33,14 +33,14 @@ namespace SISPRAS.Controllers
             var IDUnitUser    = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
             var IDRoleUser    = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).Single();
 
-            var RKA = mainDAO.getRencanaPengadaanAset(IDUnitUser, IDRoleUser);
-            myObj.status = (!RKA.status) ? RKA.pesan : "";
-            myObj.RKA = RKA.data;
+            var RKA         = mainDAO.getRencanaPengadaanAset(IDUnitUser, IDRoleUser);
+            myObj.status    = (!RKA.status) ? RKA.pesan : "";
+            myObj.RKA       = RKA.data;
 
             myObj.unit          = masterDAO.getAllUnit();
             myObj.tahun         = masterDAO.getAllTahunAnggaran();
-            myObj.kategori      = mainDAO.getAllKategori();
-            myObj.subKategori   = mainDAO.getAllSubKategori();
+            myObj.kategori      = masterDAO.getAllKategori();
+            myObj.subKategori   = masterDAO.getAllSubKategori();
 
             return View(myObj);
         }
@@ -51,14 +51,14 @@ namespace SISPRAS.Controllers
             var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
             var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).Single();
 
-            var RKI = mainDAO.getRekapPengadaanInvestasi(IDUnitUser, IDRoleUser);
-            myObj.status = (!RKI.status) ? RKI.pesan : "";
-            myObj.RKI = RKI.data;
+            var RKI         = mainDAO.getRekapPengadaanInvestasi(IDUnitUser, IDRoleUser);
+            myObj.status    = (!RKI.status) ? RKI.pesan : "";
+            myObj.RKI       = RKI.data;
 
-            myObj.unit = masterDAO.getAllUnit();
-            myObj.tahun = masterDAO.getAllTahunAnggaran();
-            myObj.kategori = mainDAO.getAllKategori();
-            myObj.subKategori = mainDAO.getAllSubKategori();
+            myObj.unit          = masterDAO.getAllUnit();
+            myObj.tahun         = masterDAO.getAllTahunAnggaran();
+            myObj.kategori      = masterDAO.getAllKategori();
+            myObj.subKategori   = masterDAO.getAllSubKategori();
 
             return View(myObj);
         }
@@ -69,13 +69,13 @@ namespace SISPRAS.Controllers
             var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
             var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).Single();
 
-            var RKI = mainDAO.getRekapPengadaanInvestasi(IDUnitUser, IDRoleUser);
-            myObj.status = (!RKI.status) ? RKI.pesan : "";
-            myObj.RKI = RKI.data;
+            var RKI         = mainDAO.getRekapPengadaanInvestasi(IDUnitUser, IDRoleUser);
+            myObj.status    = (!RKI.status) ? RKI.pesan : "";
+            myObj.RKI       = RKI.data;
 
-            myObj.tahun = masterDAO.getAllTahunAnggaran();
-            myObj.kategori = mainDAO.getAllKategori();
-            myObj.subKategori = mainDAO.getAllSubKategori();
+            myObj.tahun         = masterDAO.getAllTahunAnggaran();
+            myObj.kategori      = masterDAO.getAllKategori();
+            myObj.subKategori   = masterDAO.getAllSubKategori();
 
             return View(myObj);
         }
@@ -83,11 +83,11 @@ namespace SISPRAS.Controllers
         [Authorize(Roles = "KPSP")]
         public IActionResult ApprovalPencairanInvestasi()
         {
-            var pencairanInvestasi = mainDAO.getPencairanInvestasiApproval();
-            myObj.status = (!pencairanInvestasi.status) ? pencairanInvestasi.pesan : "";
-            myObj.pencairanInvestasi = pencairanInvestasi.data;
+            var pencairanInvestasi      = mainDAO.getPencairanInvestasiApproval();
+            myObj.status                = (!pencairanInvestasi.status) ? pencairanInvestasi.pesan : "";
+            myObj.pencairanInvestasi    = pencairanInvestasi.data;
 
-            myObj.unit = masterDAO.getAllUnit();
+            myObj.unit  = masterDAO.getAllUnit();
             myObj.tahun = masterDAO.getAllTahunAnggaran();
 
             return View(myObj);
@@ -96,9 +96,9 @@ namespace SISPRAS.Controllers
         [Authorize(Roles = "KPSP")]
         public IActionResult PurchaseOrderInvestasi()
         {
-            var detailPencairanInvestasi = mainDAO.getDetailPencairanInvestasiPO();
-            myObj.status = (!detailPencairanInvestasi.status) ? detailPencairanInvestasi.pesan : "";
-            myObj.detailPencairanInvestasi = detailPencairanInvestasi.data;
+            var detailPencairanInvestasi    = mainDAO.getDetailPencairanInvestasiPO();
+            myObj.status                    = (!detailPencairanInvestasi.status) ? detailPencairanInvestasi.pesan : "";
+            myObj.detailPencairanInvestasi  = detailPencairanInvestasi.data;
 
             myObj.unit              = masterDAO.getAllUnit();
             myObj.tahun             = masterDAO.getAllTahunAnggaran();
@@ -110,13 +110,13 @@ namespace SISPRAS.Controllers
         [Authorize(Roles = "KPSP")]
         public IActionResult RekapPurchaseOrderInvestasi()
         {
-            var rekapPurchaseOrderInvestasi = mainDAO.getDetailPencairanInvestasiPO();
-            myObj.status = (!rekapPurchaseOrderInvestasi.status) ? rekapPurchaseOrderInvestasi.pesan : "";
-            myObj.detailPencairanInvestasi = rekapPurchaseOrderInvestasi.data;
+            var rekapPurchaseOrderInvestasi = mainDAO.getRekapPurchaseOrderInvestasi();
+            myObj.status                    = (!rekapPurchaseOrderInvestasi.status) ? rekapPurchaseOrderInvestasi.pesan : "";
+            myObj.rekapPurchaseOrderInvestasi = rekapPurchaseOrderInvestasi.data;
 
-            myObj.unit = masterDAO.getAllUnit();
-            myObj.tahun = masterDAO.getAllTahunAnggaran();
-            myObj.supplier = mainDAO.getAllSupplier();
+            myObj.unit      = masterDAO.getAllUnit();
+            myObj.tahun     = masterDAO.getAllTahunAnggaran();
+            myObj.supplier  = mainDAO.getAllSupplier();
 
             return View(myObj);
         }
@@ -297,6 +297,12 @@ namespace SISPRAS.Controllers
         {
             var data = mainDAO.getDetailPurchaseOrderPenerimaanBarang(nomorPO);
             return Json(data);
+        }
+
+        public JsonResult ajaxGetMaxNomorPO()
+        {
+            var data = mainDAO.getMaxNomorPO();
+            return Json(data.data.NO_PO + 1);
         }
     }
 }

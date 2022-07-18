@@ -89,7 +89,7 @@
                             <div class="form-group">
                                 <label>Tanggal PO</label>
                                 <div class="input-group date" id="reservationdate" data-target-input="nearest">
-                                    <input id="tanggalPO" name="tanggalPO" type="text" class="form-control datetimepicker-input" placeholder="dd/mm/yy" data-target="#reservationdate" required/>
+                                    <input id="tanggalPO" name="tanggalPO" type="text" class="form-control datetimepicker-input" placeholder="mm/dd/yy" data-target="#reservationdate" required/>
                                     <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
                                         <div class="input-group-text btn"><i class="fa fa-calendar"></i></div>
                                     </div>
@@ -204,6 +204,43 @@
            }).format(number);
         };
 
+        var formatRomawi = (number) => {
+            var numeric = [ 5000,4000,1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 ];
+            var roman = [ 'V\u0305','I\u0305V\u0305','M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I' ];
+            var output = '', i, len = numeric.length;
+
+            for (i = 0; i < len; i++){
+                while (numeric[i] <= number){
+                    output += roman[i];
+                    number -= numeric[i];
+                }
+            }
+
+            return output;
+        };
+
+        $( document ).ready(function() {
+            var now = new Date();
+
+            autoGenerateNomorPurchaseOrder();
+            $('#tanggalPO').val((now.getMonth()+1) + '/' +  now.getDate() + '/' + now.getFullYear());
+        });
+
+        function autoGenerateNomorPurchaseOrder(){
+            var now = new Date();
+
+            var month = formatRomawi(now.getMonth() + 1);
+            var year  = now.getFullYear();
+
+            $.ajax({
+                url: "/PengelolaanInvestasi/ajaxGetMaxNomorPO",
+                type: "POST",
+                dataType: "json",
+                success: function (result) {
+                    $('#nomorPO').val(result + '/PBK.KPSP/' + month + '/' + year);
+                }
+            })
+        }
         tabel
             .on( 'select', function ( e, dt, type, indexes ) {
                 var selectedRows = indexes.filter(x => !rowIndex.includes(x));
@@ -220,6 +257,7 @@
                 $('#inpTotalPO').val(formatRupiah(totalDetailPencairanInvestasi));
 
                 $('#btnProsesPO').prop('disabled', false);
+                autoGenerateNomorPurchaseOrder();
             } )
             .on( 'deselect', function ( e, dt, type, indexes ) {
                 rowIndex = rowIndex.filter(x => !indexes.includes(x));
@@ -237,6 +275,7 @@
                 if(idDetailPencairanInvestasiArray.length == 0){
                     $('#btnProsesPO').prop('disabled', true);
                 }
+                autoGenerateNomorPurchaseOrder();
             } );
 
         window.addEventListener('load', function () {
@@ -306,7 +345,7 @@
             var bulan  = $("#bulan").val();
 
             tabel.column(6).search(tahun ? '^'+tahun+'$' : '', true, false).column(7).search(bulan ? '^'+bulan+'$' : '', true, false).order( [ 0, 'asc' ] ).draw();
-        }   
+        }
 
         jQuery.fn.dataTable.Api.register( 'sum()', function ( ) {
 	        return this.flatten().reduce( function ( a, b ) {

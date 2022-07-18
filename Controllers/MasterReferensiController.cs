@@ -21,6 +21,7 @@ namespace SISPRAS.Controllers
             mainDAO = new MasterReferensiDAO();
             masterDAO = new MasterDAO();
         }
+
         public IActionResult Index()
         {
             return View();
@@ -30,6 +31,7 @@ namespace SISPRAS.Controllers
         public IActionResult KelolaReferensi()
         {
             myObj.provinsi = masterDAO.getAllProvinsi();
+            myObj.kategori = masterDAO.getAllKategori();
 
             return View(myObj);
         }
@@ -111,7 +113,7 @@ namespace SISPRAS.Controllers
                 if (addKategori.status == true)
                 {
                     data.status = true;
-                    data.pesan = "menambah data kategori";
+                    data.pesan = "menambah kategori";
                 }
                 else
                 {
@@ -126,7 +128,7 @@ namespace SISPRAS.Controllers
                 if (updateKategori.status == true)
                 {
                     data.status = true;
-                    data.pesan = "memperbarui data kategori";
+                    data.pesan = "memperbarui kategori";
                 }
                 else
                 {
@@ -162,58 +164,65 @@ namespace SISPRAS.Controllers
             return Json(data);
         }
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult updateKategori(Kategori kategori)
+        public JsonResult ajaxGetDetailSubKategori(int IDSubKategori)
+        {
+            var data = mainDAO.getDetailSubKategori(IDSubKategori);
+            return Json(data);
+        }
+
+        //public JsonResult ajaxGetKodeBarangSubKategori(int IDSubKategori)
         //{
-        //    var updateKategori = mainDAO.updateKategori(kategori);
-
-        //    if (updateKategori.status == true)
-        //    {
-        //        TempData["success"] = "memperbarui kategori";
-        //    }
-        //    else
-        //    {
-        //        TempData["error"] = updateKategori.pesan;
-        //    }
-
-        //    return RedirectToAction("KelolaReferensi");
-        //}
-
-        //public JsonResult ajaxDeleteKategori(int IDKategori)
-        //{
-        //    var data = mainDAO.deleteKategori(IDKategori);
+        //    var data = mainDAO.getDetailSubKategori(IDSubKategori);
         //    return Json(data);
         //}
 
-        //public JsonResult ajaxGetSubKategori(int IDKategori)
-        //{
-        //    var data = mainDAO.getSubKategori(IDKategori);
-        //    return Json(data);
-        //}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult addUpdateSubKategori(SubKategori subKategori)
+        {
+            DBOutput data = new DBOutput();
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult ajaxSubKategori(SubKategori subKategori)
-        //{
-        //    var updateSubKategori = mainDAO.updateSubKategori(subKategori);
+            if (subKategori.IDRefSK == 0)
+            {
+                var addSubKategori = mainDAO.addSubKategori(subKategori);
 
-        //    if (updateSubKategori.status == true)
-        //    {
-        //        TempData["success"] = "memperbarui sub kategori";
-        //    }
-        //    else
-        //    {
-        //        TempData["error"] = updateSubKategori.pesan;
-        //    }
+                if (addSubKategori.status == true)
+                {
+                    data.status = true;
+                    data.pesan  = "menambah sub kategori";
+                    data.data   = subKategori.IDKategori;
+                }
+                else
+                {
+                    data.status = false;
+                    data.pesan = addSubKategori.pesan;
+                }
+            }
+            else
+            {
+                var updateSubKategori = mainDAO.updateSubKategori(subKategori);
 
-        //    return RedirectToAction("KelolaReferensi");
-        //}
+                if (updateSubKategori.status == true)
+                {
+                    data.status = true;
+                    data.pesan  = "memperbarui sub kategori";
+                    data.data   = subKategori.IDKategori;
+                }
+                else
+                {
+                    data.status = false;
+                    data.pesan = updateSubKategori.pesan;
+                }
+            }
 
-        //public JsonResult ajaxDeleteSubKategori(int IDSubKategori)
-        //{
-        //    var data = mainDAO.deleteSubKategori(IDSubKategori);
-        //    return Json(data);
-        //}
+            return Json(data);
+        }
+
+        public JsonResult ajaxDeleteSubKategori(int IDSubKategori)
+        {
+            var data = mainDAO.deleteSubKategori(IDSubKategori);
+            return Json(data);
+        }
+
     }
 }

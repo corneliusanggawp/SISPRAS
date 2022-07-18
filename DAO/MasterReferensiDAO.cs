@@ -374,6 +374,71 @@ namespace SISPRAS.DAO
             }
         }
 
+        public DBOutput getDetailSubKategori(int IDSubKategori)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT      *
+                        FROM        sispras.REF_SUB_KATEGORI
+                        WHERE       (sispras.REF_SUB_KATEGORI.ID_REF_SK = @IDSubKategori)
+                    ";
+
+                    var data = conn.QueryFirstOrDefault<dynamic>(query, new { IDSubKategori = IDSubKategori });
+
+                    output.data = data;
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public DBOutput addSubKategori(SubKategori obj)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        INSERT INTO sispras.REF_SUB_KATEGORI(ID_KATEGORI, DESKRIPSI, KODE_BARANG)
+                        VALUES (@IDKategori, @deskripsi, @kodeBarang)
+                    ";
+
+                    output.data = conn.Execute(query, obj);
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
         public DBOutput updateSubKategori(SubKategori obj)
         {
             DBOutput output = new DBOutput();
@@ -385,8 +450,8 @@ namespace SISPRAS.DAO
                 {
                     string query = @"
                         UPDATE sispras.REF_SUB_KATEGORI
-                        SET ID_KATEGORI = @IDKategori,DESKRIPSI = @deskripsi, KODE_BARANG = @kodeBarang
-                        WHERE ID_REF_SK = @IDSubKategori
+                        SET ID_KATEGORI = @IDKategori, DESKRIPSI = @deskripsi, KODE_BARANG = @kodeBarang
+                        WHERE ID_REF_SK = @IDRefSK
                     ";
 
                     output.data = conn.Execute(query, obj);

@@ -13,65 +13,6 @@
     <link rel="stylesheet" href="~/lib/jquery-datatables-checkboxes-1.2.12/css/dataTables.checkboxes.css">
 }
 
-<!-- Modal Dialog 2 -->
-<div class="modal fade" id="DetailPencairanInvestasi" role="dialog">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Detail Pencairan Investasi</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="card-body">
-                    <table id="tabelDetailPencairanInvestasi" class="table table-hover table-head-fixed">
-                        <thead>
-                            <tr>
-                                <th>Pengadaan</th>
-                                <th>Merk</th>
-                                <th>Satuan</th>
-                                <th>Jumlah</th>
-                                <th>Harga</th>
-                                <th class="none">Kategori</th>
-                                <th class="none">Spesifikasi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyDetailPencairanInvestasi">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Modal Dialog 2 End -->
-
-<!-- Modal Dialog 1 -->
-<div class="modal fade" id="SpesifikasiDetailPencairanInvestasiModal" role="dialog">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Spesifikasi</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p id="spesifikasi"></p>
-                <div class="modal-footer" justify-content-between>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Modal Dialog 1 End -->
-
-
 <div class="row">
 	<div class="col-md-12">
         <div class="card card-primary">
@@ -81,7 +22,7 @@
             <!-- /.card-header -->
             <div class="card-body">
                 <div class="row">
-                    <div class="col-4">
+                    <div class="col-6">
                          <div class="form-group">
                             <label>Tahun</label>
                             <select onchange="filterDataPencairanInvestasi()" id="tahun" class="form-control select2bs4" style="width: 100%;">
@@ -93,7 +34,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-6">
                         <div class="form-group">
                             <label>Bulan</label>
                             <select onchange="filterDataPencairanInvestasi()" id="bulan" class="form-control select2bs4" style="width: 100%;">
@@ -113,18 +54,6 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-4">
-                         <div class="form-group">
-                            <label>Unit</label>
-                            <select onchange="filterDataPencairanInvestasi()" id="unit" class="form-control select2bs4" style="width: 100%;">
-                                <option value="" selected>Semua unit...</option>
-                                @foreach (var unit in Model.unit)
-                                {
-                                    <option value="@unit.NAMA_UNIT">@unit.NAMA_UNIT</option>
-                                }
-                            </select>                            
-                        </div>
-                    </div>
                 </div>
             </div>
             <!-- /.card-body -->
@@ -138,16 +67,39 @@
                 <table id="tabelRekapPurchaseOrderInvestasi" class="table table-hover">
                     <thead>
                         <tr>
-                            <th></th>
-                            <th>Tahun</th>
-                            <th>Bulan</th>
-                            <th>Unit Pengaju</th>
-                            <th>Tanggal</th>
-                            <th>Total</th>
-                            <th class="text-center">Detail</th>
+                            <th>Nomor PO:</th>
+                            <th>Tanggal PO:</th>
+                            <th class="none">Total Tanpa Pajak:</th>
+                            <th class="none">Pajak:</th>
+                            <th>Total Dengan Pajak:</th>
+                            <th>Supplier:</th>
+                            <th>Lunas:</th>
+                            <th>Cetak:</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach (var PurchaseOrderInvestasi in Model.rekapPurchaseOrderInvestasi) { 
+                        <tr>
+                            <td>@PurchaseOrderInvestasi.NO_PO</td>
+                            <td>@((PurchaseOrderInvestasi.TGL_PO).ToLongDateString())</td>
+                            <td>@((PurchaseOrderInvestasi.TOTAL_PO_TANPA_PAJAK).ToString("C0", culture))</td>
+                            <td>@((PurchaseOrderInvestasi.PAJAK).ToString("C0", culture))</td>
+                            <td>@((PurchaseOrderInvestasi.TOTAL_DENGAN_PAJAK).ToString("C0", culture))</td>
+                            <td>@PurchaseOrderInvestasi.SUPPLIER</td>
+                            <td>
+                                @if(@PurchaseOrderInvestasi.IS_LUNAS){
+                                <span class="badge badge-success">Lunas</span>
+                                }
+                                else
+                                {
+                                <span class="badge badge-danger">Belum Lunas</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <a data-toggle="modal" href="#PDFModal" onclick="showPDF(@PurchaseOrderInvestasi.NO_PO)" class="btn btn-primary btn-sm"> <i class="fas fa-print"> </i> </a>
+                            </td>
+                        </tr> 
+                        }
                     </tbody>
                 </table>                
             </div>
@@ -178,7 +130,7 @@
     <script> 
         var tabelRekapPurchaseOrderInvestasi;
 
-        refreshtabelRekapPurchaseOrderInvestasi();
+        refreshRekapPurchaseOrderInvestasi();
 
         $('.select2bs4').select2({
             theme: 'bootstrap4'
@@ -200,9 +152,12 @@
                 paging: true,
                 lengthChange: true,
                 searching: true,
-                ordering: false,
+                ordering: true,
                 info: true,
                 autoWidth: false,
+                columnDefs: [
+                    { targets: 7, orderable: false}
+                ],
                 responsive: true
             }).buttons().container().appendTo('#tabelRekapPurchaseOrderInvestasi_wrapper .col-md-6:eq(0)');
         }

@@ -274,55 +274,6 @@ namespace SISPRAS.DAO
             }
         }
 
-        public List<dynamic> getAllKategori()
-        {
-            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
-            {
-                try
-                {
-                    string query = @"
-                        SELECT *
-                        FROM sispras.REF_KATEGORI";
-
-                    var data = conn.Query<dynamic>(query).ToList();
-
-                    return data;
-                }
-                catch (Exception ex)
-                {
-                    return new List<dynamic>();
-                }
-                finally
-                {
-                    conn.Dispose();
-                }
-            }
-        }
-
-        public List<dynamic> getAllSubKategori()
-        {
-            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
-            {
-                try
-                {
-                    string query = @"
-                        SELECT *
-                        FROM sispras.REF_SUB_KATEGORI";
-                    var data = conn.Query<dynamic>(query).ToList();
-
-                    return data;
-                }
-                catch (Exception ex)
-                {
-                    return new List<dynamic>();
-                }
-                finally
-                {
-                    conn.Dispose();
-                }
-            }
-        }
-
         public DBOutput getPencairanInvestasiApproval()
         {
             DBOutput output = new DBOutput();
@@ -514,6 +465,40 @@ namespace SISPRAS.DAO
             }
         }
 
+        public DBOutput getRekapPurchaseOrderInvestasi()
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT      sispras.TBL_PO_INVESTASI.*, sispras.MST_SUPPLIER.NAMA_SUPPLIER AS SUPPLIER
+                        FROM        sispras.TBL_PO_INVESTASI
+                        INNER JOIN  sispras.MST_SUPPLIER ON sispras.TBL_PO_INVESTASI.ID_SUPPLIER = sispras.MST_SUPPLIER.ID_SUPPLIER
+                    ";
+
+                    var data = conn.Query<dynamic>(query).ToList();
+
+                    output.data = data;
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
         public List<dynamic> getAllSupplier()
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
@@ -551,9 +536,9 @@ namespace SISPRAS.DAO
                     string query = @"
                         if not exists(select ID_PO_INVESTASI from sispras.TBL_PO_INVESTASI where NO_PO = @nomorPO)
 	                        begin
-                                INSERT INTO sispras.TBL_PO_INVESTASI (NO_PO, TGL_PO, TOTAL_PO_TANPA_PAJAK, PAJAK, TOTAL_DENGAN_PAJAK, USER_ID, IP_ADDRESS, INSERT_DATE, ID_SUPPLIER, NAMA_PO)
+                                INSERT INTO sispras.TBL_PO_INVESTASI (NO_PO, TGL_PO, TOTAL_PO_TANPA_PAJAK, PAJAK, TOTAL_DENGAN_PAJAK, USER_ID, IP_ADDRESS, INSERT_DATE, ID_SUPPLIER, NAMA_PO, @IS_LUNAS)
                                 OUTPUT INSERTED.ID_PO_INVESTASI
-                                VALUES (@nomorPO, @tanggalPO, @totalTanpaPajak, @pajak, @totalDenganPajak, @userID, @IPAddress, @insertDate, @IDSupplier, @namaPO)
+                                VALUES (@nomorPO, @tanggalPO, @totalTanpaPajak, @pajak, @totalDenganPajak, @userID, @IPAddress, @insertDate, @IDSupplier, @namaPO, @isLunas)
                             end
                         else
                             begin
@@ -680,7 +665,41 @@ namespace SISPRAS.DAO
                     conn.Dispose();
                 }
             }
-
         }
+
+        public DBOutput getMaxNomorPO()
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT COUNT(ID_PO_INVESTASI) AS NO_PO
+                        FROM	sispras.TBL_PO_INVESTASI
+                        WHERE	MONTH(TGL_PO) = DATEPART(month, GETDATE())
+                    ";
+
+                    var data = conn.QueryFirstOrDefault<dynamic>(query);
+
+                    output.data = data;
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
     }
 }

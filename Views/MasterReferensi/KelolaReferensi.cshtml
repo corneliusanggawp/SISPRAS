@@ -14,7 +14,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form class="formSupplier" method="post" enctype="multipart/form-data" novalidate>
+            <form class="formSupplier" method="post" asp-action="addUpdateSupplier" asp-controller="MasterReferensi" enctype="multipart/form-data" novalidate>
             @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <input type="hidden" class="form-control" id="IDSupplier" name="IDSupplier" value="" readonly="readonly">
@@ -101,7 +101,7 @@
 
 <!-- Modal Dialog 2 -->
 <div class="modal fade" id="KategoriModal" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Kategori</h5>
@@ -113,10 +113,7 @@
             @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <input type="hidden" class="form-control" id="IDKategori" name="IDKategori" value="" readonly="readonly">
-                    <div class="form-group">
-                        <label>Deskripsi</label>
-                        <input id="deskripsiKategori" name="deskripsi" type="text" class="form-control" placeholder="Masukkan deskripsi kategori..." required>
-                    </div>
+                    <input id="deskripsiKategori" name="deskripsi" type="text" class="form-control" placeholder="Masukkan deskripsi kategori..." required>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Keluar</button>
@@ -144,7 +141,7 @@
                         <tr>
                             <th>
                                 Sub Kategori
-                                <a data-toggle="modal" href="#SubKategoriModal" onclick="addSubKategori()" class="btn btn-primary btn-sm"> <i class="fas fa-plus"></i> </a>
+                                <a id="btnAddSubKategori" data-toggle="modal" href="#DetailSubKategoriModal" onclick="addSubKategori(this.value)" class="btn btn-primary btn-sm"> <i class="fas fa-plus"></i> </a>
                             </th>
                             <th>Kategori</th>
                             <th>Kode Barang</th>
@@ -162,6 +159,52 @@
     </div>
 </div>
 <!-- Modal Dialog 3 End -->
+
+<!-- Modal Dialog 4 -->
+<div class="modal fade" id="DetailSubKategoriModal" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sub Kategori</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form class="formSubKategori" method="post" enctype="multipart/form-data" novalidate>
+            @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input id="IDRefSK_SK" name="IDRefSK"  type="hidden" class="form-control" required>
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                <select id="IDKategori_SK" name="IDKategori" class="form-control select2bs4" required>
+                                    @foreach (var Kategori in Model.kategori)
+                                    {
+                                    <option value="@Kategori.ID_KATEGORI">@Kategori.DESKRIPSI</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Deskripsi</label>
+                                <input id="deskripsi_SK" name="deskripsi"  type="text" class="form-control" placeholder="Masukkan deskripsi sub kategori..." required>
+                            </div>  
+                            <div class="form-group">
+                                <label>Kode Barang</label>
+                                <input id="kodeBarang_SK" name="kodeBarang"  type="number" class="form-control" placeholder="Masukkan kode barang..." required>
+                            </div>  
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Keluar</button>
+                    <button id="btnSubKategori" type="submit" class="btn btn-primary"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Modal Dialog 4 End -->
 
 <div class="row">
     <div class="col-12">
@@ -238,6 +281,12 @@
         $('.select2bs4').select2({
             theme: 'bootstrap4'
         });
+
+        $(document).on('show.bs.modal', '.modal', function() {
+            var zIndex = 1040 + 10 * $('.modal:visible').length;
+            $(this).css('z-index', zIndex);
+            setTimeout(() => $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack'));
+        }); 
 
         function refreshTabelSupplier() {
             tabelSupplier = $("#tabelSupplier").DataTable({
@@ -344,39 +393,6 @@
             });
         });
 
-        window.addEventListener('load', function () {
-            var forms = document.getElementsByClassName('formSupplier');
-            var validation = Array.prototype.filter.call(forms, function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (form.checkValidity() === false) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }else{
-                        event.preventDefault();
-                        var formData    = new FormData(event.target);
-
-                        $.ajax({
-                            url: "/MasterReferensi/addUpdateSupplier",
-                            type: "POST",
-                            data: Object.fromEntries(formData.entries()),
-                            dataType: "json",
-                            success: function (result) {
-                                $('#SupplierModal').modal('hide');
-
-                                if(result.status){
-                                    toastr.success(result.pesan, 'Berhasil');
-                                    $('#tabelSupplier').DataTable().ajax.reload();
-                                }else{
-                                    toastr.error(result.pesan, 'Gagal');
-                                }
-                            }
-                        })
-                    }
-                    form.classList.add('was-validated');
-                }, false);
-            });
-        }, false);
-
         function showKabKodya(IDProvinsi){
             $("#IDKabKodya").empty();
 
@@ -479,39 +495,6 @@
             });
         });
 
-        window.addEventListener('load', function () {
-            var forms = document.getElementsByClassName('formKategori');
-            var validation = Array.prototype.filter.call(forms, function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (form.checkValidity() === false) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }else{
-                        event.preventDefault();
-                        var formData    = new FormData(event.target);
-
-                        $.ajax({
-                            url: "/MasterReferensi/addUpdateKategori",
-                            type: "POST",
-                            data: Object.fromEntries(formData.entries()),
-                            dataType: "json",
-                            success: function (result) {
-                                $('#KategoriModal').modal('hide');
-
-                                if(result.status){
-                                    toastr.success(result.pesan, 'Berhasil');
-                                    $('#tabelKategori').DataTable().ajax.reload();
-                                }else{
-                                    toastr.error(result.pesan, 'Gagal');
-                                }
-                            }
-                        })
-                    }
-                    form.classList.add('was-validated');
-                }, false);
-            });
-        }, false);
-
         function updateKategori(IDKategori){
             $('#btnKategori').html('Perbarui');
 
@@ -568,6 +551,8 @@
         }
 
         function showSubKategori(IDKategori){
+            $('#btnAddSubKategori').prop('value', IDKategori);
+
             var tabelSubKategori = $('#tabelSubKategori').DataTable();
 
             $.ajax({
@@ -579,10 +564,171 @@
                     tabelSubKategori.clear().draw();
 
                     for (var i = 0; i < result.data.length; i++) {
-                        tabelSubKategori.row.add([result.data[i].DESKRIPSI, result.data[i].KATEGORI, result.data[i].KODE_BARANG, '<a data-toggle="modal" href="#SubKategoriModal" onclick="updateKategori(' + result.data[i].ID_REF_SK + ')" class="btn btn-success btn-sm"> <i class="fas fa-edit"> </i> </a>  <a onclick="deleteSubKategori(' + result.data[i].ID_REF_SK + ')" id="btnDeleteKategori" class="btn btn-danger btn-sm"> <i class="fas fa-trash"> </i> </a>' ]).draw();
+                        tabelSubKategori.row.add([result.data[i].DESKRIPSI, result.data[i].KATEGORI, result.data[i].KODE_BARANG, '<a data-toggle="modal" href="#DetailSubKategoriModal" onclick="updateSubKategori(' + result.data[i].ID_REF_SK + ')" class="btn btn-success btn-sm"> <i class="fas fa-edit"> </i> </a>  <a onclick="deleteSubKategori(' + result.data[i].ID_REF_SK + ', ' + IDKategori +')" id="btnDeleteKategori" class="btn btn-danger btn-sm"> <i class="fas fa-trash"> </i> </a>' ]).draw();
                     }
                 }
             })            
         }
+
+        function addSubKategori(IDKategori){
+            $('#btnSubKategori').html('Tambah');
+
+            $("#IDRefSK_SK").val("");
+            $("#IDKategori_SK").val(IDKategori).trigger('change');
+            $("#deskripsi_SK").val("");
+            $("#kodeBarang_SK").val("");
+        }
+
+        function updateSubKategori(IDSubKategori){
+            $('#btnSubKategori').html('Perbarui');
+                        
+            $.ajax({
+                url: "/MasterReferensi/ajaxGetDetailSubKategori",
+                type: "POST",
+                data: { "IDSubKategori": IDSubKategori},
+                dataType: "json",
+                success: function (result) {
+                    $("#IDRefSK_SK").val(IDSubKategori);
+                    $("#IDKategori_SK").val(result.data.ID_KATEGORI).trigger('change');
+                    $("#deskripsi_SK").val(result.data.DESKRIPSI);
+                    $("#kodeBarang_SK").val(result.data.KODE_BARANG);                    
+                }
+            }) 
+        }
+
+        function deleteSubKategori(IDSubKategori, IDKategori){
+            Swal.fire({
+                title: 'Lanjutkan Hapus Sub Kategori?',
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                text: "Mohon pastikan sub kategori yang dipilih sudah sesuai",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#007bff',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, lanjutkan!',
+                cancelButtonText: 'Batal',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "/MasterReferensi/ajaxDeleteSubKategori",
+                            type: "POST",
+                            data: { "IDSubKategori": IDSubKategori },
+                            dataType: "json",
+                            success: function (result) {
+                                if(result.status){
+                                     toastr.success('menghapus sub kategori', 'Berhasil');
+                                     showSubKategori(IDKategori);
+                                }else{
+                                    toastr.error(result.pesan, 'Gagal');
+                                }
+                                
+                            }
+                        })
+                    }
+                })
+        }
+
+        $('#DetailSubKategoriModal').on('hidden.bs.modal', function() {
+            var forms = document.getElementsByClassName('formSubKategori');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.classList.remove('was-validated');
+            });
+        });
+
+        window.addEventListener('load', function () {
+            var forms = document.getElementsByClassName('formSupplier');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }else{
+                        event.preventDefault();
+                        var formData    = new FormData(event.target);
+
+                        $.ajax({
+                            url: "/MasterReferensi/addUpdateSupplier",
+                            type: "POST",
+                            data: Object.fromEntries(formData.entries()),
+                            dataType: "json",
+                            success: function (result) {
+                                $('#SupplierModal').modal('hide');
+
+                                if(result.status){
+                                    toastr.success(result.pesan, 'Berhasil');
+                                    $('#tabelSupplier').DataTable().ajax.reload();
+                                }else{
+                                    toastr.error(result.pesan, 'Gagal');
+                                }
+                            }
+                        })
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+
+            var forms = document.getElementsByClassName('formKategori');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }else{
+                        event.preventDefault();
+                        var formData    = new FormData(event.target);
+
+                        $.ajax({
+                            url: "/MasterReferensi/addUpdateKategori",
+                            type: "POST",
+                            data: Object.fromEntries(formData.entries()),
+                            dataType: "json",
+                            success: function (result) {
+                                $('#KategoriModal').modal('hide');
+
+                                if(result.status){
+                                    toastr.success(result.pesan, 'Berhasil');
+                                    $('#tabelKategori').DataTable().ajax.reload();
+                                }else{
+                                    toastr.error(result.pesan, 'Gagal');
+                                }
+                            }
+                        })
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+
+            var forms = document.getElementsByClassName('formSubKategori');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }else{
+                        event.preventDefault();
+                        var formData    = new FormData(event.target);
+
+                        $.ajax({
+                            url: "/MasterReferensi/addUpdateSubKategori",
+                            type: "POST",
+                            data: Object.fromEntries(formData.entries()),
+                            dataType: "json",
+                            success: function (result) {
+                                $('#DetailSubKategoriModal').modal('hide');
+
+                                if(result.status){
+                                    toastr.success(result.pesan, 'Berhasil');
+                                    showSubKategori(result.data);
+                                }else{
+                                    toastr.error(result.pesan, 'Gagal');
+                                }
+                            }
+                        })
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
     </script>
 }

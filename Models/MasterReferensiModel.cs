@@ -22,8 +22,8 @@
 
     public class SubKategori
     {
-        public int IDSubKategori { get; set; }
-        public string IDKategori { get; set; }
+        public int IDRefSK { get; set; }
+        public int IDKategori { get; set; }
         public string deskripsi { get; set; }
         public string kodeBarang { get; set; }
     }

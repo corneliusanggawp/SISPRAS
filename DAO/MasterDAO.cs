@@ -172,5 +172,54 @@ namespace SISPRAS.DAO
                 }
             }
         }
+
+        public List<dynamic> getAllKategori()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT *
+                        FROM sispras.REF_KATEGORI";
+
+                    var data = conn.Query<dynamic>(query).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public List<dynamic> getAllSubKategori()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT *
+                        FROM sispras.REF_SUB_KATEGORI";
+                    var data = conn.Query<dynamic>(query).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
     }
 }
