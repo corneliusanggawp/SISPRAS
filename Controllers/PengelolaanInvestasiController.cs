@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Razor.Templating.Core;
+using Rotativa.AspNetCore;
 using SISPRAS.DAO;
 using SISPRAS.Models;
 using System;
@@ -27,7 +29,7 @@ namespace SISPRAS.Controllers
             return View();
         }
 
-        [Authorize(Roles = "KPSP, Unit")] 
+        [Authorize(Roles = "Admin, Unit")] 
         public IActionResult RencanaPengadaanAset()
         {
             var IDUnitUser    = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
@@ -45,7 +47,7 @@ namespace SISPRAS.Controllers
             return View(myObj);
         }
 
-        [Authorize(Roles = "KPSP")]
+        [Authorize(Roles = "Admin")]
         public IActionResult RekapPengadaanInvestasi()
         {
             var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
@@ -80,7 +82,7 @@ namespace SISPRAS.Controllers
             return View(myObj);
         }
 
-        [Authorize(Roles = "KPSP")]
+        [Authorize(Roles = "Admin")]
         public IActionResult ApprovalPencairanInvestasi()
         {
             var pencairanInvestasi      = mainDAO.getPencairanInvestasiApproval();
@@ -93,7 +95,7 @@ namespace SISPRAS.Controllers
             return View(myObj);
         }
 
-        [Authorize(Roles = "KPSP")]
+        [Authorize(Roles = "Admin")]
         public IActionResult PurchaseOrderInvestasi()
         {
             var detailPencairanInvestasi    = mainDAO.getDetailPencairanInvestasiPO();
@@ -107,7 +109,7 @@ namespace SISPRAS.Controllers
             return View(myObj);
         }
 
-        [Authorize(Roles = "KPSP")]
+        [Authorize(Roles = "Admin")]
         public IActionResult RekapPurchaseOrderInvestasi()
         {
             var rekapPurchaseOrderInvestasi = mainDAO.getRekapPurchaseOrderInvestasi();
@@ -121,10 +123,24 @@ namespace SISPRAS.Controllers
             return View(myObj);
         }
 
-        [Authorize(Roles = "KPSP")]
+        [Authorize(Roles = "Admin")]
         public IActionResult PenerimaanBarangInvestasi()
         {
             return View(myObj);
+        }
+
+        [HttpPost]
+        public IActionResult SuratPemesananBarang(int IDPurchaseOrderInvestasi)
+        {
+            var purchaseOrderInvestasi = mainDAO.getPurchaseOrderInvestasi(IDPurchaseOrderInvestasi);
+            var detailPurchaseOrderInvestasi = mainDAO.getDetailPurchaseOrderInvestasi(IDPurchaseOrderInvestasi);
+
+            myObj.purchaseOrderInvestasi = purchaseOrderInvestasi.data;
+            myObj.detailPurchaseOrderInvestasi = detailPurchaseOrderInvestasi.data;
+
+            var html =  RazorTemplateEngine.RenderAsync("~/wwwroot/pdf/SuratPemesananBarang.cshtml", myObj);
+
+            return Json(html);
         }
 
         [HttpPost]
@@ -216,14 +232,14 @@ namespace SISPRAS.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult addPurchaseOrder(string nomorPO, int IDSupplier, String tanggalPO, String IDDetailPencairanInvestasi, decimal totalPO)
+        public IActionResult addPurchaseOrder(string nomorPO, int IDSupplier, int pajak, string tanggalPO, string IDDetailPencairanInvestasi, decimal totalPO)
         {
             PurchaseOrderInvestasi POI = new PurchaseOrderInvestasi();
 
             POI.nomorPO = nomorPO;
             POI.tanggalPO = tanggalPO;
             POI.totalTanpaPajak = totalPO;
-            POI.pajak = POI.totalTanpaPajak;
+            POI.pajak = ((decimal)totalPO * ((decimal)pajak / 100));
             POI.totalDenganPajak = POI.totalTanpaPajak + POI.pajak;
             POI.userID  = User.Claims.Where(c => c.Type == "NPP").Select(c => c.Value).SingleOrDefault();
             POI.IPAddress   = HttpContext.Connection.RemoteIpAddress.ToString();
@@ -269,6 +285,63 @@ namespace SISPRAS.Controllers
             return RedirectToAction("PurchaseOrderInvestasi");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult addPenerimaanBarang(string nomorInvoice, string tanggalTerima, decimal totalInvoice, string IDDetailPO, int IDPO)
+        {
+            //TerimaAset TA = new TerimaAset();
+
+            //TA.tanggalTerima = tanggalTerima;
+            //TA.nomorInvoice = nomorInvoice;
+            //TA.totalInvoice = totalInvoice;
+            //TA.IDPurchaseOrderInvestasi = IDPO;
+            //TA.userID = User.Claims.Where(c => c.Type == "NPP").Select(c => c.Value).SingleOrDefault();
+            //TA.IPAddress = HttpContext.Connection.RemoteIpAddress.ToString();
+            //TA.insertDate = DateTime.Now.ToString();
+            //var IDDetailPurchaseOrder = IDDetailPO.Split(",").Select(Int32.Parse).ToArray();
+            //TA.jumlahItem = IDDetailPurchaseOrder.Length;
+
+            //var checkTerimaAset = mainDAO.addTerimaAset(TA);
+
+            //if (checkTerimaAset.status == true)
+            //{
+            //    DetailTerimaAset DTA = new DetailTerimaAset();
+
+            //    DTA.IDTerimaAset = checkTerimaAset.data;
+            //    DTA.isProccessed = false;
+            //    var success = 0;
+
+            //    foreach (int IDDetail in IDDetailPurchaseOrder)
+            //    {
+            //        DTA.IDDetailPurchaseOrderInvestasi = IDDetail;
+
+            //        var inpDetailTerimaAset = mainDAO.addDetailTerimaAset(DTA);
+
+            //        if (inpDetailTerimaAset.status == true)
+            //        {
+            //            success++;
+            //        }
+            //        else
+            //        {
+            //            TempData["error"] = inpDetailTerimaAset.pesan;
+            //        }
+            //    }
+
+            //    if (success != 0)
+            //    {
+            //        TempData["success"] = "memproses " + success + " dari " + IDDetailPurchaseOrder.Length + " aset";
+            //    }
+            //}
+            //else
+            //{
+            //    TempData["error"] = checkTerimaAset.pesan;
+            //}
+
+            TempData["success"] = "memproses penerimaan barang";
+
+            return RedirectToAction("PenerimaanBarangInvestasi");
+        }
+
         public JsonResult ajaxGetDetailRencanaKhususInvestasi(int IDRKA)
         {
             var data = mainDAO.getDetailRencanaKhususInvestasi(IDRKA);
@@ -303,6 +376,12 @@ namespace SISPRAS.Controllers
         {
             var data = mainDAO.getMaxNomorPO();
             return Json(data.data.NO_PO + 1);
+        }
+
+        public JsonResult ajaxGetAutoCompleteNomorPO(string nomorPO)
+        {
+            var data = mainDAO.getAutoCompleteNomorPO(nomorPO);
+            return Json(data.data);
         }
     }
 }

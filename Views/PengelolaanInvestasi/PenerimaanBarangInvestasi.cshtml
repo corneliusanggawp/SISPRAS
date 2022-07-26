@@ -10,7 +10,14 @@
 }
 
 @section Header{
+    <!-- jQuery UI -->
+    <link rel="stylesheet" href="~/lib/jquery-ui/jquery-ui.css"/>
+    <!-- DataTables Select-->
     <link rel="stylesheet" href="~/lib/jquery-datatables-checkboxes-1.2.12/css/dataTables.checkboxes.css">
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="~/lib/daterangepicker/daterangepicker.css">
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet" href="~/lib/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
 }
 
 <div class="row">
@@ -20,35 +27,37 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-4">
-                        <div class="input-group mb-3">
+                        <div class="input-group">
                             <input id="nomorPO" name="nomorPO" type="text" class="form-control" placeholder="Masukkan No. Purchase Order...">
                             <div class="input-group-append">
-                                <button id="btnSearchDetailPO" type="submit" class="btn btn-primary"><i id="loadbtnSearchDetailPO" class="fas fa-search"></i></button>
+                              <span class="input-group-text"><i class="fas fa-search"></i></span>
                             </div>
                         </div>                    
                     </div>                    
                 </div>
-                <table id="tabelDetailPurchaseOrder" class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Nama Barang</th>
-                            <th>Merk</th>
-                            <th>Harga Satuan</th>
-                            <th>Jumlah</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table id="tabelDetailPurchaseOrder" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Nama Barang</th>
+                                <th>Merk</th>
+                                <th>Harga Satuan</th>
+                                <th>Jumlah</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <!-- /.card-body -->
         </div>
     </div>
 
     <div class="col-12">
-        <form id="formTerimaAset" method="post" asp-action="addPurchaseOrder" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
+        <form id="formTerimaAset" method="post" asp-action="addPenerimaanBarang" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
             @Html.AntiForgeryToken()
             <div class="card card-primary">
                 <div class="card-header">
@@ -66,7 +75,7 @@
                             <div class="form-group">
                                 <label>Tanggal Terima</label>
                                 <div class="input-group date" id="reservationdate" data-target-input="nearest">
-                                    <input id="tanggalInvoice" name="tanggalInvoice" type="text" class="form-control datetimepicker-input" placeholder="dd/mm/yy" data-target="#reservationdate" required/>
+                                    <input id="tanggalTerima" name="tanggalTerima" type="text" class="form-control datetimepicker-input" placeholder="dd/mm/yy" data-target="#reservationdate" required/>
                                     <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
                                         <div class="input-group-text btn"><i class="fa fa-calendar"></i></div>
                                     </div>
@@ -74,10 +83,10 @@
                             </div>
                         </div>
                     </div>
-                    <input id="IDDetailPO" name="IDDetailPO" type="hidden" class="form-control" readonly="readonly" required>
+                    <input id="IDPO" name="IDPO" type="hidden" class="form-control" readonly="readonly" required>
                     <input id="totalInvoice" name="totalInvoice" type="hidden" class="form-control" readonly="readonly" required>
                     <div class="form-group">
-                        <label>Total Invoice</label>
+                        <label>Total</label>
                         <div class="input-group">
                             <input id="inpTotalInvoice" type="text" class="form-control" placeholder="Rp 0" readonly="readonly" required>
                             <span class="input-group-append">
@@ -94,6 +103,8 @@
 </div>
 
 @section Scripts{  
+    <!-- jQuery UI -->
+    <script src="~/lib/jquery-ui/jquery-ui.js"></script>
     <!-- Select -->
     <script src="~/lib/datatables-select/js/dataTables.select.min.js"></script>    
     <!-- CheckBox -->
@@ -105,6 +116,8 @@
     <script src="~/lib/daterangepicker/daterangepicker.js"></script>
     <!-- Tempusdominus Bootstrap 4 -->
     <script src="~/lib/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+    <!-- Input Spiner -->
+    <script src="~/lib/bootstrap-input-spinner/bootstrap-input-spinner.js"></script>
 
 
     @if (TempData["success"] != null){
@@ -129,54 +142,38 @@
         $('.select2bs4').select2({
             theme: 'bootstrap4'
         });
-        
+
         var tabel      = $('#tabelDetailPurchaseOrder').DataTable();
+
         var rowIndex = [];
         var totalDetailPencairanInvestasi = 0;
         var idDetailPencairanInvestasiArray = [];
 
         var formatRupiah = (number) => {
-           return new Intl.NumberFormat('id-ID', { 
+           return new Intl.NumberFormat('id-ID', {
                style: 'currency', 
                currency: 'IDR', 
                minimumFractionDigits: 0 
            }).format(number);
         };
 
-        tabel
-            .on( 'select', function ( e, dt, type, indexes ) {
-                var selectedRows = indexes.filter(x => !rowIndex.includes(x));
-                rowIndex.push(...selectedRows);
+        function updateTotal(comp, jumlahBarang){
+            var rowsIndex       = $(comp).closest('tr').index();
+            var jumlahBarang    = $(comp).val();
+            var hargaSatuan     = tabel.cell({row:rowsIndex, column:3}).data().replace(/[^\d]/g, '') * 1;
+            var totalBarang     = jumlahBarang * hargaSatuan;
+            var total           = tabel.column(5).data().sum();
 
-                var selectedID  = tabel.cells( selectedRows, 0 ).data().toArray();
-                var addTotal    = tabel.cells( selectedRows, 5 ).data().sum();
-                
-                idDetailPencairanInvestasiArray.push(...selectedID);
-                totalDetailPencairanInvestasi += addTotal;
+            tabel.cell({row:rowsIndex, column:5}).data(formatRupiah(totalBarang));
+            $('#totalInvoice').val(total);
+            $('#inpTotalInvoice').val(formatRupiah(total));
 
-                $('#IDDetailPO').val(idDetailPencairanInvestasiArray);
-                $('#totalInvoice').val(totalDetailPencairanInvestasi);
-                $('#inpTotalInvoice').val(formatRupiah(totalDetailPencairanInvestasi));
-
+            if(total == 0){
+                $('#btnSimpanInvoice').prop('disabled', true);
+            }else{
                 $('#btnSimpanInvoice').prop('disabled', false);
-            } )
-            .on( 'deselect', function ( e, dt, type, indexes ) {
-                rowIndex = rowIndex.filter(x => !indexes.includes(x));
-
-                var deselectIDArray = tabel.cells( indexes, 0 ).data().toArray();
-                var minTotal        = tabel.cells( indexes, 5 ).data().sum();
-
-                idDetailPencairanInvestasiArray = idDetailPencairanInvestasiArray.filter(a => !deselectIDArray.includes(a));
-                totalDetailPencairanInvestasi   -= minTotal;
-
-                $('#IDDetailPO').val(idDetailPencairanInvestasiArray);
-                $('#totalInvoice').val(totalDetailPencairanInvestasi);
-                $('#inpTotalInvoice').val(formatRupiah(totalDetailPencairanInvestasi));
-                
-                if(idDetailPencairanInvestasiArray.length == 0){
-                    $('#btnSimpanInvoice').prop('disabled', true);
-                }
-            } );
+            }
+        }
 
         window.addEventListener('load', function () {
             var forms = $('#formTerimaAset');
@@ -210,6 +207,33 @@
             });
         }, false);
 
+        $("#nomorPO").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/PengelolaanInvestasi/ajaxGetAutoCompleteNomorPO",
+                    data: { "nomorPO": request.term },
+                    type: "POST",
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return item.NO_PO;
+                        }))
+                    }
+                });
+            },
+            select: function (e, i) {
+                $("#nomorPO").val(i.item.value);
+                searchDetailPurchaseOrder(i.item.value);
+            },
+            minLength: 1
+        });
+
+        $( document ).ready(function() {
+            var now = new Date();
+
+            $('#tanggalTerima').val((now.getMonth()+1) + '/' +  now.getDate() + '/' + now.getFullYear());
+
+        });
+
         function refreshTabelDetailPurchaseOrder() {
             tabelDetailPurchaseOrder = $("#tabelDetailPurchaseOrder").DataTable({
                 language: {
@@ -218,14 +242,14 @@
                 columnDefs: [
                     {
                         targets     :   0,
-                        checkboxes  : {
-                            selectRow: true
-                        }
+                        visible     : false,
+                        searchable  : true,
+                    },
+                    {
+                        targets     :   4,
+                        width       :   "15%",
                     }
                 ],
-                select: {
-                    style       : 'multi'
-                },
                 paging: true,
                 lengthChange: false,
                 searching: false,
@@ -236,7 +260,7 @@
             }).buttons().container().appendTo('#tabelDetailPurchaseOrder_wrapper .col-md-6:eq(0)');
         }
 
-        $("#btnSearchDetailPO").on("click", function() {
+        function searchDetailPurchaseOrder(nomorPO) {
             Swal.fire({
                 title: 'Mencari Data PO...',
                 showClass: { popup: 'animate__animated animate__zoomIn' },
@@ -248,8 +272,6 @@
                 },
             });
 
-            var nomorPO = $('#nomorPO').val();
-
             $.ajax({
                 url: "/PengelolaanInvestasi/ajaxGetDetailPurchaseOrderPenerimaanBarang",
                 type: "POST",
@@ -258,8 +280,13 @@
                 success: function (result) {
                     tabel.clear().draw();
                     for (var i = 0; i < result.data.length; i++) {
-                        tabel.row.add([result.data[i].ID_DETAIL_PO_INVESTASI, result.data[i].NAMA_BARANG, result.data[i].MERK, formatRupiah(result.data[i].HARGA_SATUAN), result.data[i].JUMLAH, formatRupiah(result.data[i].HARGA_SATUAN * result.data[i].JUMLAH)]).draw();
+                        if(result.data[i].ID_DETAIL_TERIMA == null){
+                            tabel.row.add([result.data[i].ID_DETAIL_PO_INVESTASI, result.data[i].NAMA_BARANG, result.data[i].MERK, formatRupiah(result.data[i].HARGA_SATUAN), '<input onchange="updateTotal(this, this.value)" id="jumlahBarang" name="jumlahBarang" type="number" class="form-control form-control-sm form-control-border" min="0" max="' + result.data[i].JUMLAH +'" value="' + result.data[i].JUMLAH +'"/>', formatRupiah(result.data[i].HARGA_SATUAN * result.data[i].JUMLAH)]).draw();
+                        }
+
+                        $("#IDPO").val(result.data[i].ID_PO_INVESTASI);
                     }
+
                     swal.close();
 
                     if(result.data.length == 0){
@@ -270,10 +297,22 @@
                             showClass: { popup: 'animate__animated animate__zoomIn' },
                             hideClass: { popup: 'animate__animated animate__zoomOut' },
                         })
+                    }else{
+                        $("input[type='number']").inputSpinner();
+
+                        var totalInvoice    = tabel.column(5).data().sum();
+                        $('#totalInvoice').val(totalInvoice);
+                        $('#inpTotalInvoice').val(formatRupiah(totalInvoice));
+
+                        if(totalInvoice == 0){
+                            $('#btnSimpanInvoice').prop('disabled', true);
+                        }else{
+                            $('#btnSimpanInvoice').prop('disabled', false);
+                        }
                     }
                 }
             })     
-        });
+        }
 
         jQuery.fn.dataTable.Api.register( 'sum()', function ( ) {
 	        return this.flatten().reduce( function ( a, b ) {

@@ -1,0 +1,171 @@
+﻿@using System;
+@using System.Globalization;
+@using System.Linq;
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Surat Pemesanan Barang";
+
+    CultureInfo culture = new CultureInfo("id-ID");
+    int index = 0;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Surat Pemesanan Barang</title>
+        
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="~/lib/fontawesome-free/css/all.min.css">
+        <!-- Theme style -->
+        <link rel="stylesheet" href="~/css/adminlte.min.css">
+        <style>
+            @@page { 
+                size:  A4 potrait;
+                margin: 113.38582677px;
+                scale : 100%;
+            }
+            html, body {
+                height: auto;
+                font-size: 12pt;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrapper">
+            <!-- Main content -->
+            <section class="invoice">
+                <!-- title row -->
+                <div class="row">
+                    <div class="col-6">
+                        <p>No&nbsp;&nbsp;: @(Model.purchaseOrderInvestasi.NO_PO)<br/> Hal&nbsp;&nbsp;: Pemesanan Barang</p>
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-6">
+                        <p class="float-right">@((Model.purchaseOrderInvestasi.TGL_PO).ToLongDateString())</p>
+                    </div>
+                    <!-- /.col -->
+                </div>
+                <!-- info row -->
+
+                <br/>
+                <div class="row">
+                    <div class="col-12">
+                        <address>
+                            <strong>Kepada<br />
+                            Yth. Pimpinan<br />
+                            @(Model.purchaseOrderInvestasi.NAMA_SUPPLIER)<br />
+                            @(Model.purchaseOrderInvestasi.ALAMAT)<br />
+                            @(Model.purchaseOrderInvestasi.KABUPATEN) , @(Model.purchaseOrderInvestasi.PROVINSI)</strong>
+                        </address>
+                    </div>
+                </div>
+
+                <br/>
+                <div class="row">
+                    <div class="col-12">
+                        <p>Dengan hormat,</p>
+                        <p>Memperhatikan kebutuhan peralatan penunjangan untuk unit-unit Universitas Atma Jaya Yogyakarta, sesuai penawaran harga dari <b>@(Model.purchaseOrderInvestasi.NAMA_SUPPLIER)</b> tanggal 19 Juli 2022, kami memesan barang sebagai berikut:</p>
+                    </div>
+
+                    <div class="col-12 table-responsive">
+                        <table id="tabelPurchaseOrder" class="table table-bordered" style="border: 2px solid;">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">No</th>
+                                    <th class="text-center">Spesifikasi</th>
+                                    <th class="text-center">Jumlah</th>
+                                    <th class="text-center">Harga Satuan</th>
+                                    <th class="text-center">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var DetailPurchaseOrderInvestasi in Model.detailPurchaseOrderInvestasi) {
+                                index++;
+                                <tr>
+                                    <td>@index</td>
+                                    <td>
+                                        <b>@DetailPurchaseOrderInvestasi.NAMA_BARANG</b>
+                                        <br>
+                                        <b>Spesifikasi : </b>
+                                        <br>
+                                        @DetailPurchaseOrderInvestasi.SPESIFIKASI
+                                    </td>
+                                    <td>@DetailPurchaseOrderInvestasi.JUMLAH @DetailPurchaseOrderInvestasi.SATUAN</td>
+                                    <td>@((DetailPurchaseOrderInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                                    <td>@((DetailPurchaseOrderInvestasi.JUMLAH * DetailPurchaseOrderInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                                </tr> 
+                                }
+                                <tr>
+                                    <td colspan="4" class="text-center">
+                                        <b>Total</b>
+                                    </td>
+                                    <td class="text-center">
+                                        <b>@((Model.purchaseOrderInvestasi.TOTAL_PO_TANPA_PAJAK).ToString("C0", culture))</b>
+                                    </td>
+                                </tr> 
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <br/>
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <h5><b id="terbilang">Terbilang : </b></h5>
+                    </div>
+                </div>
+
+                <br/>
+                <div class="row">
+                    <div class="col-12">
+                        <p><i>
+                            <b>Pembayaran :</b>
+                            <ul>
+                                <li>Tagihan mohon disertai dengan tanda terima barang dan kuitansi dengan materai yang cukup,</li>
+                                <li>Pembayaran akan dilakukan oleh Kantor Keuangan melalui transfer bank,</li>
+                            </ul>
+                        </i></p>
+                    </div>
+                </div>
+
+                <br/>
+                <div class="row">
+                    <div class="col-12">
+                        <p>Atas perhatian dan kerjasamanya, kami mengucapkan terimakasih</p>
+                    </div>
+                </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- ./wrapper -->
+        <!-- jQuery -->
+        <script src="~/lib/jquery/jquery.min.js"></script>
+        <!-- Page specific script -->
+        <script src="~/lib/angka-terbilang/index.min.js"></script>
+
+        <script>
+            $( document ).ready(function() {
+                
+                $('#terbilang').append(angkaTerbilang(@Model.purchaseOrderInvestasi.TOTAL_PO_TANPA_PAJAK) + " Rupiah");
+
+                //window.addEventListener("load", window.print());
+            });
+
+            jQuery.fn.dataTable.Api.register( 'sum()', function ( ) {
+	            return this.flatten().reduce( function ( a, b ) {
+		            if ( typeof a === 'string' ) {
+			            a = a.replace(/[^\d]/g, '') * 1;
+		            }
+		            if ( typeof b === 'string' ) {
+			            b = b.replace(/[^\d]/g, '') * 1;
+		            }
+
+		            return a + b;
+	            }, 0 );
+            } );
+        </script>
+    </body>
+</html>

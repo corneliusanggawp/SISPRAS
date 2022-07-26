@@ -27,11 +27,10 @@ namespace SISPRAS.Controllers
             return View();
         }
 
-        [Authorize(Roles = "KPSP")]
+        [Authorize(Roles = "Admin")]
         public IActionResult KelolaReferensi()
         {
             myObj.provinsi = masterDAO.getAllProvinsi();
-            myObj.kategori = masterDAO.getAllKategori();
 
             return View(myObj);
         }
@@ -169,12 +168,6 @@ namespace SISPRAS.Controllers
             var data = mainDAO.getDetailSubKategori(IDSubKategori);
             return Json(data);
         }
-
-        //public JsonResult ajaxGetKodeBarangSubKategori(int IDSubKategori)
-        //{
-        //    var data = mainDAO.getDetailSubKategori(IDSubKategori);
-        //    return Json(data);
-        //}
 
         [HttpPost]
         [ValidateAntiForgeryToken]

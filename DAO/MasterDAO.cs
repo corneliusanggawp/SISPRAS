@@ -51,6 +51,7 @@ namespace SISPRAS.DAO
                         INNER JOIN  siatmax.TBL_SI_MENU ON siatmax.TBL_SI_SUBMENU.ID_SI_MENU = siatmax.TBL_SI_MENU.ID_SI_MENU
                         WHERE       siatmax.TBL_SI_MENU.ID_SISTEM_INFORMASI = 2 AND siatmax.TBL_SI_SUBMENU.ISACTIVE = 1 AND siatmax.TBL_SI_MENU.ISACTIVE = 1
                         AND siatmax.TBL_ROLE_SUBMENU.ID_ROLE = @IDRole
+                        ORDER BY siatmax.TBL_SI_SUBMENU.NO_URUT ASC
                     ";
 
                     var data = conn.Query<dynamic>(query, new { IDRole = IDRole }).ToList();

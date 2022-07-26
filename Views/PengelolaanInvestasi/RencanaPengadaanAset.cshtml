@@ -68,7 +68,7 @@
                     <input type="hidden" class="form-control" id="IDKategori" name="IDKategori" value="" readonly="readonly" required>
                     <input type="hidden" class="form-control" id="hargaSatuan" name="hargaSatuan" value="" readonly="readonly" required>
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="form-group">
                                 <label>Kategori</label>
                                 <select id="IDRefSK" name="IDRefSK" class="form-control select2bs4" onchange="getKategori(this.value)" required>
@@ -85,35 +85,50 @@
                                         }
                                     }
                                 </select>
-                            </div>
+                            </div>                            
+                        </div>         
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label>Nama</label>
                                 <input id="namaPengadaan" name="namaPengadaan" type="text" class="form-control" placeholder="Masukkan nama aset..." required>
-                            </div>
-                            <div class="form-group">
-                                <label>Harga Satuan</label>
-                                <input id="inpHargaSatuan" type="text" class="form-control" oninput="formatHarga(this.value)" placeholder="Masukkan harga satuan aset..." required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Merk</label>
                                 <input id="merk" name="merk" type="text" class="form-control" placeholder="Masukkan merek aset..." required>
-                            </div>  
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Satuan</label>
                                 <input id="satuan" name="satuan" type="text" class="form-control" placeholder="Masukan satuan aset..." required>
                             </div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Jumlah</label>
                                 <input id="jumlah" name="jumlah" type="number" class="form-control" placeholder="Masukkan jumlah aset..." required>
                             </div>
-                        </div>                
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Harga Satuan</label>
+                                <input id="inpHargaSatuan" type="text" class="form-control" oninput="formatHarga(this.value)" placeholder="Masukkan harga satuan aset..." required>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label>Spesifikasi</label>
-                        <textarea id="spesifikasi" name="spesifikasi" class="form-control" rows="3" placeholder="Masukkan spesifikasi aset..." required></textarea>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Spesifikasi</label>
+                                <textarea id="spesifikasi" name="spesifikasi" class="form-control" rows="3" placeholder="Masukkan spesifikasi aset..." required></textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

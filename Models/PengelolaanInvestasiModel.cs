@@ -63,4 +63,32 @@
         public int IDUnit { get; set; }
         public int IDDetailPencairanInvestasi { get; set; }
     }
+
+    public class TerimaAset
+    {
+        public int IDTerimaAset { get; set; }
+        public int IDPurchaseOrderInvestasi { get; set; }
+        public string tanggalTerima { get; set; }
+        public string nomorInvoice { get; set; }
+        public decimal totalInvoice { get; set; }
+        public int jumlahItem { get; set; }
+        public string userID { get; set; }
+        public string IPAddress { get; set; }
+        public string insertDate { get; set; }
+    }
+
+    public class DetailTerimaAset
+    {
+        public int IDDetailTerimaAset { get; set; }
+        public int IDTerimaAset { get; set; }
+        public string merk { get; set; }
+        public string satuan { get; set; }
+        public string namaBarang { get; set; }
+        public string spesifikasi { get; set; }
+        public decimal hargaSatuan { get; set; }
+        public int jumlah { get; set; }
+        public bool isProccessed { get; set; }
+        public int IDDetailPurchaseOrderInvestasi { get; set; }
+    }
+
 }

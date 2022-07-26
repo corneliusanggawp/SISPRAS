@@ -179,10 +179,10 @@
                             <div class="form-group">
                                 <label>Kategori</label>
                                 <select id="IDKategori_SK" name="IDKategori" class="form-control select2bs4" required>
-                                    @foreach (var Kategori in Model.kategori)
+@*                                    @foreach (var Kategori in Model.kategori)
                                     {
                                     <option value="@Kategori.ID_KATEGORI">@Kategori.DESKRIPSI</option>
-                                    }
+                                    }*@
                                 </select>
                             </div>
                             <div class="form-group">
@@ -191,7 +191,7 @@
                             </div>  
                             <div class="form-group">
                                 <label>Kode Barang</label>
-                                <input id="kodeBarang_SK" name="kodeBarang"  type="number" class="form-control" placeholder="Masukkan kode barang..." required>
+                                <input id="kodeBarang_SK" name="kodeBarang"  type="text" class="form-control" placeholder="Masukkan kode barang..." required>
                             </div>  
                         </div>
                     </div>
@@ -280,6 +280,10 @@
 
         $('.select2bs4').select2({
             theme: 'bootstrap4'
+        });
+
+        $( document ).ready(function() {
+            showKategori();
         });
 
         $(document).on('show.bs.modal', '.modal', function() {
@@ -511,6 +515,19 @@
             })
         }
 
+        function showKategori(){
+            $.ajax({
+                url: "/MasterReferensi/ajaxGetKategori",
+                type: "POST",
+                dataType: "json",
+                success: function (result) {
+                    for (var i = 0; i < result.data.length; i++) {
+                        $('#IDKategori_SK').append('<option value="' +result.data[i].ID_KATEGORI+ '">' +result.data[i].DESKRIPSI+ '</option>');
+                    }
+                }
+            })
+        }
+
         function addKategori(IDKategori){
             $('#btnKategori').html('Tambah');
 
@@ -688,6 +705,7 @@
 
                                 if(result.status){
                                     toastr.success(result.pesan, 'Berhasil');
+                                    showKategori();
                                     $('#tabelKategori').DataTable().ajax.reload();
                                 }else{
                                     toastr.error(result.pesan, 'Gagal');

@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SISPRAS.Controllers;
+using Rotativa.AspNetCore;
 
 namespace SISPRAS
 {
@@ -86,6 +87,8 @@ namespace SISPRAS
             });
 
             app.UseCookiePolicy();
+
+            RotativaConfiguration.Setup(env.WebRootPath);
         }
     }
 }

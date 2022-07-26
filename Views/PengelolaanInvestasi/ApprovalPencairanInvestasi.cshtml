@@ -346,7 +346,7 @@
                     tabelDetail.clear().draw();
 
                     for (var i = 0; i < result.data.length; i++) {
-                        tabelDetail.row.add([result.data[i].NAMA_PENGADAAN, result.data[i].MERK, result.data[i].SATUAN, result.data[i].JUMLAH, formatRupiah(result.data[i].HARGA_SATUAN), result.data[i].KATEGORI, result.data[i].SUB_KATEGORI, result.data[i].SPESIFIKASI ]).draw();
+                        tabelDetail.row.add([result.data[i].NAMA_PENGADAAN, result.data[i].MERK, result.data[i].SATUAN, result.data[i].JUMLAH, formatRupiah(result.data[i].HARGA_SATUAN), result.data[i].KATEGORI + " - " + result.data[i].SUB_KATEGORI, result.data[i].SPESIFIKASI ]).draw();
                     }
                 }
             })

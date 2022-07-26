@@ -13,6 +13,30 @@
     <link rel="stylesheet" href="~/lib/jquery-datatables-checkboxes-1.2.12/css/dataTables.checkboxes.css">
 }
 
+<!-- Modal Dialog 1 -->
+<div class="modal fade" id="SuratPemesananBarangModal" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Surat Pemesanan Barang</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe id="suratPemesananBarang" class="embed-responsive-item" srcdoc="" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary"  onclick="printPDF()">Cetak</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Dialog 1 End -->
+
 <div class="row">
 	<div class="col-md-12">
         <div class="card card-primary">
@@ -96,7 +120,7 @@
                                 }
                             </td>
                             <td class="text-center">
-                                <a data-toggle="modal" href="#PDFModal" onclick="showPDF(@PurchaseOrderInvestasi.NO_PO)" class="btn btn-primary btn-sm"> <i class="fas fa-print"> </i> </a>
+                                <a data-toggle="modal" href="#SuratPemesananBarangModal" onclick="showPDF(@PurchaseOrderInvestasi.ID_PO_INVESTASI)" class="btn btn-primary btn-sm"> <i class="fas fa-print"> </i> </a>
                             </td>
                         </tr> 
                         }
@@ -160,6 +184,25 @@
                 ],
                 responsive: true
             }).buttons().container().appendTo('#tabelRekapPurchaseOrderInvestasi_wrapper .col-md-6:eq(0)');
+        }
+
+        function showPDF(IDPurchaseOrderInvestasi){
+            $('#suratPemesananBarang').attr('srcdoc', '');
+             $.ajax({
+                url: "/PengelolaanInvestasi/SuratPemesananBarang",
+                type: "POST",
+                data: { "IDPurchaseOrderInvestasi": IDPurchaseOrderInvestasi},
+                dataType: "json",
+                success: function (result) {
+                    $("#suratPemesananBarang").attr("srcdoc", result.result);
+                }
+            })           
+        }
+
+        function printPDF(){
+            var myIframe = document.getElementById("suratPemesananBarang").contentWindow;
+            myIframe.focus();
+            myIframe.print();
         }
 
     </script>
