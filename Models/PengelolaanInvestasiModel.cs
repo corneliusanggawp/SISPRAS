@@ -1,4 +1,8 @@
-﻿namespace SISPRAS.Models
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace SISPRAS.Models
 {
     public class PencairanInvestasi
     {
@@ -17,35 +21,50 @@
 
     public class DetailPencairanInvestasi
     {
-        public int IDDetailPencairanInvestasi { get; set; }
-        public int IDPencairanInvestasi { get; set; }
-        public int IDKategori { get; set; }
-        public int IDRefSK { get; set; }
+        public int IDDetailRKA { get; set; }
+        public string IDDetailPencairanInvestasi { get; set; }
+        public string IDPencairanInvestasi { get; set; }
+        public string IDKategori { get; set; }
+        [Required]
+        public string IDRefSK { get; set; }
         public string satuan { get; set; }
+        [Required]
         public decimal hargaSatuan { get; set; }
+        [Required]
+        [Range(1, Int32.MaxValue)]
         public int jumlah { get; set; }
         public string imageBarang { get; set; }
-        public int isPO { get; set; }
+        public bool isPO { get; set; }
+        [Required]
         public string spesifikasi { get; set; }
+        [Required]
         public string namaPengadaan { get; set; }
+        [Required]
         public string merk { get; set; }
-        public int IDDetailRKA { get; set; }
+        [Required]
         public decimal totalPencairan { get; set; }
     }
 
     public class PurchaseOrderInvestasi
     {
         public int IDPurchaseOrderInvestasi { get; set; }
+        [Required]
         public string nomorPO { get; set; }
+        [Required]
         public string tanggalPO { get; set; }
         public decimal totalTanpaPajak { get; set; }
+        [Required]
+        [Range(1, Double.MaxValue)]
         public decimal pajak { get; set; }
         public decimal totalDenganPajak { get; set; }
         public string userID { get; set; }
         public string IPAddress { get; set; }
         public string insertDate { get; set; }
+        [Required]
         public int IDSupplier { get; set; }
         public bool isLunas { get; set; }
+        public bool isRevisi { get; set; }
+        public decimal diskon { get; set; }
         public string namaPO { get; set; }
     }
 

@@ -1,4 +1,5 @@
 ﻿@using System.Globalization;
+@Html.AntiForgeryToken()
 
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
@@ -6,6 +7,9 @@
     ViewData["Title"] = "Rekap Pengadaan Investasi";
 
     CultureInfo culture = new CultureInfo("id-ID");
+    var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
+    var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
+    var namaUnit = User.Claims.Where(c => c.Type == "namaUnit").Select(c => c.Value).Single();
 }
 
 <!-- Modal Dialog 1 -->
@@ -30,30 +34,35 @@
 <!-- Modal Dialog 1 End -->
 
 <div class="row">
-	<div class="col-md-8">
+    <div class="col-12">
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class="card-title">Filter</h3>
+                <h3 class="card-title">Cari data berdasarkan:</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
             </div>
-            <!-- /.card-header -->
             <div class="card-body">
                 <div class="row">
-                    <div class="col-4">
-                         <div class="form-group">
+                    <div class="col-3">
+                        <div class="form-group">
                             <label>Tahun</label>
-                            <select onchange="filterDataRekapPengadaanInvestasi()" id="tahun" class="form-control select2bs4" style="width: 100%;">
+                            <select id="tahun" class="form-control select2bs4" style="width: 100%">
                                 <option value="" selected>Semua tahun...</option>
                                 @foreach (var tahun in Model.tahun)
                                 {
-                                <option value="@tahun.TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
+                                    <option value="@tahun.TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
                                 }
                             </select>
                         </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <div class="form-group">
                             <label>Bulan</label>
-                            <select onchange="filterDataRekapPengadaanInvestasi()" id="bulan" class="form-control select2bs4" style="width: 100%;">
+                            <select id="bulan" class="form-control select2bs4" style="width: 100%">
                                 <option value="" selected>Semua bulan...</option>
                                 <option value="Januari">Januari</option>
                                 <option value="Februari">Februari</option>
@@ -70,88 +79,104 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-4">
-                         <div class="form-group">
+                    <div class="col-3">
+                        <div class="form-group">
                             <label>Unit</label>
-                            <select onchange="filterDataRekapPengadaanInvestasi()" id="unit" class="form-control select2bs4" style="width: 100%;">
-                                <option value="" selected>Pilih unit...</option>
-                                @foreach (var unit in Model.unit)
-                                {
-                                    <option value="@unit.NAMA_UNIT">@unit.NAMA_UNIT</option>
+                            <select id="unit" class="form-control select2bs4" style="width: 100%">
+                                @if(Array.IndexOf(IDRoleUser, "9") != -1) {
+                                <option value="" selected>Semua unit...</option>
                                 }
-                            </select>                            
+                                @foreach (var unit in Model.unit) {
+                                <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-group">
+                            <label>Sub Unit</label>
+                            <select id="subUnit" class="form-control select2bs4" style="width: 100%">
+                                <option value="" selected>Semua sub unit...</option>
+                                @foreach (var subUnit in Model.subUnit) {
+                                <option value="@subUnit.NAMA_UNIT">@subUnit.NAMA_UNIT</option>
+                                }
+                            </select>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- /.card-body -->
         </div>
-        <!-- /.card -->	
-	</div>
-
-	<div class="col-md-4">
-        <div class="card card-primary">
-            <div class="card-header">
-                <h3 class="card-title">Rencana Pengadaan</h3>
-            </div>
-            <div class="card-body">
-                <div class="form-group">
-                    <label>Total Pengadaan</label>
-                    <input id="totalPengadaan" name="totalPengadaan" type="text" class="form-control" placeholder="Rp 0" readonly="readonly">
-                </div>               
-            </div>
-            <!-- /.card-body -->
-        </div>	
-	</div>
+    </div>
 
     <div class="col-12">
         <div class="card">
-            <h5 class="card-header">Barang Yang Direncanakan:</h5>
             <div class="card-body">
                 <table id="tabelRekapPengadaanInvestasi" class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Tahun Anggaran:</th>
-                            <th>Bulan Pengadaan:</th>
-                            <th>Unit:</th>
+                            <th style="color:transparent;">Tahun Anggaran:</th>
+                            <th style="color:transparent;">Bulan Pengadaan:</th>
+                            <th style="color:transparent;">Unit:</th>
+                            <th style="color:transparent;">Sub Unit:</th>
                             <th>Nama Barang:</th>
                             <th>Merk:</th>
-                            <th class="none">Sub Kategori:</th>
+                            <th class="none">Kategori:</th>
                             <th class="none">Spesifikasi:</th>
                             <th>Jumlah:</th>
                             <th>Satuan:</th>
-                            <th>Harga Satuan:</th>
+                            <th>Harga:</th>
                             <th>Sub Total:</th>
-                            <th>PO:</th>
+                            <th>Status:</th>
                         </tr>
                     </thead>
                     <tbody> 
-                        @foreach (var RekapPengadaanInvestasi in Model.RKI)
+                        @foreach (var PengadaanInvestasi in Model.pengadaanInvestasi)
                        {
                         <tr>
-                            <td>@RekapPengadaanInvestasi.TAHUN_ANGGARAN</td>
-                            <td>@RekapPengadaanInvestasi.BULAN_PENGADAAN</td>
-                            <td>@RekapPengadaanInvestasi.NAMA_UNIT</td>
-                            <td>@RekapPengadaanInvestasi.NAMA_PENGADAAN</td>
-                            <td>@RekapPengadaanInvestasi.MERK</td>
-                            <td>@RekapPengadaanInvestasi.KATEGORI - @RekapPengadaanInvestasi.SUB_KATEGORI</td>
-                            <td>@RekapPengadaanInvestasi.SPESIFIKASI</td>
-                            <td>@RekapPengadaanInvestasi.JUMLAH</td>
-                            <td>@RekapPengadaanInvestasi.SATUAN</td>
-                            <td>@((RekapPengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
-                            <td>@((RekapPengadaanInvestasi.JUMLAH * RekapPengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                            <td style="color:transparent;">@PengadaanInvestasi.TAHUN_ANGGARAN</td>
+                            <td style="color:transparent;">@PengadaanInvestasi.BULAN_PENGADAAN</td>
+                            <td style="color:transparent;">@PengadaanInvestasi.MST_ID_UNIT</td>
+                            <td style="color:transparent;">@PengadaanInvestasi.NAMA_UNIT</td>
+                            <td>@PengadaanInvestasi.NAMA_PENGADAAN</td>
+                            <td>@PengadaanInvestasi.MERK</td>
+                            <td>@PengadaanInvestasi.KATEGORI - @PengadaanInvestasi.SUB_KATEGORI</td>
+                            <td>@PengadaanInvestasi.SPESIFIKASI</td>
+                            <td>@PengadaanInvestasi.JUMLAH</td>
+                            <td>@PengadaanInvestasi.SATUAN</td>
+                            <td>@((PengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                            <td>@((PengadaanInvestasi.JUMLAH * PengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
                             <td>
-                                @if(@RekapPengadaanInvestasi.IS_PO){
-                                <span class="badge badge-success">Sudah PO</span>
+                                @if(@PengadaanInvestasi.STATUS_APPROVAL){
+                                <span class="badge badge-success">
+                                    <i class="fas fa-check"></i> Sudah Disetujui
+                                </span>
                                 }
                                 else
                                 {
-                                <span class="badge badge-danger">Belum PO</span>
+                                <span class="badge badge-danger">
+                                    <i class="fas fa-times"></i> Belum Disetujui
+                                </span>
+                                }
+                                @if(@PengadaanInvestasi.IS_PO){
+                                <span class="badge badge-success">
+                                    <i class="fas fa-cart-arrow-down"></i> Sudah PO
+                                </span>
+                                }
+                                else
+                                {
+                                <span class="badge badge-danger">
+                                    <i class="fas fa-cart-plus"></i> Belum PO
+                                </span>
                                 }
                             </td>
                         </tr>
                         }
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <th id="totalPengadaan" colspan="13" class="text-center">Total Pengadaan: Rp.0</th>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
             <!-- /.card-body -->
@@ -160,19 +185,9 @@
 </div>
 
 @section Scripts{
-    @if (TempData["success"] != null){
-        <script type="text/javascript">
-            toastr.success('@TempData["success"].ToString()', 'Berhasil Memperoses');
-        </script>
-    }
-    @if (TempData["error"] != null){
-        <script type="text/javascript">
-            toastr.error('@TempData["error"].ToString()', 'Gagal Memperoses');
-        </script>
-    }
-
-    <script> 
-        var tabelRekapPengadaanInvestasi;
+    <script>
+        //Element Declaration
+        let tabelRekapPengadaanInvestasi;
 
         refreshTabelRekapPengadaanInvestasi();
 
@@ -180,123 +195,120 @@
             theme: 'bootstrap4'
         });
 
-        var tabel           = $('#tabelRekapPengadaanInvestasi').DataTable();
-        
-        $( document ).ready(function() {
-            var totalPengadaan = tabel.column( 10 ).data().sum();
-            $('#totalPengadaan').val(formatRupiah(totalPengadaan));
-        });
-
-        var formatRupiah = (number) => {
-           return new Intl.NumberFormat('id-ID', { 
-               style: 'currency', 
-               currency: 'IDR', 
-               minimumFractionDigits: 0 
-           }).format(number);
-        };
-
-        function filterDataRekapPengadaanInvestasi(){
-            var tahun   = $('#tahun').val();
-            var bulan   = $('#bulan').val();
-            var unit    = $('#unit').val();
-
-            var tabel           = $("#tabelRekapPengadaanInvestasi").DataTable();
-            tabel.column(0).search(tahun ? '^'+tahun+'$' : '', true, false).column(1).search(bulan ? '^'+bulan+'$' : '', true, false).column(2).search(unit ? '^'+unit+'$' : '', true, false).order( [ 0, 'asc' ] ).draw();
- 
-            var totalPengadaan = tabel.column( 10, {page:'current'} ).data().sum();
-            $('#totalPengadaan').val(formatRupiah(totalPengadaan)); 
+        //Function Variabel
+        let formatRupiah = (number) => {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }
+            ).format(number);
         }
+
+        let formatString = (value) => {
+            return "'" + value + "'";
+        };
 
         function refreshTabelRekapPengadaanInvestasi() {
             tabelRekapRencanaPengadaanAset = $("#tabelRekapPengadaanInvestasi").DataTable({
                 language: {
                     url: "../json/datatables-id.json"
                 },
-                columnDefs: [ 
+                columnDefs: [
+                    { 
+                        targets: "_all", 
+                        className: "align-middle", 
+                    },
                     {
-                        targets     :   [0, 1, 2],
+                        targets     :   [0, 1, 2, 3],
                         visible     : false,
                         searchable  : true,
                     },
-                    {   
-                        targets: 8, 
-                        orderable: false
-                    }
                 ],
+                fixedHeader: {
+                    header: true,
+                    footer: true,
+                },
                 paging: true,
-                lengthChange: false,
+                lengthChange: true,
                 searching: true,
                 ordering: true,
                 info: true,
                 autoWidth: false,
-                responsive: true,
-                buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
-                initComplete: function () {
-                    setTimeout( function () {
-                        tabelRekapRencanaPengadaanAset.buttons().container().appendTo('#tabelRekapPengadaanInvestasi_wrapper .col-md-6:eq(0)')
-                    }, 10 );
-                }      
+                responsive: true,   
             });
         }
 
-        function getKategori(IDRefSK){
-            $.ajax({
-                url: "/PengelolaanInvestasi/ajaxGetKategori",
-                type: "POST",
-                data: { "IDRefSK": IDRefSK },
-                dataType: "json",
-                success: function (result) {
-                    var IDKategori = result.data;
-                    $("#IDKategori").val(IDKategori);
+        //jQuery Function
+        $(document).ready(function () {
+            $('#totalPengadaan').html("Total Pengadaan: " + formatRupiah($("#tabelRekapPengadaanInvestasi").DataTable().column(11).data().sum()));
+        });
+
+        $("#tahun, #bulan, #unit, #subUnit").on('change', function() {
+            let tahun   = $('#tahun').val();
+            let bulan   = $('#bulan').val();
+            let unit    = $('#unit').val();
+            let subUnit = $('#subUnit').val();
+
+            $("#tabelRekapPengadaanInvestasi").DataTable()
+                .column(0).search(tahun ? '^' + tahun + '\\s*$' : '', true, false)
+                .column(1).search(bulan ? '^' + bulan + '\\s*$' : '', true, false)
+                .column(2).search(unit ? '^' + unit + '\\s*$' : '', true, false)
+                .column(3).search(subUnit ? '^' + subUnit + '\\s*$' : '', true, false)
+                .order([0, 'asc']).draw();
+
+            $('#totalPengadaan').html("Total Pengadaan: " + formatRupiah($("#tabelRekapPengadaanInvestasi").DataTable().column(11, { page: 'current' }).data().sum()));
+        });
+
+        jQuery.fn.dataTable.Api.register('sum()', function () {
+            return this.flatten().reduce(function (a, b) {
+                if (typeof a === 'string') {
+                    a = a.replace(/[^\d]/g, '') * 1;
                 }
-            })
-        }
-
-        function showSpesifikasiPengadaanInvestasiModal(IDDetailPencairanInvestasi) {
-            $.ajax({
-                url: "/PengelolaanInvestasi/ajaxGetSpesifikasiDetailPencairanInvestasi",
-                type: "POST",
-                data: { "IDDetailPencairanInvestasi": IDDetailPencairanInvestasi },
-                dataType: "json",
-                success: function (result) {
-                    var spesifikasi = result.SPESIFIKASI;
-                    $('#spesifikasi').html(spesifikasi);
+                if (typeof b === 'string') {
+                    b = b.replace(/[^\d]/g, '') * 1;
                 }
-            })
 
-            $('#SpesifikasiPengadaanInvestasiModal').modal('show');
-        }
-
-        function showRekapPengadaanInvestasi(){
-            var IDTahunAnggaran = $("#tahunAnggaran").val();
-            var bulanPengadaan  = $("#bulanPengadaan").val();
-
-            $.ajax({
-                url: "/PengelolaanInvestasi/ajaxGetDetailPencairanInvestasiPO",
-                type: "POST",
-                data: { "IDTahunAnggaran": IDTahunAnggaran, "bulanPengadaan": bulanPengadaan},
-                dataType: "json",
-                success: function (result) {
-                    tabel.clear().draw();
-
-                    for (var i = 0; i < result.data.length; i++) {
-                        tabel.row.add([result.data[i].ID_DETAIL_PENCAIRAN_INVESTASI, result.data[i].NAMA_PENGADAAN , result.data[i].MERK, formatRupiah(result.data[i].HARGA_SATUAN), result.data[i].JUMLAH, formatRupiah(result.data[i].HARGA_SATUAN * result.data[i].JUMLAH)]).draw();
-                    }
-                }
-            })
-        }
-
-        jQuery.fn.dataTable.Api.register( 'sum()', function ( ) {
-	        return this.flatten().reduce( function ( a, b ) {
-		        if ( typeof a === 'string' ) {
-			        a = a.replace(/[^\d]/g, '') * 1;
-		        }
-		        if ( typeof b === 'string' ) {
-			        b = b.replace(/[^\d]/g, '') * 1;
-		        }
-
-		        return a + b;
-	        }, 0 );
-        } );
+                return a + b;
+            }, 0);
+        });
     </script>
+
+    @if(Array.IndexOf(IDRoleUser, "9") != -1){
+    <script>
+        $('#unit').on('change', function() {
+            $('#subUnit').empty();
+            $('#subUnit').append('<option value="" selected>Semua sub unit...</option>');
+
+            if($(this).val() == ""){
+                $('#subUnit').prop("disabled", true);
+            }else{
+                $.ajax({
+                    url: "/PengelolaanInvestasi/getSubUnit",
+                    type: "POST",
+                    headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                    data: { "IDMasterUnit": $(this).val() },
+                    dataType: "json",
+                    success: function (result) {
+                        for (var i = 0; i < result.length; i++) {
+                            $('#subUnit').append('<option value="' + result[i].NAMA_UNIT + '">' + result[i].NAMA_UNIT + '</option>');
+                        }
+                    }
+                })
+                $('#subUnit').prop("disabled", false);
+            }
+        });
+
+        $( document ).ready(function() {
+            $('#subUnit').prop("disabled", true);
+        });
+    </script>
+    }else{
+    <script>
+        $( document ).ready(function() {
+            $('#unit').prop("disabled", true);
+            $('#subUnit').prop("disabled", false);
+        });
+    </script>
+    }
 }

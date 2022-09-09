@@ -1,5 +1,3 @@
-using System;
-
 namespace SISPRAS.Models
 {
     public class ErrorViewModel

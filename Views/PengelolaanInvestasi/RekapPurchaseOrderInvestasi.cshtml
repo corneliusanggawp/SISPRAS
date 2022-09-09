@@ -1,12 +1,15 @@
 ﻿@using System.Globalization;
+@Html.AntiForgeryToken()
 
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Controller"] = "Pengelolaan Investasi";
     ViewData["Title"] = "Rekap Purchase Order Investasi";
 
-
     CultureInfo culture = new CultureInfo("id-ID");
+    var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
+    var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
+    var namaUnit = User.Claims.Where(c => c.Type == "namaUnit").Select(c => c.Value).Single();
 }
 
 @section Header{
@@ -30,7 +33,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary"  onclick="printPDF()">Cetak</button>
+                <button id="btnPrintPDF" type="button" class="btn btn-primary">Cetak</button>
             </div>
         </div>
     </div>
@@ -38,30 +41,34 @@
 <!-- Modal Dialog 1 End -->
 
 <div class="row">
-	<div class="col-md-12">
+    <div class="col-12">
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class="card-title">Filter</h3>
+                <h3 class="card-title">Cari data berdasarkan:</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
             </div>
-            <!-- /.card-header -->
             <div class="card-body">
                 <div class="row">
-                    <div class="col-6">
-                         <div class="form-group">
+                    <div class="col-4">
+                        <div class="form-group">
                             <label>Tahun</label>
-                            <select onchange="filterDataPencairanInvestasi()" id="tahun" class="form-control select2bs4" style="width: 100%;">
+                            <select id="tahun" class="form-control select2bs4" style="width: 100%">
                                 <option value="" selected>Semua tahun...</option>
-                                @foreach (var tahun in Model.tahun)
-                                {
-                                <option value="@tahun.TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
+                                @foreach (var tahun in Model.tahun){
+                                <option value="@tahun.ID_TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
                                 }
                             </select>
                         </div>
                     </div>
-                    <div class="col-6">
+                    <div class="col-4">
                         <div class="form-group">
                             <label>Bulan</label>
-                            <select onchange="filterDataPencairanInvestasi()" id="bulan" class="form-control select2bs4" style="width: 100%;">
+                            <select id="bulan" class="form-control select2bs4" style="width: 100%">
                                 <option value="" selected>Semua bulan...</option>
                                 <option value="Januari">Januari</option>
                                 <option value="Februari">Februari</option>
@@ -78,12 +85,22 @@
                             </select>
                         </div>
                     </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label>Supplier</label>
+                            <select id="supplier" class="form-control select2bs4" style="width: 100%">
+                                <option value="" selected>Semua supplier...</option>
+                                @foreach (var supplier in Model.supplier){
+                                    <option value="@supplier.NAMA_SUPPLIER">@supplier.NAMA_SUPPLIER</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!-- /.card-body -->
         </div>
-        <!-- /.card -->	
-	</div>
+    </div>
+
 
     <div class="col-12">    
         <div class="card">
@@ -93,117 +110,190 @@
                         <tr>
                             <th>Nomor PO:</th>
                             <th>Tanggal PO:</th>
+                            <th class="none">Supplier:</th>
                             <th class="none">Total Tanpa Pajak:</th>
                             <th class="none">Pajak:</th>
-                            <th>Total Dengan Pajak:</th>
-                            <th>Supplier:</th>
-                            <th>Lunas:</th>
-                            <th>Cetak:</th>
+                            <th>Total</th>
+                            <th>Status:</th>
+                            <th>Surat:</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var PurchaseOrderInvestasi in Model.rekapPurchaseOrderInvestasi) { 
-                        <tr>
-                            <td>@PurchaseOrderInvestasi.NO_PO</td>
-                            <td>@((PurchaseOrderInvestasi.TGL_PO).ToLongDateString())</td>
-                            <td>@((PurchaseOrderInvestasi.TOTAL_PO_TANPA_PAJAK).ToString("C0", culture))</td>
-                            <td>@((PurchaseOrderInvestasi.PAJAK).ToString("C0", culture))</td>
-                            <td>@((PurchaseOrderInvestasi.TOTAL_DENGAN_PAJAK).ToString("C0", culture))</td>
-                            <td>@PurchaseOrderInvestasi.SUPPLIER</td>
-                            <td>
-                                @if(@PurchaseOrderInvestasi.IS_LUNAS){
-                                <span class="badge badge-success">Lunas</span>
-                                }
-                                else
-                                {
-                                <span class="badge badge-danger">Belum Lunas</span>
-                                }
-                            </td>
-                            <td class="text-center">
-                                <a data-toggle="modal" href="#SuratPemesananBarangModal" onclick="showPDF(@PurchaseOrderInvestasi.ID_PO_INVESTASI)" class="btn btn-primary btn-sm"> <i class="fas fa-print"> </i> </a>
-                            </td>
-                        </tr> 
-                        }
                     </tbody>
-                </table>                
+                    <tfoot>
+                        <tr>
+                            <th id="totalPurchaseOrder" colspan="8" class="text-center">Total Rekap Purchase Order: Rp.0</th>
+                        </tr>
+                    </tfoot>
+                </table>            
             </div>
-            <!-- /.card-body -->
         </div>
     </div>
 </div>
 
 
 @section Scripts{
-    <!-- Select -->
-    <script src="~/lib/datatables-select/js/dataTables.select.min.js"></script>  
-    <!-- CheckBox -->
-    <script src="~/lib/jquery-datatables-checkboxes-1.2.12/js/dataTables.checkboxes.min.js"></script>
-
-
-    @if (TempData["success"] != null){
-        <script type="text/javascript">
-            toastr.success('@TempData["success"].ToString()', 'Berhasil');
-        </script>
-    }
-    @if (TempData["error"] != null){
-        <script type="text/javascript">
-            toastr.error('@TempData["error"].ToString()', 'Gagal');
-        </script>
-    }
-
-    <script> 
+    <script>
+        //Element Declaration
         var tabelRekapPurchaseOrderInvestasi;
 
-        refreshRekapPurchaseOrderInvestasi();
+        refreshTabelRekapPurchaseOrderInvestasi();
 
         $('.select2bs4').select2({
             theme: 'bootstrap4'
         });
 
-        var formatRupiah = (number) => {
-           return new Intl.NumberFormat('id-ID', { 
-               style: 'currency', 
-               currency: 'IDR', 
-               minimumFractionDigits: 0 
-           }).format(number);
+        //Function Variabel
+        let formatRupiah = (number) => {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }
+            ).format(number);
+        }
+
+        let formatString = (value) => {
+           return '"' + value + '"';
         };
 
-        function refreshRekapPurchaseOrderInvestasi() {
+        let formatDate = (date) => {
+            return new Date(date).toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric'
+            });
+        };
+
+        function refreshTabelRekapPurchaseOrderInvestasi() {
             tabelRekapPurchaseOrderInvestasi = $("#tabelRekapPurchaseOrderInvestasi").DataTable({
+                ajax: {
+                    url: '/PengelolaanInvestasi/getRekapPurchaseOrderInvestasi',
+                    type: 'POST',
+                    dataSrc: 'data',
+                    beforeSend: function (request) {
+                        request.setRequestHeader("RequestVerificationToken", $('input[name="__RequestVerificationToken"]').val());
+                    },
+                },
+                columns: [
+                    { data: "NO_PO" },
+                    {
+                        data: "TGL_PO",
+                        render: function (data, type, row, meta) {
+                            return formatDate(data);
+                        },
+                    },
+                    { data: "NAMA_SUPPLIER" },
+                    {
+                        data: "TOTAL_PO_TANPA_PAJAK",
+                        render: function (data, type, row, meta) {
+                            return formatRupiah(data);
+                        },
+                    },
+                    {
+                        data: "PAJAK",
+                        render: function (data, type, row, meta) {
+                            return formatRupiah(data);
+                        },
+                    },
+                    {
+                        data: "TOTAL_DENGAN_PAJAK",
+                        render: function (data, type, row, meta) {
+                            return formatRupiah(data);
+                        },
+                    },
+                    {
+                        data: "IS_LUNAS",
+                        render: function (data, type, row, meta) {
+                            if(data){
+                                return type === 'display' ?
+                                    '<span class="badge badge-success">< i class="fas fa-check" > </i> Lunas< /span>' : data;
+                            }else{
+                                return type === 'display' ?
+                                    '<span class="badge badge-danger"><i class="fas fa-times"></i> Belum Lunas</span>' : data;
+                            }
+                        },
+                    },
+                    {
+                        data: "ID_PO_INVESTASI",
+                        render: function (data, type, row, meta) {
+                            return type === 'display' ?
+                                '<a id="btnShowPDF" data-id="'+ data +'" data-toggle="modal" href="#SuratPemesananBarangModal" class="btn btn-primary btn-sm"> <i class="fas fa-print"> </i> </a>' : data;
+                        },
+                    },
+                ],
                 language: {
                     url: "../json/datatables-id.json"
+                },
+                columnDefs: [
+                    {
+                        targets: "_all",
+                        className: "align-middle",
+                    },
+                    { 
+                        targets: 7, 
+                        orderable: false,
+                    },
+                ],
+                fixedHeader: {
+                    header: true,
+                    footer: true,
                 },
                 paging: true,
                 lengthChange: true,
                 searching: true,
-                ordering: true,
+                ordering: false,
                 info: true,
                 autoWidth: false,
-                columnDefs: [
-                    { targets: 7, orderable: false}
-                ],
                 responsive: true
-            }).buttons().container().appendTo('#tabelRekapPurchaseOrderInvestasi_wrapper .col-md-6:eq(0)');
+            });
         }
 
-        function showPDF(IDPurchaseOrderInvestasi){
-            $('#suratPemesananBarang').attr('srcdoc', '');
-             $.ajax({
+        //jQuery Function
+        $(document).ready(function () {
+            $('#totalPurchaseOrder').html("Total Rekap Purchase Order: " + formatRupiah($("#tabelRekapPurchaseOrderInvestasi").DataTable().column(4).data().sum()));
+        });
+
+        $("#tahun, #bulan, #supplier").on("change", function () {
+            let tahun = $("#tahun").val();
+            let bulan = $("#bulan").val();
+            let supplier = $("#supplier").val();
+
+            $("#tabelRekapPurchaseOrderInvestasi").DataTable()
+                .column(1).search(bulan + " " +tahun)
+                .column(2).search(supplier)
+                .draw();
+        });
+
+        $("#btnShowPDF").on('click', function () {
+            $("#suratPemesananBarang").attr("srcdoc", "");
+            $.ajax({
                 url: "/PengelolaanInvestasi/SuratPemesananBarang",
                 type: "POST",
-                data: { "IDPurchaseOrderInvestasi": IDPurchaseOrderInvestasi},
+                headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                data: { IDPurchaseOrderInvestasi: $(this).data("id") },
                 dataType: "json",
                 success: function (result) {
                     $("#suratPemesananBarang").attr("srcdoc", result.result);
-                }
-            })           
-        }
+                },
+            });
+        });
 
-        function printPDF(){
-            var myIframe = document.getElementById("suratPemesananBarang").contentWindow;
+        $("#btnPrintPDF").on('click', function () {
+            let myIframe = document.getElementById("suratPemesananBarang").contentWindow;
             myIframe.focus();
             myIframe.print();
-        }
+        });
 
+        jQuery.fn.dataTable.Api.register('sum()', function () {
+            return this.flatten().reduce(function (a, b) {
+                if (typeof a === 'string') {
+                    a = a.replace(/[^\d]/g, '') * 1;
+                }
+                if (typeof b === 'string') {
+                    b = b.replace(/[^\d]/g, '') * 1;
+                }
+
+                return a + b;
+            }, 0);
+        });
     </script>
 }

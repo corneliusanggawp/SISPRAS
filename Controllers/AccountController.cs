@@ -2,11 +2,9 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using SISPRAS.DAO;
+using SISPRAS.Models;
 using System;
 using System.Security.Claims;
-using System.Linq;
-using System.Collections.Generic;
-using SISPRAS.Models;
 
 namespace SISPRAS.Controllers
 {
@@ -42,8 +40,8 @@ namespace SISPRAS.Controllers
                 if (userData.PASSWORD == password)
                 {
                     data.status = true;
-                    data.pesan  = "Login berhasil";
-                    data.data   = dao.getUserRole(userData.NPP);
+                    data.pesan = "Login berhasil";
+                    data.data = dao.getUserRole(userData.NPP);
                 }
                 else
                 {

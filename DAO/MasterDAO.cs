@@ -8,7 +8,7 @@ namespace SISPRAS.DAO
 {
     public class MasterDAO
     {
-        public List<dynamic> getAllMenu(String IDRole)
+        public List<dynamic> getAllMenu(string IDRole)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
             {
@@ -38,7 +38,7 @@ namespace SISPRAS.DAO
             }
         }
 
-        public List<dynamic> getAllSubMenu(String IDRole)
+        public List<dynamic> getAllSubMenu(string IDRole)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
             {
@@ -69,17 +69,62 @@ namespace SISPRAS.DAO
             }
         }
 
-        public List<dynamic> getAllUnit()
+        public List<dynamic> getAllUnit(string IDUnitUser, string IDRoleUser)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
             {
                 try
                 {
                     string query = @"
-                        SELECT ID_UNIT, MST_ID_UNIT, NAMA_UNIT
-                        FROM siatmax.MST_UNIT";
+                        SELECT ID_UNIT, NAMA_UNIT
+                        FROM siatmax.MST_UNIT
+                        WHERE EXISTS(
+	                        SELECT DISTINCT MST_ID_UNIT
+	                        FROM siatmax.MST_UNIT
+                        )
+                    ";
 
-                    var data = conn.Query<dynamic>(query).ToList();
+                    if (IDRoleUser != "9")
+                    {
+                        query += @" AND (ID_UNIT = @IDUnitUser)";
+                    }
+                    else
+                    {
+                        query += @" AND (MST_ID_UNIT = 285)";
+                    }
+
+                    var data = conn.Query<dynamic>(query, new { IDUnitUser = IDUnitUser }).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public List<dynamic> getAllSubUnit(string IDUnitUser, string IDRoleUser)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                            SELECT ID_UNIT, NAMA_UNIT
+                            FROM siatmax.MST_UNIT
+                            WHERE EXISTS(
+	                            SELECT DISTINCT MST_ID_UNIT
+	                            FROM siatmax.MST_UNIT
+                            )
+                            AND (MST_ID_UNIT = @IDUnitUser)
+                    ";
+
+                    var data = conn.Query<dynamic>(query, new { IDUnitUser = IDUnitUser }).ToList();
 
                     return data;
                 }
@@ -209,6 +254,33 @@ namespace SISPRAS.DAO
                         SELECT *
                         FROM sispras.REF_SUB_KATEGORI";
                     var data = conn.Query<dynamic>(query).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+
+        public List<dynamic> getSubKategori(string IDKategori)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT *
+                        FROM sispras.REF_SUB_KATEGORI
+                        WHERE ID_KATEGORI = @IDKategori
+                    ";
+                    var data = conn.Query<dynamic>(query, new { IDKategori = IDKategori }).ToList();
 
                     return data;
                 }

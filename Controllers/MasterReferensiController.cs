@@ -2,10 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SISPRAS.DAO;
 using SISPRAS.Models;
-using System;
 using System.Dynamic;
-using System.Linq;
-using System.Security.Claims;
 
 namespace SISPRAS.Controllers
 {
@@ -68,7 +65,7 @@ namespace SISPRAS.Controllers
                 else
                 {
                     data.status = false;
-                    data.pesan =  updateSupplier.pesan;
+                    data.pesan = updateSupplier.pesan;
                 }
             }
 
@@ -182,8 +179,8 @@ namespace SISPRAS.Controllers
                 if (addSubKategori.status == true)
                 {
                     data.status = true;
-                    data.pesan  = "menambah sub kategori";
-                    data.data   = subKategori.IDKategori;
+                    data.pesan = "menambah sub kategori";
+                    data.data = subKategori.IDKategori;
                 }
                 else
                 {
@@ -198,8 +195,8 @@ namespace SISPRAS.Controllers
                 if (updateSubKategori.status == true)
                 {
                     data.status = true;
-                    data.pesan  = "memperbarui sub kategori";
-                    data.data   = subKategori.IDKategori;
+                    data.pesan = "memperbarui sub kategori";
+                    data.data = subKategori.IDKategori;
                 }
                 else
                 {

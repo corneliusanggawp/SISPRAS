@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace SISPRAS.DAO
 {
@@ -12,7 +11,7 @@ namespace SISPRAS.DAO
     {
         public DBOutput getSupplier()
         {
-            DBOutput output = new DBOutput(); 
+            DBOutput output = new DBOutput();
             output.status = true;
 
             using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
@@ -49,7 +48,7 @@ namespace SISPRAS.DAO
 
         public DBOutput getDetailSupplier(int IDSupplier)
         {
-            DBOutput output = new DBOutput(); 
+            DBOutput output = new DBOutput();
             output.status = true;
 
             using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))

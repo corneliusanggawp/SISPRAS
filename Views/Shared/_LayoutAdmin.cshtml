@@ -35,7 +35,7 @@
     <link rel="stylesheet" href="~/lib/datatables-bs4/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="~/lib/datatables-responsive/css/responsive.bootstrap4.min.css">
     <link rel="stylesheet" href="~/lib/datatables-buttons/css/buttons.bootstrap4.min.css">
-    <!-- Select2 -->
+    <link rel="stylesheet" href="~/lib/datatables-fixedheader/css/fixedHeader.bootstrap4.css">
     <link rel="stylesheet" href="~/lib/select2/css/select2.min.css">
     <link rel="stylesheet" href="~/lib/select2-bootstrap4-theme/select2-bootstrap4.min.css">
     <!-- Toastr -->
@@ -47,21 +47,19 @@
 
     @RenderSection("Header", required: false)
 
-@*    <style>
-        @@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,700;1,400&display=swap');
-
+    <style>
         html {
             scroll-behavior: smooth;
         }
 
-        body {
-            font-family: 'Poppins', sans-serif;
+@*        body {
+            font-family: 'Google Sans', sans-serif;
             font-size: 90%;
         }
         .main-sidebar { 
-            background-color: #435361 !important
-        }
-    </style>*@
+            background-color: #ffffff !important
+        }*@
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -235,7 +233,7 @@
                         @foreach (var main in mainMenu)
                         {
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="@main.LINK" asp-action="Index">
+                            <a class="nav-link" asp-area="index" asp-controller="@main.LINK" asp-action="Index">
                                 <i class="nav-icon @main.ICON"></i>
                                 <p> 
                                     @main.DESKRIPSI
@@ -293,7 +291,7 @@
         </div>
         <!-- /.content-wrapper -->
         <!-- Control Sidebar -->
-        <aside class="control-sidebar control-sidebar-dark">
+        <aside class="control-sidebar control-sidebar-light">
             <!-- Control sidebar content goes here -->
             <div class="p-3">
                 <h5>Title</h5>
@@ -327,6 +325,7 @@
     <script src="~/lib/datatables-buttons/js/buttons.html5.min.js"></script>
     <script src="~/lib/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="~/lib/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <script src="~/lib/datatables-fixedheader/js/dataTables.fixedHeader.js"></script>
     <script src="~/lib/jszip/jszip.min.js"></script>
     <script src="~/lib/pdfmake/pdfmake.min.js"></script>
     <script src="~/lib/pdfmake/vfs_fonts.js"></script>
@@ -355,8 +354,8 @@
           "closeButton": false,
           "debug": false,
           "newestOnTop": false,
-          "progressBar": false,
-          "positionClass": "toast-bottom-right",
+          "progressBar": true,
+          "positionClass": "toast-top-right",
           "preventDuplicates": false,
           "onclick": null,
           "showDuration": "90000",
@@ -369,7 +368,6 @@
           "hideMethod": "fadeOut"
         }    
     </script>
-
     @RenderSection("Scripts", required: false)
 
 </body>

@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace SISPRAS.DAO
 {
@@ -24,7 +23,7 @@ namespace SISPRAS.DAO
                         AND         simka.MST_KARYAWAN.USERNAME = @username
                     ";
 
-                    var data  = conn.QueryFirstOrDefault<dynamic>(query, new { username = username });
+                    var data = conn.QueryFirstOrDefault<dynamic>(query, new { username = username });
 
                     return data;
                 }
