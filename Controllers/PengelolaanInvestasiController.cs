@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Razor.Templating.Core;
@@ -306,8 +307,8 @@ namespace SISPRAS.Controllers
                 purchaseOrderInvestasi.namaPO = "";
                 purchaseOrderInvestasi.nomorPO = getPurchaseOrderNumberString();
                 purchaseOrderInvestasi.totalTanpaPajak = mainDAO.getTotalPurchaseOrder(IDDetailPencairanInvestasi);
-                purchaseOrderInvestasi.pajak = ((decimal)purchaseOrderInvestasi.totalTanpaPajak * ((decimal)purchaseOrderInvestasi.pajak / 100));
-                purchaseOrderInvestasi.totalDenganPajak = purchaseOrderInvestasi.totalTanpaPajak + purchaseOrderInvestasi.pajak;
+                purchaseOrderInvestasi.pajak = (((decimal)purchaseOrderInvestasi.totalTanpaPajak - (decimal)purchaseOrderInvestasi.diskon) * ((decimal)purchaseOrderInvestasi.pajak / 100));
+                purchaseOrderInvestasi.totalDenganPajak = (purchaseOrderInvestasi.totalTanpaPajak - purchaseOrderInvestasi.diskon) + purchaseOrderInvestasi.pajak;
                 purchaseOrderInvestasi.userID = User.Claims.Where(c => c.Type == "NPP").Select(c => c.Value).SingleOrDefault();
                 purchaseOrderInvestasi.IPAddress = HttpContext.Connection.RemoteIpAddress.ToString();
                 purchaseOrderInvestasi.insertDate = DateTime.Now.ToString();
@@ -387,8 +388,8 @@ namespace SISPRAS.Controllers
                 purchaseOrderInvestasi.namaPO = "";
                 purchaseOrderInvestasi.nomorPO = mainDAO.getNomorPORevisi(purchaseOrderInvestasi.IDPurchaseOrderInvestasi);
                 purchaseOrderInvestasi.totalTanpaPajak = detailPurchaseOrderArr.Sum(item => item.hargaSatuan * item.jumlah);
-                purchaseOrderInvestasi.pajak = ((decimal)purchaseOrderInvestasi.totalTanpaPajak * ((decimal)purchaseOrderInvestasi.pajak / 100));
-                purchaseOrderInvestasi.totalDenganPajak = purchaseOrderInvestasi.totalTanpaPajak + purchaseOrderInvestasi.pajak;
+                purchaseOrderInvestasi.pajak = (((decimal)purchaseOrderInvestasi.totalTanpaPajak - (decimal)purchaseOrderInvestasi.diskon) * ((decimal)purchaseOrderInvestasi.pajak / 100));
+                purchaseOrderInvestasi.totalDenganPajak = (purchaseOrderInvestasi.totalTanpaPajak - purchaseOrderInvestasi.diskon) + purchaseOrderInvestasi.pajak;
                 purchaseOrderInvestasi.userID = User.Claims.Where(c => c.Type == "NPP").Select(c => c.Value).SingleOrDefault();
                 purchaseOrderInvestasi.IPAddress = HttpContext.Connection.RemoteIpAddress.ToString();
                 purchaseOrderInvestasi.insertDate = DateTime.Now.ToString();
@@ -448,6 +449,14 @@ namespace SISPRAS.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public JsonResult getRekapRevisiPurchaseOrderInvestasi(string nomorPO)
+        {
+            var rekapRevisiPurchaseOrderInvestasi = mainDAO.getRekapRevisiPurchaseOrderInvestasi(nomorPO);
+            return Json(rekapRevisiPurchaseOrderInvestasi);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult SuratPemesananBarang(int IDPurchaseOrderInvestasi)
         {
             var purchaseOrderInvestasi = mainDAO.getPurchaseOrderInvestasi(IDPurchaseOrderInvestasi);
@@ -461,23 +470,74 @@ namespace SISPRAS.Controllers
             return Json(html);
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult getListNomorPOTerimaBarang(string nomorPO)
+        {
+            var listNomorPO = mainDAO.getListNomorPOTerimaBarang(nomorPO);
+            return Json(listNomorPO);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult addPenerimaanBarang(string nomorInvoice, string tanggalTerima, decimal totalInvoice, string IDDetailPO, int IDPO)
+        public JsonResult getDetailTerimaBarang(string IDPurchaseOrderInvestasi)
         {
+            var listDetailPurchaseOrder = mainDAO.getDetailTerimaBarang(IDPurchaseOrderInvestasi);
+            return Json(listDetailPurchaseOrder);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult addPenerimaanBarang(TerimaAset terimaAset, DetailTerimaAset[] detailTerimaAsetArr)
+        {
+            DBOutput data = new DBOutput();
+
+            
+            data.status = false;
+            data.pesan = "mohon periksa kembali inputan anda";
+            data.data = terimaAset;
+
+            return Json(data);
+        }
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public IActionResult addPenerimaanBarang(TerimaAset terimaAset, DetailTerimaAset[] detailTerimaAsetArr)
+        //{
+        //    DBOutput data = new DBOutput();
+
+        //    //if (ModelState.IsValid && detailTerimaAsetArr.Length > 0)
+        //    //{
+        //    //    data.status = false;
+        //    //    data.pesan = "nononono";
+        //    //}
+        //    //else
+        //    //{
+        //    //    data.status = false;
+        //    //    data.pesan = "niceee";
+        //    //}
+
+        //    data.status = false;
+        //    data.pesan = "niceee";
+
+        //    return Json(data);
+        //}
+
+
+
+
+
+
+
+
+
+
+
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public IActionResult addPenerimaanBarang(string nomorInvoice, string tanggalTerima, decimal totalInvoice, string IDDetailPO, int IDPO)
+        //{
             //TerimaAset TA = new TerimaAset();
 
             //TA.tanggalTerima = tanggalTerima;
@@ -526,10 +586,10 @@ namespace SISPRAS.Controllers
             //    TempData["error"] = checkTerimaAset.pesan;
             //}
 
-            TempData["success"] = "memproses penerimaan barang";
+        //    TempData["success"] = "memproses penerimaan barang";
 
-            return RedirectToAction("PenerimaanBarangInvestasi");
-        }
+        //    return RedirectToAction("PenerimaanBarangInvestasi");
+        //}
 
 
         public JsonResult ajaxGetDetailPurchaseOrderPenerimaanBarang(string nomorPO)

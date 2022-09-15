@@ -16,7 +16,44 @@
     <link rel="stylesheet" href="~/lib/jquery-datatables-checkboxes-1.2.12/css/dataTables.checkboxes.css">
 }
 
-<!-- Modal Dialog 1 -->
+<div class="modal fade" id="HistoryRevisiModal" data-id="" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">History Revisi Purchase Order</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card-body table-responsive">
+                    <table id="tabelRekapRevisiPurchaseOrderInvestasi" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nomor PO:</th>
+                                <th>Tanggal PO:</th>
+                                <th class="none">Supplier:</th>
+                                <th class="none">Total Tanpa Pajak:</th>
+                                <th class="none">Pajak:</th>
+                                <th class="none">Diskon</th>
+                                <th>Total</th>
+                                <th>Status:</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Dialog 1 End -->
+
+<!-- Modal Dialog 2 -->
 <div class="modal fade" id="SuratPemesananBarangModal" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
@@ -38,7 +75,7 @@
         </div>
     </div>
 </div>
-<!-- Modal Dialog 1 End -->
+<!-- Modal Dialog 2 End -->
 
 <div class="row">
     <div class="col-12">
@@ -101,7 +138,6 @@
         </div>
     </div>
 
-
     <div class="col-12">    
         <div class="card">
             <div class="card-body">
@@ -113,16 +149,17 @@
                             <th class="none">Supplier:</th>
                             <th class="none">Total Tanpa Pajak:</th>
                             <th class="none">Pajak:</th>
+                            <th class="none">Diskon</th>
                             <th>Total</th>
                             <th>Status:</th>
-                            <th>Surat:</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th id="totalPurchaseOrder" colspan="8" class="text-center">Total Rekap Purchase Order: Rp.0</th>
+                            <th id="totalPurchaseOrder" colspan="9" class="text-center">Total Rekap Purchase Order: Rp.0</th>
                         </tr>
                     </tfoot>
                 </table>            
@@ -135,9 +172,13 @@
 @section Scripts{
     <script>
         //Element Declaration
-        var tabelRekapPurchaseOrderInvestasi;
+        let tabelRekapPurchaseOrderInvestasi;
+        let tabelRekapRevisiPurchaseOrderInvestasi;
+
+        let data = {};
 
         refreshTabelRekapPurchaseOrderInvestasi();
+        refreshTabelRekapRevisiPurchaseOrderInvestasi();
 
         $('.select2bs4').select2({
             theme: 'bootstrap4'
@@ -191,6 +232,12 @@
                     {
                         data: "PAJAK",
                         render: function (data, type, row, meta) {
+                            return data + "%";
+                        },
+                    },
+                    {
+                        data: "DISCOUNT",
+                        render: function (data, type, row, meta) {
                             return formatRupiah(data);
                         },
                     },
@@ -213,10 +260,10 @@
                         },
                     },
                     {
-                        data: "ID_PO_INVESTASI",
+                        data: { ID_PO_INVESTASI: "ID_PO_INVESTASI", NO_PO : "NO_PO"},
                         render: function (data, type, row, meta) {
                             return type === 'display' ?
-                                '<a id="btnShowPDF" data-id="'+ data +'" data-toggle="modal" href="#SuratPemesananBarangModal" class="btn btn-primary btn-sm"> <i class="fas fa-print"> </i> </a>' : data;
+                                '<a id="btnShowPDF" data-id="'+ data.ID_PO_INVESTASI +'" data-toggle="modal" href="#SuratPemesananBarangModal" class="btn btn-success btn-sm my-1"> <i class="fas fa-print"> </i> Cetak Surat </a> <a id="btnShowHistoryRevisi" data-id="' + data.NO_PO + '" data-toggle="modal" href="#HistoryRevisiModal" class="btn btn-primary btn-sm my-1"> <i class="fas fa-history"> </i> History Revisi </a>' : data;
                         },
                     },
                 ],
@@ -225,12 +272,13 @@
                 },
                 columnDefs: [
                     {
-                        targets: "_all",
+                        targets: [0,1,2,3,4,5,6,7],
                         className: "align-middle",
                     },
                     { 
-                        targets: 7, 
+                        targets: 8, 
                         orderable: false,
+                        className: "align-middle text-center",
                     },
                 ],
                 fixedHeader: {
@@ -240,7 +288,92 @@
                 paging: true,
                 lengthChange: true,
                 searching: true,
-                ordering: false,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true
+            });
+        }
+
+        function refreshTabelRekapRevisiPurchaseOrderInvestasi() {
+            tabelRekapRevisiPurchaseOrderInvestasi = $("#tabelRekapRevisiPurchaseOrderInvestasi").DataTable({
+                ajax: {
+                    url: '/PengelolaanInvestasi/getRekapRevisiPurchaseOrderInvestasi',
+                    type: 'POST',
+                    data: function (d) {
+                        return  $.extend(d, data);
+                    },
+                    dataSrc: 'data',
+                    beforeSend: function (request) {
+                        request.setRequestHeader("RequestVerificationToken", $('input[name="__RequestVerificationToken"]').val());
+                    },
+                },
+                columns: [
+                    { data: "NO_PO" },
+                    {
+                        data: "TGL_PO",
+                        render: function (data, type, row, meta) {
+                            return formatDate(data);
+                        },
+                    },
+                    { data: "NAMA_SUPPLIER" },
+                    {
+                        data: "TOTAL_PO_TANPA_PAJAK",
+                        render: function (data, type, row, meta) {
+                            return formatRupiah(data);
+                        },
+                    },
+                    {
+                        data: "PAJAK",
+                        render: function (data, type, row, meta) {
+                            return data + "%";
+                        },
+                    },
+                    {
+                        data: "DISCOUNT",
+                        render: function (data, type, row, meta) {
+                            return formatRupiah(data);
+                        },
+                    },
+                    {
+                        data: "TOTAL_DENGAN_PAJAK",
+                        render: function (data, type, row, meta) {
+                            return formatRupiah(data);
+                        },
+                    },
+                    {
+                        data: "IS_LUNAS",
+                        render: function (data, type, row, meta) {
+                            if (data) {
+                                return type === 'display' ?
+                                    '<span class="badge badge-success">< i class="fas fa-check" > </i> Lunas< /span>' : data;
+                            } else {
+                                return type === 'display' ?
+                                    '<span class="badge badge-danger"><i class="fas fa-times"></i> Belum Lunas</span>' : data;
+                            }
+                        },
+                    },
+                ],
+                initComplete :function( settings, json){
+                    $('#totalPurchaseOrder').html("Total Rekap Purchase Order: " + formatRupiah($("#tabelRekapPurchaseOrderInvestasi").DataTable().column(6).data().sum()));
+                },
+                language: {
+                    url: "../json/datatables-id.json"
+                },
+                columnDefs: [
+                    {
+                        targets: "_all",
+                        className: "align-middle",
+                    },
+                ],
+                fixedHeader: {
+                    header: true,
+                    footer: true,
+                },
+                paging: true,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
                 info: true,
                 autoWidth: false,
                 responsive: true
@@ -249,7 +382,13 @@
 
         //jQuery Function
         $(document).ready(function () {
-            $('#totalPurchaseOrder').html("Total Rekap Purchase Order: " + formatRupiah($("#tabelRekapPurchaseOrderInvestasi").DataTable().column(4).data().sum()));
+            $("#HistoryRevisiModal").data("id", "");
+        });
+
+        $(document).on('show.bs.modal', '.modal', function () {
+            var zIndex = 1040 + 10 * $('.modal:visible').length;
+            $(this).css('z-index', zIndex);
+            setTimeout(() => $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack'));
         });
 
         $("#tahun, #bulan, #supplier").on("change", function () {
@@ -263,7 +402,12 @@
                 .draw();
         });
 
-        $("#btnShowPDF").on('click', function () {
+        $("#tabelRekapPurchaseOrderInvestasi").on('click', '[id=btnShowHistoryRevisi]', function () {
+            data.nomorPO = $(this).data("id");
+            $("#tabelRekapRevisiPurchaseOrderInvestasi").DataTable().ajax.reload();
+        });
+
+        $("#tabelRekapPurchaseOrderInvestasi").on('click', '[id=btnShowPDF]', function () {
             $("#suratPemesananBarang").attr("srcdoc", "");
             $.ajax({
                 url: "/PengelolaanInvestasi/SuratPemesananBarang",

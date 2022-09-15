@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Linq;
 
 namespace SISPRAS.Models
 {
@@ -87,13 +90,19 @@ namespace SISPRAS.Models
     {
         public int IDTerimaAset { get; set; }
         public int IDPurchaseOrderInvestasi { get; set; }
+        [Required]
         public string tanggalTerima { get; set; }
+        [Required]
         public string nomorInvoice { get; set; }
         public decimal totalInvoice { get; set; }
         public int jumlahItem { get; set; }
         public string userID { get; set; }
         public string IPAddress { get; set; }
         public string insertDate { get; set; }
+        [Required]
+        //[MaxFileSize(20 * 1024 * 1024)]
+        //[AllowedExtensions(new string[] { ".pdf", ".doc", ".docx" })]
+        public IFormFile DokumenInvoice { get; set; }
     }
 
     public class DetailTerimaAset
@@ -101,13 +110,69 @@ namespace SISPRAS.Models
         public int IDDetailTerimaAset { get; set; }
         public int IDTerimaAset { get; set; }
         public string merk { get; set; }
+        [Required]
         public string satuan { get; set; }
         public string namaBarang { get; set; }
         public string spesifikasi { get; set; }
         public decimal hargaSatuan { get; set; }
         public int jumlah { get; set; }
         public bool isProccessed { get; set; }
+        [Required]
         public int IDDetailPurchaseOrderInvestasi { get; set; }
     }
+
+    public class AllowedExtensionsAttribute : ValidationAttribute
+    {
+        private readonly string[] _extensions;
+
+        public AllowedExtensionsAttribute(string[] extensions)
+        {
+            _extensions = extensions;
+        }
+
+
+        public override bool IsValid(object value)
+        {
+            if (value is null)
+            {
+                return true;
+            }
+
+            var file = value as IFormFile;
+            var extension = Path.GetExtension(file.FileName);
+
+            if (!_extensions.Contains(extension.ToLower()))
+            {
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    public class MaxFileSizeAttribute : ValidationAttribute
+    {
+        private readonly int _maxFileSize;
+        public MaxFileSizeAttribute(int maxFileSize)
+        {
+            _maxFileSize = maxFileSize;
+        }
+
+        public override bool IsValid(object value)
+        {
+            var file = value as IFormFile;
+            if (file != null)
+            {
+                if (file.Length > _maxFileSize)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+
+ 
 
 }

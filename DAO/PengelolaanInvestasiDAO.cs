@@ -614,7 +614,7 @@ namespace SISPRAS.DAO
 			                        case when charindex('-', A.NO_PO) = 0 then A.NO_PO 
 			                        else left(A.NO_PO, charindex('-', A.NO_PO) - 1) end + '%'
 		                        AND B.IS_REVISI = 1) AS VARCHAR(10)) AS NEW_NO_PO,
-	                        ROUND((((A.TOTAL_DENGAN_PAJAK - (A.TOTAL_PO_TANPA_PAJAK-A.DISCOUNT))/A.TOTAL_DENGAN_PAJAK) * 100), 0)AS PAJAK,
+	                        ROUND(((((A.TOTAL_DENGAN_PAJAK + A.DISCOUNT) - (A.TOTAL_PO_TANPA_PAJAK - A.DISCOUNT))/(A.TOTAL_DENGAN_PAJAK + A.DISCOUNT)) * 100), 0)AS PAJAK,
 	                        A.TGL_PO, A.TOTAL_PO_TANPA_PAJAK, A.DISCOUNT, A.ID_SUPPLIER
                         FROM sispras.TBL_PO_INVESTASI A
                         WHERE A.NO_PO LIKE @nomorPO + '%'
@@ -795,7 +795,7 @@ namespace SISPRAS.DAO
                 try
                 {
                     string query = @"
-                        SELECT      sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI, sispras.TBL_PO_INVESTASI.NO_PO, sispras.TBL_PO_INVESTASI.TGL_PO, sispras.TBL_PO_INVESTASI.TOTAL_PO_TANPA_PAJAK, sispras.TBL_PO_INVESTASI.PAJAK, sispras.TBL_PO_INVESTASI.TOTAL_DENGAN_PAJAK, sispras.MST_SUPPLIER.NAMA_SUPPLIER, sispras.TBL_PO_INVESTASI.IS_LUNAS, sispras.TBL_PO_INVESTASI.IS_REVISI, sispras.TBL_PO_INVESTASI.DISCOUNT
+                        SELECT      sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI, sispras.TBL_PO_INVESTASI.NO_PO, sispras.TBL_PO_INVESTASI.TGL_PO, sispras.TBL_PO_INVESTASI.TOTAL_PO_TANPA_PAJAK, ROUND(((((sispras.TBL_PO_INVESTASI.TOTAL_DENGAN_PAJAK + sispras.TBL_PO_INVESTASI.DISCOUNT) - (sispras.TBL_PO_INVESTASI.TOTAL_PO_TANPA_PAJAK - sispras.TBL_PO_INVESTASI.DISCOUNT))/(sispras.TBL_PO_INVESTASI.TOTAL_DENGAN_PAJAK + sispras.TBL_PO_INVESTASI.DISCOUNT)) * 100), 0)AS PAJAK, sispras.TBL_PO_INVESTASI.TOTAL_DENGAN_PAJAK, sispras.MST_SUPPLIER.NAMA_SUPPLIER, sispras.TBL_PO_INVESTASI.IS_LUNAS, sispras.TBL_PO_INVESTASI.IS_REVISI, sispras.TBL_PO_INVESTASI.DISCOUNT
                         FROM        sispras.TBL_PO_INVESTASI
                         INNER JOIN  sispras.MST_SUPPLIER ON sispras.TBL_PO_INVESTASI.ID_SUPPLIER = sispras.MST_SUPPLIER.ID_SUPPLIER
                         WHERE sispras.TBL_PO_INVESTASI.IS_REVISI = 0
@@ -829,7 +829,7 @@ namespace SISPRAS.DAO
                 try
                 {
                     string query = @"
-                        SELECT	sispras.TBL_PO_INVESTASI.*, sispras.MST_SUPPLIER.*, siatmax.REF_PROPINSI.DESKRIPSI AS PROVINSI, siatmax.REF_KAB_KODYA.DESKRIPSI AS KABUPATEN
+                        SELECT	sispras.TBL_PO_INVESTASI.*, sispras.MST_SUPPLIER.*, ROUND(((((sispras.TBL_PO_INVESTASI.TOTAL_DENGAN_PAJAK + sispras.TBL_PO_INVESTASI.DISCOUNT) - (sispras.TBL_PO_INVESTASI.TOTAL_PO_TANPA_PAJAK - sispras.TBL_PO_INVESTASI.DISCOUNT))/(sispras.TBL_PO_INVESTASI.TOTAL_DENGAN_PAJAK + sispras.TBL_PO_INVESTASI.DISCOUNT)) * 100), 0)AS PAJAK_PERCENT,siatmax.REF_PROPINSI.DESKRIPSI AS PROVINSI, siatmax.REF_KAB_KODYA.DESKRIPSI AS KABUPATEN
                         FROM	sispras.TBL_PO_INVESTASI
                         INNER JOIN sispras.MST_SUPPLIER ON sispras.TBL_PO_INVESTASI.ID_SUPPLIER = sispras.MST_SUPPLIER.ID_SUPPLIER
                         INNER JOIN  siatmax.REF_PROPINSI ON sispras.MST_SUPPLIER.ID_REF_PROPINSI = siatmax.REF_PROPINSI.ID_REF_PROPINSI
@@ -890,7 +890,116 @@ namespace SISPRAS.DAO
             }
         }
 
+        public DBOutput getRekapRevisiPurchaseOrderInvestasi(string nomorPO)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
 
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT      sispras.TBL_PO_INVESTASI.NO_PO, sispras.TBL_PO_INVESTASI.TGL_PO, sispras.TBL_PO_INVESTASI.TOTAL_PO_TANPA_PAJAK, ROUND(((((sispras.TBL_PO_INVESTASI.TOTAL_DENGAN_PAJAK + sispras.TBL_PO_INVESTASI.DISCOUNT) - (sispras.TBL_PO_INVESTASI.TOTAL_PO_TANPA_PAJAK - sispras.TBL_PO_INVESTASI.DISCOUNT))/(sispras.TBL_PO_INVESTASI.TOTAL_DENGAN_PAJAK + sispras.TBL_PO_INVESTASI.DISCOUNT)) * 100), 0)AS PAJAK, sispras.TBL_PO_INVESTASI.TOTAL_DENGAN_PAJAK, sispras.MST_SUPPLIER.NAMA_SUPPLIER, sispras.TBL_PO_INVESTASI.IS_LUNAS, sispras.TBL_PO_INVESTASI.IS_REVISI, sispras.TBL_PO_INVESTASI.DISCOUNT
+                        FROM        sispras.TBL_PO_INVESTASI
+                        INNER JOIN  sispras.MST_SUPPLIER ON sispras.TBL_PO_INVESTASI.ID_SUPPLIER = sispras.MST_SUPPLIER.ID_SUPPLIER
+                        WHERE		sispras.TBL_PO_INVESTASI.NO_PO LIKE
+	                        case when charindex('-', @nomorPO) = 0 
+	                        then @nomorPO
+	                        else left(@nomorPO, charindex('-', @nomorPO) - 1) end + '%'
+                        AND		sispras.TBL_PO_INVESTASI.IS_REVISI = 1
+                    ";
+
+                    output.data = conn.Query<dynamic>(query, new { nomorPO = nomorPO }).ToList();
+
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public List<dynamic> getListNomorPOTerimaBarang(string nomorPO)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT	sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI, sispras.TBL_PO_INVESTASI.NO_PO, sispras.TBL_TERIMA_ASET.NO_INVOICE, sispras.TBL_TERIMA_ASET.TGL_TERIMA, sispras.TBL_TERIMA_ASET.DOKUMEN_INVOICE
+                        FROM	sispras.TBL_PO_INVESTASI
+                        LEFT JOIN sispras.TBL_TERIMA_ASET ON sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI = sispras.TBL_TERIMA_ASET.ID_PO_INVESTASI
+                        WHERE sispras.TBL_PO_INVESTASI.NO_PO LIKE @nomorPO + '%'
+                        AND (sispras.TBL_PO_INVESTASI.IS_REVISI = 0)
+                    ";
+
+                    var data = conn.Query<dynamic>(query, new { nomorPO = nomorPO }).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public DBOutput getDetailTerimaBarang(string IDPurchaseOrderInvestasi)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        if not exists(SELECT ID_TERIMA_ASET FROM sispras.TBL_TERIMA_ASET WHERE ID_PO_INVESTASI = @IDPurchaseOrderInvestasi)
+	                        begin
+		                        SELECT NAMA_BARANG AS NAMA_ASET, MERK, SATUAN, HARGA_SATUAN, JUMLAH, (JUMLAH * HARGA_SATUAN) AS TOTAL, ID_DETAIL_PO_INVESTASI
+		                        FROM sispras.TBL_DETAIL_PO_INVESTASI
+		                        WHERE ID_PO_INVESTASI = @IDPurchaseOrderInvestasi
+	                        end
+                        else
+	                        begin
+		                        SELECT	NAMA_ASET, MERK, SATUAN, HARGA_SATUAN, JUMLAH, (JUMLAH * HARGA_SATUAN) AS TOTAL, ID_DETAIL_PO_INVESTASI
+		                        FROM	sispras.TBL_DETAIL_TERIMA_ASET
+		                        LEFT JOIN sispras.TBL_TERIMA_ASET ON sispras.TBL_DETAIL_TERIMA_ASET.ID_TERIMA_ASET = sispras.TBL_TERIMA_ASET.ID_TERIMA_ASET
+		                        WHERE	sispras.TBL_TERIMA_ASET.ID_PO_INVESTASI = @IDPurchaseOrderInvestasi
+	                        end
+                    ";
+
+                    var data = conn.Query<dynamic>(query, new { IDPurchaseOrderInvestasi = IDPurchaseOrderInvestasi }).ToList();
+
+                    output.data = data;
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
 
 
 

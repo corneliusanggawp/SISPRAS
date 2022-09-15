@@ -1,5 +1,6 @@
 ﻿@using System;
 @using System.Globalization;
+@Html.AntiForgeryToken() 
 
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
@@ -7,6 +8,9 @@
     ViewData["Title"] = "Penerimaan Barang Investasi";
 
     CultureInfo culture = new CultureInfo("id-ID");
+    var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
+    var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
+    var namaUnit = User.Claims.Where(c => c.Type == "namaUnit").Select(c => c.Value).Single();
 }
 
 @section Header{
@@ -20,95 +24,105 @@
     <link rel="stylesheet" href="~/lib/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
 }
 
-<div class="row">
-    <div class="col-12">
-        <div class="card card-primary card-outline">
-            <!-- /.card-header -->
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-4">
-                        <div class="input-group">
-                            <input id="nomorPO" name="nomorPO" type="text" class="form-control" placeholder="Masukkan No. Purchase Order...">
-                            <div class="input-group-append">
-                              <span class="input-group-text"><i class="fas fa-search"></i></span>
-                            </div>
-                        </div>                    
-                    </div>                    
-                </div>
-                <div class="table-responsive">
-                    <table id="tabelDetailPurchaseOrder" class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Nama Barang</th>
-                                <th>Merk</th>
-                                <th>Harga Satuan</th>
-                                <th>Jumlah</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- /.card-body -->
-        </div>
-    </div>
-
-    <div class="col-12">
-        <form id="formTerimaAset" method="post" asp-action="addPenerimaanBarang" asp-controller="PengelolaanInvestasi" enctype="multipart/form-data" novalidate>
-            @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-12">
             <div class="card card-primary">
                 <div class="card-header">
-                    <h3 class="card-title">Input Terima Aset *</h3>
+                    <h3 class="card-title"> Terima Barang </h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label>Nomor Invoice</label>
-                                <input id="nomorInvoice" name="nomorInvoice" type="text" class="form-control" placeholder="Masukan Nomor PO..." required>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label>Tanggal Terima</label>
-                                <div class="input-group date" id="reservationdate" data-target-input="nearest">
-                                    <input id="tanggalTerima" name="tanggalTerima" type="text" class="form-control datetimepicker-input" placeholder="dd/mm/yy" data-target="#reservationdate" required/>
-                                    <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
-                                        <div class="input-group-text btn"><i class="fa fa-calendar"></i></div>
-                                    </div>
+                        <div class="col-4">
+                            <div class="input-group mb-2">
+                                <input id="findNomorPO" name="findNomorPO" type="text" class="form-control" placeholder="Masukkan No. Purchase Order..." />
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <input id="IDPO" name="IDPO" type="hidden" class="form-control" readonly="readonly" required>
-                    <input id="totalInvoice" name="totalInvoice" type="hidden" class="form-control" readonly="readonly" required>
-                    <div class="form-group">
-                        <label>Total</label>
-                        <div class="input-group">
-                            <input id="inpTotalInvoice" type="text" class="form-control" placeholder="Rp 0" readonly="readonly" required>
+                    <form method="post" id="formDetailTerimaBarang" enctype="multipart/form-data" novalidate>
+                        <table id="tabelTerimaBarang" class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nama Barang:</th>
+                                    <th>Merk:</th>
+                                    <th>Satuan:</th>
+                                    <th>Harga Satuan:</th>
+                                    <th>Jumlah:</th>
+                                    <th>Total:</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </form>
+                    <hr />
+                    <form method="post" id="formTerimaBarang" enctype="multipart/form-data" novalidate>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Terima Aset <b class="text-danger">*</b></h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <input id="IDPurchaseOrderInvestasi" name="IDPurchaseOrderInvestasi" type="hidden" class="form-control" readonly required />
+                                <div class="row">
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <label>Nomor Invoice <b class="text-danger">*</b></label>
+                                            <input id="nomorInvoice" name="nomorInvoice" type="text" class="form-control" placeholder="Masukan Nomor Invoice..." required />
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <label>Tanggal Terima <b class="text-danger">*</b></label>
+                                            <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                                                <input id="tanggalTerima" name="tanggalTerima" type="text" class="form-control datetimepicker-input" placeholder="mm/dd/yy" data-target="#reservationdate" required />
+                                                <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                                                    <div class="input-group-text btn"><i class="fa fa-calendar"></i></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+@*                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <label>Dokumen Invoice<b class="text-danger">*</b></label>
+                                            <div class="input-group">
+                                                <div class="custom-file">
+                                                    <input id="dokumenInvoice" name="dokumenInvoice" type="file" class="custom-file-input" accept="application/pdf" required/>
+                                                    <label class="custom-file-label">Pilih File</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>*@
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                    </form>
+                    <form method="post" id="formTerimaBarangFooter" class="row justify-content-center" style="position: -webkit-sticky; position: sticky; bottom: 0; background-color: white; padding: 10px; z-index: 4">
+                        <label class="col-sm-auto col-form-label text-left">Total Penerimaan</label>
+                        <div class="input-group col-sm-6">
+                            <input id="totalPenerimaan" name="totalPenerimaan" type="text" class="form-control" placeholder="Rp 0" onkeydown="return false;" required />
                             <span class="input-group-append">
-                                <button id="btnSimpanInvoice" type="submit" class="btn btn-primary" disabled>Simpan</button>
+                                <button id="btnPenerimaanBarang" type="submit" form="formDetailTerimaBarang" class="btn btn-primary">Simpan</button>
                             </span>
                         </div>
-                    </div>
+                    </form>
                 </div>
-                <!-- /.card-body -->
             </div>
-            <!-- /.card -->
-        </form>
+        </div>
     </div>
-</div>
 
 @section Scripts{  
     <!-- jQuery UI -->
     <script src="~/lib/jquery-ui/jquery-ui.js"></script>
     <!-- Select -->
-    <script src="~/lib/datatables-select/js/dataTables.select.min.js"></script>    
-    <!-- CheckBox -->
-    <script src="~/lib/jquery-datatables-checkboxes-1.2.12/js/dataTables.checkboxes.min.js"></script>
+    <script src="~/lib/datatables-select/js/dataTables.select.min.js"></script> 
     <!-- InputMask -->
     <script src="~/lib/moment/moment.min.js"></script>
     <script src="~/lib/inputmask/jquery.inputmask.min.js"></script>
@@ -118,138 +132,86 @@
     <script src="~/lib/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
     <!-- Input Spiner -->
     <script src="~/lib/bootstrap-input-spinner/bootstrap-input-spinner.js"></script>
+    <!-- File Input -->
+    <script src="~/lib/bs-custom-file-input/bs-custom-file-input.js"></script>
 
-
-    @if (TempData["success"] != null){
-        <script type="text/javascript">
-            toastr.success('@TempData["success"].ToString()', 'Berhasil');
-        </script>
-    }
-    @if (TempData["error"] != null){
-        <script type="text/javascript">
-            toastr.error('@TempData["error"].ToString()', 'Gagal');
-        </script>
-    }
 
     <script>
-        var tabelDetailPurchaseOrder;
-        refreshTabelDetailPurchaseOrder();
+        //Element Declaration
+        let tabelTerimaBarang;
 
-        $('#reservationdate').datetimepicker({
-            format: 'L'
+        refreshTabelTerimaBarang();
+        bsCustomFileInput.init();
+
+        $("#reservationdate").datetimepicker({
+            format: "L",
         });
-        
-        $('.select2bs4').select2({
-            theme: 'bootstrap4'
-        });
 
-        var tabel      = $('#tabelDetailPurchaseOrder').DataTable();
-
-        var rowIndex = [];
-        var totalDetailPencairanInvestasi = 0;
-        var idDetailPencairanInvestasiArray = [];
-
-        var formatRupiah = (number) => {
-           return new Intl.NumberFormat('id-ID', {
-               style: 'currency', 
-               currency: 'IDR', 
-               minimumFractionDigits: 0 
-           }).format(number);
+        //Function Variabel
+        let formatRupiah = (number) => {
+            return new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+            }).format(number);
         };
 
-        function updateTotal(comp, jumlahBarang){
-            var rowsIndex       = $(comp).closest('tr').index();
-            var jumlahBarang    = $(comp).val();
-            var hargaSatuan     = tabel.cell({row:rowsIndex, column:3}).data().replace(/[^\d]/g, '') * 1;
-            var totalBarang     = jumlahBarang * hargaSatuan;
-            var total           = tabel.column(5).data().sum();
-
-            tabel.cell({row:rowsIndex, column:5}).data(formatRupiah(totalBarang));
-            $('#totalInvoice').val(total);
-            $('#inpTotalInvoice').val(formatRupiah(total));
-
-            if(total == 0){
-                $('#btnSimpanInvoice').prop('disabled', true);
-            }else{
-                $('#btnSimpanInvoice').prop('disabled', false);
-            }
-        }
-
-        window.addEventListener('load', function () {
-            var forms = $('#formTerimaAset');
-            var validation = Array.prototype.filter.call(forms, function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (form.checkValidity() === false) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }else{
-                        event.preventDefault();
-
-                        Swal.fire({
-                            title: 'Lanjutkan Simpan Invoice?',
-                            showClass: { popup: 'animate__animated animate__fadeInDown' },
-                            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-                            text: "Mohon pastikan semua barang yang dipilih sudah sesuai",
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonColor: '#007bff',
-                            cancelButtonColor: '#6c757d',
-                            confirmButtonText: 'Ya, lanjutkan!',
-                            cancelButtonText: 'Batal',
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                form.submit();
-                            }
-                        })
-                    }
-                    form.classList.add('was-validated');
-                }, false);
-            });
-        }, false);
-
-        $("#nomorPO").autocomplete({
-            source: function (request, response) {
-                $.ajax({
-                    url: "/PengelolaanInvestasi/ajaxGetAutoCompleteNomorPO",
-                    data: { "nomorPO": request.term },
-                    type: "POST",
-                    success: function (data) {
-                        response($.map(data, function (item) {
-                            return item.NO_PO;
-                        }))
-                    }
-                });
-            },
-            select: function (e, i) {
-                $("#nomorPO").val(i.item.value);
-                searchDetailPurchaseOrder(i.item.value);
-            },
-            minLength: 1
-        });
-
-        $( document ).ready(function() {
-            var now = new Date();
-
-            $('#tanggalTerima').val((now.getMonth()+1) + '/' +  now.getDate() + '/' + now.getFullYear());
-
-        });
-
-        function refreshTabelDetailPurchaseOrder() {
-            tabelDetailPurchaseOrder = $("#tabelDetailPurchaseOrder").DataTable({
-                language: {
-                    url: "../json/datatables-id.json"
+        function refreshTabelTerimaBarang() {
+            tabelTerimaBarang = $("#tabelTerimaBarang").DataTable({
+                ajax: {
+                    url: '/PengelolaanInvestasi/getDetailTerimaBarang',
+                    type: 'POST',
+                    data: function (e) {
+                        e.IDPurchaseOrderInvestasi = $('#IDPurchaseOrderInvestasi').val();
+                    },
+                    dataSrc: 'data',
+                    beforeSend: function (request) {
+                        request.setRequestHeader("RequestVerificationToken", $('input[name="__RequestVerificationToken"]').val());
+                    },
                 },
-                columnDefs: [
+                columns: [
+                    { data: "NAMA_ASET" },
+                    { data: "MERK" },
+                    { data: "SATUAN" },
                     {
-                        targets     :   0,
-                        visible     : false,
-                        searchable  : true,
+                        data: "HARGA_SATUAN", render: function (data, type, row, meta) {
+                            return formatRupiah(data);
+                        }
                     },
                     {
-                        targets     :   4,
-                        width       :   "15%",
-                    }
+                        data: "JUMLAH", render: function (data, type, row, meta) {
+                            return type === 'display' ?
+                                '<input id="jumlah" name="jumlah" type="number" min="0" max="'+ data +'" class="form-control form-control-border input-sm" value="'+ data +'" required/>' : data;
+                        }
+                    },
+                    {
+                        data: "TOTAL", render: function (data, type, row, meta) {
+                            return formatRupiah(data);
+                        }
+                    },
+                    { data: "ID_DETAIL_PO_INVESTASI" },
                 ],
+                language: {
+                    url: "../json/datatables-id.json",
+                },
+                columnDefs: [
+                    { 
+                        targets: "_all", 
+                        className: "align-middle", 
+                    },
+                    {
+                        targets: [3,4,5],
+                        width: "15%",
+                    },
+                    {
+                        targets: 6,
+                        visible: false,
+                    },
+                ],
+                fixedHeader: {
+                    header: true,
+                    footer: true,
+                },
                 paging: true,
                 lengthChange: false,
                 searching: false,
@@ -257,74 +219,145 @@
                 info: true,
                 autoWidth: false,
                 responsive: true,
-            }).buttons().container().appendTo('#tabelDetailPurchaseOrder_wrapper .col-md-6:eq(0)');
-        }
-
-        function searchDetailPurchaseOrder(nomorPO) {
-            Swal.fire({
-                title: 'Mencari Data PO...',
-                showClass: { popup: 'animate__animated animate__zoomIn' },
-                hideClass: { popup: 'animate__animated animate__zoomOut' },
-                allowOutsideClick: false,
-                timerProgressBar: true,
-                didOpen: () => {
-                    Swal.showLoading()
-                },
             });
-
-            $.ajax({
-                url: "/PengelolaanInvestasi/ajaxGetDetailPurchaseOrderPenerimaanBarang",
-                type: "POST",
-                data: { "nomorPO": nomorPO },
-                dataType: "json",
-                success: function (result) {
-                    tabel.clear().draw();
-                    for (var i = 0; i < result.data.length; i++) {
-                        if(result.data[i].ID_DETAIL_TERIMA == null){
-                            tabel.row.add([result.data[i].ID_DETAIL_PO_INVESTASI, result.data[i].NAMA_BARANG, result.data[i].MERK, formatRupiah(result.data[i].HARGA_SATUAN), '<input onchange="updateTotal(this, this.value)" id="jumlahBarang" name="jumlahBarang" type="number" class="form-control form-control-sm form-control-border" min="0" max="' + result.data[i].JUMLAH +'" value="' + result.data[i].JUMLAH +'"/>', formatRupiah(result.data[i].HARGA_SATUAN * result.data[i].JUMLAH)]).draw();
-                        }
-
-                        $("#IDPO").val(result.data[i].ID_PO_INVESTASI);
-                    }
-
-                    swal.close();
-
-                    if(result.data.length == 0){
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Data PO Tidak Ditemukan',
-                            text: 'Mohon periksa kembali No. Purchase Order!',
-                            showClass: { popup: 'animate__animated animate__zoomIn' },
-                            hideClass: { popup: 'animate__animated animate__zoomOut' },
-                        })
-                    }else{
-                        $("input[type='number']").inputSpinner();
-
-                        var totalInvoice    = tabel.column(5).data().sum();
-                        $('#totalInvoice').val(totalInvoice);
-                        $('#inpTotalInvoice').val(formatRupiah(totalInvoice));
-
-                        if(totalInvoice == 0){
-                            $('#btnSimpanInvoice').prop('disabled', true);
-                        }else{
-                            $('#btnSimpanInvoice').prop('disabled', false);
-                        }
-                    }
-                }
-            })     
         }
 
-        jQuery.fn.dataTable.Api.register( 'sum()', function ( ) {
-	        return this.flatten().reduce( function ( a, b ) {
-		        if ( typeof a === 'string' ) {
-			        a = a.replace(/[^\d]/g, '') * 1;
-		        }
-		        if ( typeof b === 'string' ) {
-			        b = b.replace(/[^\d]/g, '') * 1;
-		        }
+        //jQuery Function
+        $("#tabelTerimaBarang").on("input", "[id=jumlah]", function () {
+            let hargaSatuan = $("#tabelTerimaBarang").DataTable().cell($(this).closest('tr'), 3).data();
+            let jumlah = $(this).val();
 
-		        return a + b;
-	        }, 0 );
-        } );
+            $("#tabelTerimaBarang").DataTable().cell($(this).closest('tr'), 5).data(hargaSatuan * jumlah);
+            $("#totalPenerimaan").val(formatRupiah($("#tabelTerimaBarang").DataTable().columns(5).data().sum()));
+        });
+
+       $("#formDetailTerimaBarang").submit(function () {
+            if ($(this)[0].checkValidity() === false || $('#formTerimaBarang')[0].checkValidity() === false || $('#formTerimaBarangFooter')[0].checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                Swal.fire({
+                    title: "Simpan Penerimaan Barang?",
+                    showClass: { popup: "animate__animated animate__fadeInDown" },
+                    hideClass: { popup: "animate__animated animate__fadeOutUp" },
+                    text: "Mohon pastikan semua jumlah barang yang diterima sudah sesuai",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonColor: "#007bff",
+                    cancelButtonColor: "#6c757d",
+                    confirmButtonText: "Ya, lanjutkan!",
+                    cancelButtonText: "Batal",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        let dataDetailTerimaAset = $("#tabelTerimaBarang tbody tr").map(function () {
+                            return {
+                                jumlah: $(this).find("#jumlah").val(),
+                                IDDetailPurchaseOrderInvestasi: $('#tabelTerimaBarang').DataTable().cell($(this), 6).data(),
+                            };
+                        }).get();
+
+
+                        let terimaAset = new FormData($('#formTerimaBarang')[0]);
+                        let detailTerimaAsetArr = new FormData();
+
+                        dataDetailTerimaAset.forEach(item => {
+                            detailTerimaAsetArr.append(`detailTerimaAsetArr[]`, JSON.stringify(item));
+                        });
+
+                        //for (var i = 0, valuePair; valuePair = dataDetailTerimaAset[i]; i++)
+                        //    for (var j in valuePair) detailTerimaAsetArr.append(j, valuePair[j]);
+                        for (var pair of detailTerimaAsetArr.entries()) {
+                            console.log(pair);
+                        }
+
+
+                        //for(var pair of terimaAset.entries()) {
+                        //   console.log(pair); 
+                        //}
+
+
+
+                        $.ajax({
+                            url: "/PengelolaanInvestasi/addPenerimaanBarang",
+                            type: "POST",
+                            headers: { RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+                            data: terimaAset,
+                            //dataType: "json",
+                            contentType: false,
+                            processData: false,
+                            success: function (result) {
+                                console.log(result);
+                                //if (result.status) {
+                                //    toastr.success(result.pesan, "Berhasil");
+
+                                //} else {
+                                //    toastr.error(result.pesan, "Gagal");
+                                //}
+                            },
+                        });
+                    }
+                });
+            }
+            $(this).addClass("was-validated");
+            $('#formTerimaBarang').addClass("was-validated");
+            $('#formTerimaBarangFooter').addClass("was-validated");
+            return false;
+        });
+
+        $("#findNomorPO").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/PengelolaanInvestasi/getListNomorPOTerimaBarang",
+                    type: "POST",
+                    headers: { RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+                    data: { nomorPO: request.term },
+                    success: function (data) {
+                        response(
+                            $.map(data, function (item) {
+                                return {
+                                    value: item.NO_PO,
+                                    IDPurchaseOrderInvestasi : item.ID_PO_INVESTASI,
+                                    nomorInvoice: item.NO_INVOICE,
+                                    tanggalTerima: item.TGL_TERIMA,
+                                    dokumenInvoice: item.DOKUMEN_INVOICE,
+                                };
+                            })
+                        );
+                    },
+                });
+            },
+            select: function (e, i) {
+                $("#findNomorPO").val(i.item.value);
+
+                $("#IDPurchaseOrderInvestasi").val(i.item.IDPurchaseOrderInvestasi);
+                $("#nomorInvoice").val(i.item.nomorInvoice);
+                $("#tanggalTerima").val(i.item.tanggalTerima);
+                $("#dokumenInvoice").val(i.item.dokumenInvoice);
+
+                if(i.item.tanggalTerima == null){
+                    $("#tanggalTerima").val(new Date().toLocaleDateString());
+                }else{
+                    $("#tanggalTerima").val(new Date().toLocaleDateString());
+                }
+
+                $("#tabelTerimaBarang").DataTable().ajax.reload(function () {
+                    $("#totalPenerimaan").val(formatRupiah($("#tabelTerimaBarang").DataTable().columns(5).data().sum()))
+                });
+            },
+            minLength: 1,
+        });
+
+        jQuery.fn.dataTable.Api.register('sum()', function () {
+            return this.flatten().reduce(function (a, b) {
+                if (typeof a === 'string') {
+                    a = a.replace(/[^\d]/g, '') * 1;
+                }
+                if (typeof b === 'string') {
+                    b = b.replace(/[^\d]/g, '') * 1;
+                }
+
+                return a + b;
+            }, 0);
+        });
     </script>
 }
