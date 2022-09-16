@@ -48,9 +48,9 @@
                                     <th>Nama Barang:</th>
                                     <th>Merk:</th>
                                     <th>Satuan:</th>
-                                    <th>Harga Satuan:</th>
-                                    <th>Jumlah:</th>
-                                    <th>Total:</th>
+                                    <th class="text-center">Harga Satuan:</th>
+                                    <th class="text-center">Jumlah:</th>
+                                    <th class="text-center">Total:</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -71,13 +71,13 @@
                             <div class="card-body">
                                 <input id="IDPurchaseOrderInvestasi" name="IDPurchaseOrderInvestasi" type="hidden" class="form-control" readonly required />
                                 <div class="row">
-                                    <div class="col-4">
+                                    <div class="col-6">
                                         <div class="form-group">
                                             <label>Nomor Invoice <b class="text-danger">*</b></label>
                                             <input id="nomorInvoice" name="nomorInvoice" type="text" class="form-control" placeholder="Masukan Nomor Invoice..." required />
                                         </div>
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-6">
                                         <div class="form-group">
                                             <label>Tanggal Terima <b class="text-danger">*</b></label>
                                             <div class="input-group date" id="reservationdate" data-target-input="nearest">
@@ -196,15 +196,22 @@
                 },
                 columnDefs: [
                     { 
-                        targets: "_all", 
+                        targets: [0,1,2], 
                         className: "align-middle", 
                     },
+                    { 
+                        targets: [3,5], 
+                        className: "align-middle text-right", 
+                        width: "15%",
+                    },
                     {
-                        targets: [3,4,5],
+                        targets: 4,
+                        className: "align-middle", 
                         width: "15%",
                     },
                     {
                         targets: 6,
+                        className: "align-middle",
                         visible: false,
                     },
                 ],

@@ -140,7 +140,7 @@
                             <th style="color:transparent;">Unit</th>
                             <th>Unit Pengaju</th>
                             <th>Tanggal</th>
-                            <th>Total</th>
+                            <th class="text-center">Total</th>
                             <th class="text-center">Detail</th>
                         </tr>
                     </thead>
@@ -249,7 +249,11 @@
                         targets: 3,
                         visible: false,
                         searchable: true,
-                    }
+                    },
+                    {
+                        targets: 6,
+                        className: "text-right",
+                    },
                 ],
                 select: {
                     style: 'multi'

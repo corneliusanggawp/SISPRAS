@@ -30,10 +30,10 @@
                             <tr>
                                 <th>Nama Kegiatan:</th>
                                 <th>Bulan:</th>
-                                <th>Jumlah:</th>
+                                <th class="text-center">Jumlah:</th>
                                 <th>Satuan:</th>
-                                <th>Harga:</th>
-                                <th>Total:</th>
+                                <th class="text-center">Harga:</th>
+                                <th class="text-center">Total:</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -359,7 +359,18 @@
                     url: "../json/datatables-id.json"
                 },
                 columnDefs: [
-                    { targets: 6, orderable: false }
+                    { 
+                        targets: 6, 
+                        orderable: false 
+                    },
+                    { 
+                        targets: 2, 
+                        className: "text-center",
+                    },
+                    { 
+                        targets: [4,5], 
+                        className: "text-right",
+                    },
                 ],
                 fixedHeader: {
                     header: true,

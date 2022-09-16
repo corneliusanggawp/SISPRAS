@@ -122,10 +122,10 @@
                             <th>Merk:</th>
                             <th class="none">Kategori:</th>
                             <th class="none">Spesifikasi:</th>
-                            <th>Jumlah:</th>
-                            <th>Satuan:</th>
-                            <th>Harga:</th>
-                            <th>Sub Total:</th>
+                            <th class="text-center">Jumlah:</th>
+                            <th class="none">Satuan:</th>
+                            <th class="text-center">Harga:</th>
+                            <th class="text-center">Sub Total:</th>
                             <th>Status:</th>
                         </tr>
                     </thead>
@@ -143,8 +143,8 @@
                             <td>@PengadaanInvestasi.SPESIFIKASI</td>
                             <td>@PengadaanInvestasi.JUMLAH</td>
                             <td>@PengadaanInvestasi.SATUAN</td>
-                            <td>@((PengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
-                            <td>@((PengadaanInvestasi.JUMLAH * PengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                            <td class="text-right">@((PengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
+                            <td class="text-right">@((PengadaanInvestasi.JUMLAH * PengadaanInvestasi.HARGA_SATUAN).ToString("C0", culture))</td>
                             <td>
                                 @if(@PengadaanInvestasi.STATUS_APPROVAL){
                                 <span class="badge badge-success">

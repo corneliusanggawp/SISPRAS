@@ -32,11 +32,11 @@
                             <tr>
                                 <th>Nomor PO:</th>
                                 <th>Tanggal PO:</th>
-                                <th class="none">Supplier:</th>
+                                <th>Supplier:</th>
                                 <th class="none">Total Tanpa Pajak:</th>
                                 <th class="none">Pajak:</th>
                                 <th class="none">Diskon</th>
-                                <th>Total</th>
+                                <th class="text-center">Total</th>
                                 <th>Status:</th>
                             </tr>
                         </thead>
@@ -150,7 +150,7 @@
                             <th class="none">Total Tanpa Pajak:</th>
                             <th class="none">Pajak:</th>
                             <th class="none">Diskon</th>
-                            <th>Total</th>
+                            <th class="text-center">Total</th>
                             <th>Status:</th>
                             <th></th>
                         </tr>
@@ -272,8 +272,12 @@
                 },
                 columnDefs: [
                     {
-                        targets: [0,1,2,3,4,5,6,7],
+                        targets: [0,1,2,3,4,5,7],
                         className: "align-middle",
+                    },
+                    {
+                        targets: 6,
+                        className: "align-middle text-right",
                     },
                     { 
                         targets: 8, 
@@ -362,8 +366,12 @@
                 },
                 columnDefs: [
                     {
-                        targets: "_all",
+                        targets: [0,1,2,3,4,5,7],
                         className: "align-middle",
+                    },
+                    {
+                        targets: 6,
+                        className: "align-middle text-right",
                     },
                 ],
                 fixedHeader: {
