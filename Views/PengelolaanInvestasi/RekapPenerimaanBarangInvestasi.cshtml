@@ -1,0 +1,275 @@
+﻿@using System.Globalization;
+@Html.AntiForgeryToken()
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Controller"] = "Pengelolaan Investasi";
+    ViewData["Title"] = "Rekap Penerimaan Barang Investasi";
+
+    CultureInfo culture = new CultureInfo("id-ID");
+    var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
+    var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
+    var namaUnit = User.Claims.Where(c => c.Type == "namaUnit").Select(c => c.Value).Single();
+}
+
+@section Header{
+    <link rel="stylesheet" href="~/lib/jquery-datatables-checkboxes-1.2.12/css/dataTables.checkboxes.css">
+}
+
+    
+@*    <!-- Modal Dialog 1 -->
+    <div class="modal fade" id="DokumenInvoiceBarangModal" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Dokumen Invoice</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <div id="pdfViewer" style="height: 100%; width: 100%;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button id="btnPrintPDF" type="button" class="btn btn-primary">Cetak</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Dialog 1 End -->*@
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h3 class="card-title">Cari data berdasarkan:</h3>
+
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>Tahun</label>
+                                <select id="tahun" class="form-control select2bs4" style="width: 100%">
+                                    <option value="" selected>Semua tahun...</option>
+                                    @foreach (var tahun in Model.tahun)
+                                    {
+                                    <option value="@tahun.ID_TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
+                                    }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>Bulan</label>
+                            <select id="bulan" class="form-control select2bs4" style="width: 100%">
+                                <option value="" selected>Semua bulan...</option>
+                                <option value="Januari">Januari</option>
+                                <option value="Februari">Februari</option>
+                                <option value="Maret">Maret</option>
+                                <option value="April">April</option>
+                                <option value="Mei">Mei</option>
+                                <option value="Juni">Juni</option>
+                                <option value="Juli">Juli</option>
+                                <option value="Agustus">Agustus</option>
+                                <option value="September">September</option>
+                                <option value="Oktober">Oktober</option>
+                                <option value="November">November</option>
+                                <option value="Desember">Desember</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <table id="tabelRekapPenerimaanBarang" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nomor Invoice:</th>
+                            <th>Tanggal Terima:</th>
+                            <th>Jumlah Item:</th>
+                            <th>Total Invoice:</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th id="totalPenerimaanBarang" colspan="5" class="text-center">Total Rekap Penerimaan Barang: Rp.0</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script>
+        //Element Declaration
+        let tabelRekapPenerimaanBarang;
+
+        let data = {};
+
+        refreshTabelRekapPenerimaanBarang();
+
+        $('.select2bs4').select2({
+            theme: 'bootstrap4'
+        });
+
+        //Function Variabel
+        let formatRupiah = (number) => {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }
+            ).format(number);
+        }
+
+        let formatString = (value) => {
+            return '"' + value + '"';
+        };
+
+        let formatDate = (date) => {
+            return new Date(date).toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric'
+            });
+        };
+
+        function refreshTabelRekapPenerimaanBarang() {
+            tabelRekapPenerimaanBarang = $("#tabelRekapPenerimaanBarang").DataTable({
+                ajax: {
+                    url: '/PengelolaanInvestasi/getRekapPenerimaanBarangInvestasi',
+                    type: 'POST',
+                    dataSrc: 'data',
+                    beforeSend: function (request) {
+                        request.setRequestHeader("RequestVerificationToken", $('input[name="__RequestVerificationToken"]').val());
+                    },
+                },
+                columns: [
+                    { data: "NO_INVOICE" },
+                    {
+                        data: "TGL_TERIMA",
+                        render: function (data, type, row, meta) {
+                            return formatDate(data);
+                        },
+                    },
+                    { data: "JUMLAH_ITEM" },
+                    {
+                        data: "TOTAL_INVOICE",
+                        render: function (data, type, row, meta) {
+                            return formatRupiah(data);
+                        },
+                    },
+                    {
+                        data: { ID_TERIMA_ASET: "ID_TERIMA_ASET", ID_PO_INVESTASI: "ID_PO_INVESTASI" },
+                        render: function (data, type, row, meta) {
+                            return type === 'display' ?
+                                '<a id="btnShowPDF" data-id="' + data.ID_TERIMA_ASET + '" data-toggle="modal" href="#DokumenInvoiceBarangModal" class="btn btn-success btn-sm my-1"> <i class="far fa-file-pdf"> </i> Dokumen Invoice </a>' : data;
+                        },
+                    },
+                ],
+                initComplete: function (settings, json) {
+                    $('#totalPenerimaanBarang').html("Total Rekap Penerimaan Barang: " + formatRupiah($("#tabelRekapPenerimaanBarang").DataTable().column(3).data().sum()));
+                },
+                language: {
+                    url: "../json/datatables-id.json"
+                },
+                columnDefs: [
+                    {
+                        targets: [0, 1, 2, 4],
+                        className: "align-middle",
+                    },
+                    {
+                        targets: 3,
+                        className: "text-right align-middle",
+                    },
+                ],
+                fixedHeader: {
+                    header: true,
+                    footer: true,
+                },
+                paging: true,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true
+            });
+        }
+
+        //jQuery Function
+        $(document).ready(function () {
+            
+        });
+
+        $(document).on('show.bs.modal', '.modal', function () {
+            var zIndex = 1040 + 10 * $('.modal:visible').length;
+            $(this).css('z-index', zIndex);
+            setTimeout(() => $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack'));
+        });
+
+        $("#tahun, #bulan, #supplier").on("change", function () {
+            let tahun = $("#tahun").val();
+            let bulan = $("#bulan").val();
+
+            $("#tabelRekapPenerimaanBarang").DataTable()
+                .column(1).search(bulan + " " + tahun)
+                .draw();
+        });
+
+        //$("#tabelRekapPurchaseOrderInvestasi").on('click', '[id=btnShowHistoryRevisi]', function () {
+        //    data.nomorPO = $(this).data("id");
+        //    $("#tabelRekapRevisiPurchaseOrderInvestasi").DataTable().ajax.reload();
+        //});
+
+        $("#tabelRekapPenerimaanBarang").on('click', '[id=btnShowPDF]', function () {
+            $.ajax({
+                url: "/PengelolaanInvestasi/getDokumenInvoice",
+                type: "POST",
+                headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                data: { IDTerimaAset: $(this).data("id") },
+                dataType: "json",
+                success: function (result) {
+                    window.open("data:application/pdf;base64," + result, '_blank');
+                },
+            });
+        });
+
+        //$("#btnPrintPDF").on('click', function () {
+        //    let myIframe = document.getElementById("suratPemesananBarang").contentWindow;
+        //    myIframe.focus();
+        //    myIframe.print();
+        //});
+
+        jQuery.fn.dataTable.Api.register('sum()', function () {
+            return this.flatten().reduce(function (a, b) {
+                if (typeof a === 'string') {
+                    a = a.replace(/[^\d]/g, '') * 1;
+                }
+                if (typeof b === 'string') {
+                    b = b.replace(/[^\d]/g, '') * 1;
+                }
+
+                return a + b;
+            }, 0);
+        });
+    </script>
+}

@@ -617,9 +617,11 @@ namespace SISPRAS.DAO
 	                        ROUND(((((A.TOTAL_DENGAN_PAJAK + A.DISCOUNT) - (A.TOTAL_PO_TANPA_PAJAK - A.DISCOUNT))/(A.TOTAL_DENGAN_PAJAK + A.DISCOUNT)) * 100), 0)AS PAJAK,
 	                        A.TGL_PO, A.TOTAL_PO_TANPA_PAJAK, A.DISCOUNT, A.ID_SUPPLIER
                         FROM sispras.TBL_PO_INVESTASI A
+                        LEFT JOIN sispras.TBL_TERIMA_ASET C ON A.ID_PO_INVESTASI = C.ID_PO_INVESTASI
                         WHERE A.NO_PO LIKE @nomorPO + '%'
                         AND A.IS_REVISI = 0
                         AND IS_LUNAS = 0
+                        AND C.ID_TERIMA_ASET IS NULL
                     ";
 
                     var data = conn.Query<dynamic>(query, new { nomorPO = nomorPO }).ToList();
@@ -691,7 +693,10 @@ namespace SISPRAS.DAO
                         SELECT  NAMA_BARANG, MERK, SATUAN, SPESIFIKASI, HARGA_SATUAN, JUMLAH, (HARGA_SATUAN*JUMLAH) AS TOTAL, ID_DETAIL_PO_INVESTASI
                         FROM	sispras.TBL_DETAIL_PO_INVESTASI
                         INNER JOIN	sispras.TBL_PO_INVESTASI ON sispras.TBL_DETAIL_PO_INVESTASI.ID_PO_INVESTASI = sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI
-                        WHERE	sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI = @IDPurchaseOrderInvestasi AND sispras.TBL_PO_INVESTASI.IS_REVISI = 0
+                        LEFT JOIN sispras.TBL_TERIMA_ASET ON sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI = sispras.TBL_TERIMA_ASET.ID_PO_INVESTASI
+                        WHERE	sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI = @IDPurchaseOrderInvestasi 
+                        AND sispras.TBL_PO_INVESTASI.IS_REVISI = 0
+                        AND sispras.TBL_TERIMA_ASET.ID_TERIMA_ASET IS NULL
                     ";
 
                     var data = conn.Query<dynamic>(query, new { IDPurchaseOrderInvestasi = IDPurchaseOrderInvestasi }).ToList();
@@ -935,7 +940,7 @@ namespace SISPRAS.DAO
                 try
                 {
                     string query = @"
-                        SELECT	sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI, sispras.TBL_PO_INVESTASI.NO_PO, sispras.TBL_TERIMA_ASET.NO_INVOICE, sispras.TBL_TERIMA_ASET.TGL_TERIMA, sispras.TBL_TERIMA_ASET.DOKUMEN_INVOICE
+                        SELECT	sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI, sispras.TBL_PO_INVESTASI.NO_PO, sispras.TBL_TERIMA_ASET.NO_INVOICE, sispras.TBL_TERIMA_ASET.TGL_TERIMA
                         FROM	sispras.TBL_PO_INVESTASI
                         LEFT JOIN sispras.TBL_TERIMA_ASET ON sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI = sispras.TBL_TERIMA_ASET.ID_PO_INVESTASI
                         WHERE sispras.TBL_PO_INVESTASI.NO_PO LIKE @nomorPO + '%'
@@ -969,16 +974,18 @@ namespace SISPRAS.DAO
                     string query = @"
                         if not exists(SELECT ID_TERIMA_ASET FROM sispras.TBL_TERIMA_ASET WHERE ID_PO_INVESTASI = @IDPurchaseOrderInvestasi)
 	                        begin
-		                        SELECT NAMA_BARANG AS NAMA_ASET, MERK, SATUAN, HARGA_SATUAN, JUMLAH, (JUMLAH * HARGA_SATUAN) AS TOTAL, ID_DETAIL_PO_INVESTASI
+		                        SELECT NAMA_BARANG AS NAMA_ASET, MERK, SATUAN, HARGA_SATUAN, JUMLAH, JUMLAH AS JUMLAH_MAX, (JUMLAH * HARGA_SATUAN) AS TOTAL, ID_DETAIL_PO_INVESTASI
 		                        FROM sispras.TBL_DETAIL_PO_INVESTASI
 		                        WHERE ID_PO_INVESTASI = @IDPurchaseOrderInvestasi
 	                        end
                         else
 	                        begin
-		                        SELECT	NAMA_ASET, MERK, SATUAN, HARGA_SATUAN, JUMLAH, (JUMLAH * HARGA_SATUAN) AS TOTAL, ID_DETAIL_PO_INVESTASI
-		                        FROM	sispras.TBL_DETAIL_TERIMA_ASET
-		                        LEFT JOIN sispras.TBL_TERIMA_ASET ON sispras.TBL_DETAIL_TERIMA_ASET.ID_TERIMA_ASET = sispras.TBL_TERIMA_ASET.ID_TERIMA_ASET
-		                        WHERE	sispras.TBL_TERIMA_ASET.ID_PO_INVESTASI = @IDPurchaseOrderInvestasi
+                                SELECT	sispras.TBL_DETAIL_TERIMA_ASET.NAMA_ASET, sispras.TBL_DETAIL_TERIMA_ASET.MERK, sispras.TBL_DETAIL_TERIMA_ASET.SATUAN, sispras.TBL_DETAIL_TERIMA_ASET.HARGA_SATUAN, sispras.TBL_DETAIL_TERIMA_ASET.JUMLAH, sispras.TBL_DETAIL_PO_INVESTASI.JUMLAH AS JUMLAH_MAX,(sispras.TBL_DETAIL_TERIMA_ASET.JUMLAH * sispras.TBL_DETAIL_TERIMA_ASET.HARGA_SATUAN) AS TOTAL, sispras.TBL_DETAIL_TERIMA_ASET.ID_DETAIL_PO_INVESTASI
+                                FROM	sispras.TBL_DETAIL_TERIMA_ASET
+                                LEFT JOIN sispras.TBL_TERIMA_ASET ON sispras.TBL_DETAIL_TERIMA_ASET.ID_TERIMA_ASET = sispras.TBL_TERIMA_ASET.ID_TERIMA_ASET
+                                LEFT JOIN sispras.TBL_DETAIL_PO_INVESTASI ON sispras.TBL_DETAIL_TERIMA_ASET.ID_DETAIL_PO_INVESTASI = sispras.TBL_DETAIL_PO_INVESTASI.ID_DETAIL_PO_INVESTASI
+                                WHERE	sispras.TBL_TERIMA_ASET.ID_PO_INVESTASI = @IDPurchaseOrderInvestasi
+                                AND sispras.TBL_DETAIL_TERIMA_ASET.JUMLAH < sispras.TBL_DETAIL_PO_INVESTASI.JUMLAH
 	                        end
                     ";
 
@@ -1001,14 +1008,184 @@ namespace SISPRAS.DAO
             }
         }
 
+        public DBOutput addTerimaAset(TerimaAset obj)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
 
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        if not exists(select ID_TERIMA_ASET from sispras.TBL_TERIMA_ASET where ID_PO_INVESTASI = @IDPurchaseOrderInvestasi)
+	                        begin
+                                INSERT INTO sispras.TBL_TERIMA_ASET (ID_PO_INVESTASI, TGL_TERIMA, NO_INVOICE, TOTAL_INVOICE, JUMLAH_ITEM, USER_ID, INSERT_DATE, IP_ADDRESS, DOKUMEN_INVOICE)
+                                OUTPUT INSERTED.ID_TERIMA_ASET
+                                VALUES (@IDPurchaseOrderInvestasi, @tanggalTerima, @nomorInvoice, 0, 0, @userID, @insertDate, @IPAddress, @DokumenInvoiceByte)
+                            end
+                        else
+                            begin
+                                UPDATE sispras.TBL_TERIMA_ASET
+                                SET NO_INVOICE = @nomorInvoice, TGL_TERIMA = @insertDate, INSERT_DATE = @tanggalTerima, DOKUMEN_INVOICE = @DokumenInvoiceByte
+                                OUTPUT INSERTED.ID_TERIMA_ASET
+                                WHERE  (NO_INVOICE = @nomorInvoice)
+                            end
+                    ";
 
+                    var data = conn.QueryFirstOrDefault<int>(query, obj);
 
+                    output.data = data;
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
 
+        public DBOutput addDetailTerimaAset(DetailTerimaAset obj)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
 
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        if not exists(select ID_DETAIL_TERIMA from sispras.TBL_DETAIL_TERIMA_ASET where ID_DETAIL_PO_INVESTASI = @IDDetailPurchaseOrderInvestasi)
+	                        begin
+                                INSERT INTO sispras.TBL_DETAIL_TERIMA_ASET(ID_TERIMA_ASET, MERK, SATUAN, NAMA_ASET, SPESIFIKASI, HARGA_SATUAN, JUMLAH, IS_PROCESSED, ID_DETAIL_PO_INVESTASI)
+                                SELECT		@IDTerimaAset, MERK, SATUAN, NAMA_BARANG, SPESIFIKASI, HARGA_SATUAN, @jumlah, 0, ID_DETAIL_PO_INVESTASI
+                                FROM        sispras.TBL_DETAIL_PO_INVESTASI
+                                WHERE       (ID_DETAIL_PO_INVESTASI = @IDDetailPurchaseOrderInvestasi)
+                            end
+                        else
+                            begin
+                                UPDATE sispras.TBL_DETAIL_TERIMA_ASET
+                                SET JUMLAH = @jumlah
+                                WHERE  (ID_DETAIL_PO_INVESTASI = @IDDetailPurchaseOrderInvestasi)
+                            end
+                    ";
 
+                    output.data = conn.Execute(query, obj);
 
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
 
+        public DBOutput updateTerimaAset(int IDTerimaAset)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        UPDATE sispras.TBL_TERIMA_ASET
+                        SET TOTAL_INVOICE = (SELECT	SUM(JUMLAH*HARGA_SATUAN) FROM sispras.TBL_DETAIL_TERIMA_ASET WHERE (ID_TERIMA_ASET = @IDTerimaAset)), JUMLAH_ITEM = (SELECT COUNT(*) FROM sispras.TBL_DETAIL_TERIMA_ASET WHERE (ID_TERIMA_ASET = @IDTerimaAset))
+                        WHERE  (ID_TERIMA_ASET = @IDTerimaAset)
+                    ";
+
+                    output.data = conn.QueryFirstOrDefault<int>(query, new { IDTerimaAset = IDTerimaAset });
+
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public DBOutput getRekapPenerimaanBarangInvestasi()
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT  ID_TERIMA_ASET, ID_PO_INVESTASI, TGL_TERIMA, NO_INVOICE, TOTAL_INVOICE, JUMLAH_ITEM, DOKUMEN_INVOICE
+                        FROM    sispras.TBL_TERIMA_ASET
+                    ";
+
+                    output.data = conn.Query<dynamic>(query).ToList();
+
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public byte[] getDokumenInvoice(int IDTerimaAset)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT DOKUMEN_INVOICE
+                        FROM sispras.TBL_TERIMA_ASET
+                        WHERE ID_TERIMA_ASET = @IDTerimaAset
+                    ";
+
+                    var data = conn.QueryFirstOrDefault<byte[]>(query, new { IDTerimaAset = IDTerimaAset });
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
 
 
 
@@ -1049,80 +1226,7 @@ namespace SISPRAS.DAO
 
 
 
-        public DBOutput addTerimaAset(TerimaAset obj)
-        {
-            DBOutput output = new DBOutput();
-            output.status = true;
 
-            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
-            {
-                try
-                {
-                    string query = @"
-                        if not exists(select ID_TERIMA_ASET from sispras.TBL_TERIMA_ASET where NO_INVOICE = @nomorInvoice)
-	                        begin
-                                INSERT INTO sispras.TBL_TERIMA_ASET (ID_PO_INVESTASI, TGL_TERIMA, NO_INVOICE, TOTAL_INVOICE, JUMLAH_ITEM, USER_ID, INSERT_DATE, IP_ADDRESS)
-                                OUTPUT INSERTED.ID_TERIMA_ASET
-                                VALUES (@IDPurchaseOrderInvestasi, @tanggalTerima, @nomorInvoice, @totalInvoice, @jumlahItem, @userID, @insertDate, @IPAddress)
-                            end
-                        else
-                            begin
-                                SELECT  ID_TERIMA_ASET
-                                FROM    sispras.TBL_TERIMA_ASET
-                                WHERE   (NO_INVOICE = @nomorInvoice)
-                            end";
-
-                    var data = conn.QueryFirstOrDefault<int>(query, obj);
-
-                    output.data = data;
-                    return output;
-                }
-                catch (Exception ex)
-                {
-                    output.status = false;
-                    output.pesan = ex.Message;
-                    output.data = new List<string>();
-                    return output;
-                }
-                finally
-                {
-                    conn.Dispose();
-                }
-            }
-        }
-
-        public DBOutput addDetailTerimaAset(DetailTerimaAset obj)
-        {
-            DBOutput output = new DBOutput();
-            output.status = true;
-
-            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
-            {
-                try
-                {
-                    string query = @"
-                        INSERT INTO sispras.TBL_DETAIL_TERIMA_ASET (ID_TERIMA_ASET, MERK, IS_PROCESSED, ID_DETAIL_PO_INVESTASI)
-                        SELECT      @IDTerimaAset, DPOI.MERK, @isProccessed, @IDDetailPurchaseOrderInvestasi
-                        FROM        sispras.TBL_DETAIL_PO_INVESTASI DPOI
-                        WHERE       (DPOI.ID_DETAIL_PO_INVESTASI = @IDDetailPurchaseOrderInvestasi)";
-
-                    output.data = conn.Execute(query, obj);
-
-                    return output;
-                }
-                catch (Exception ex)
-                {
-                    output.status = false;
-                    output.pesan = ex.Message;
-                    output.data = new List<string>();
-                    return output;
-                }
-                finally
-                {
-                    conn.Dispose();
-                }
-            }
-        }
 
 
     }

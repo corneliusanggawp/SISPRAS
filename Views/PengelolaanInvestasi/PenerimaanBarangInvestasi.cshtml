@@ -71,13 +71,13 @@
                             <div class="card-body">
                                 <input id="IDPurchaseOrderInvestasi" name="IDPurchaseOrderInvestasi" type="hidden" class="form-control" readonly required />
                                 <div class="row">
-                                    <div class="col-6">
+                                    <div class="col-4">
                                         <div class="form-group">
                                             <label>Nomor Invoice <b class="text-danger">*</b></label>
                                             <input id="nomorInvoice" name="nomorInvoice" type="text" class="form-control" placeholder="Masukan Nomor Invoice..." required />
                                         </div>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-4">
                                         <div class="form-group">
                                             <label>Tanggal Terima <b class="text-danger">*</b></label>
                                             <div class="input-group date" id="reservationdate" data-target-input="nearest">
@@ -88,7 +88,7 @@
                                             </div>
                                         </div>
                                     </div>
-@*                                    <div class="col-4">
+                                    <div class="col-4">
                                         <div class="form-group">
                                             <label>Dokumen Invoice<b class="text-danger">*</b></label>
                                             <div class="input-group">
@@ -98,7 +98,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>*@
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -179,9 +179,10 @@
                         }
                     },
                     {
-                        data: "JUMLAH", render: function (data, type, row, meta) {
+                        data: { JUMLAH: "JUMLAH", JUMLAH_MAX: "JUMLAH_MAX" },
+                        render: function (data, type, row, meta) {
                             return type === 'display' ?
-                                '<input id="jumlah" name="jumlah" type="number" min="0" max="'+ data +'" class="form-control form-control-border input-sm" value="'+ data +'" required/>' : data;
+                                '<input id="jumlah" name="jumlah" type="number" min="0" max="' + data.JUMLAH_MAX + '" class="form-control form-control-border input-sm" value="' + data.JUMLAH + '" required/>' : data;
                         }
                     },
                     {
@@ -229,6 +230,26 @@
             });
         }
 
+        function clsInputTerimaAset(){
+            $("#findNomorPO").val('');
+            $("#IDPurchaseOrderInvestasi").val('');
+            $("#nomorInvoice").val('');
+            $("#tanggalTerima").val('');
+            $('#dokumenInvoice').val('');
+            $('#dokumenInvoice').next('label').html('Pilih File');
+
+
+            $("#nomorInvoice").attr('readonly', false);
+
+            $('#formDetailTerimaBarang').removeClass("was-validated");
+            $('#formTerimaBarang').removeClass("was-validated");
+            $('#formTerimaBarangFooter').removeClass("was-validated");
+
+            $("#tabelTerimaBarang").DataTable().ajax.reload(function () {
+                $("#totalPenerimaan").val(formatRupiah($("#tabelTerimaBarang").DataTable().columns(5).data().sum()))
+            });
+        }
+
         //jQuery Function
         $("#tabelTerimaBarang").on("input", "[id=jumlah]", function () {
             let hargaSatuan = $("#tabelTerimaBarang").DataTable().cell($(this).closest('tr'), 3).data();
@@ -256,6 +277,8 @@
                     cancelButtonText: "Batal",
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        let terimaAset = new FormData($('#formTerimaBarang')[0]);
+
                         let dataDetailTerimaAset = $("#tabelTerimaBarang tbody tr").map(function () {
                             return {
                                 jumlah: $(this).find("#jumlah").val(),
@@ -263,43 +286,36 @@
                             };
                         }).get();
 
-
-                        let terimaAset = new FormData($('#formTerimaBarang')[0]);
-                        let detailTerimaAsetArr = new FormData();
-
-                        dataDetailTerimaAset.forEach(item => {
-                            detailTerimaAsetArr.append(`detailTerimaAsetArr[]`, JSON.stringify(item));
-                        });
-
-                        //for (var i = 0, valuePair; valuePair = dataDetailTerimaAset[i]; i++)
-                        //    for (var j in valuePair) detailTerimaAsetArr.append(j, valuePair[j]);
-                        for (var pair of detailTerimaAsetArr.entries()) {
-                            console.log(pair);
-                        }
-
-
-                        //for(var pair of terimaAset.entries()) {
-                        //   console.log(pair); 
-                        //}
-
-
-
                         $.ajax({
                             url: "/PengelolaanInvestasi/addPenerimaanBarang",
                             type: "POST",
                             headers: { RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
                             data: terimaAset,
-                            //dataType: "json",
                             contentType: false,
                             processData: false,
                             success: function (result) {
-                                console.log(result);
-                                //if (result.status) {
-                                //    toastr.success(result.pesan, "Berhasil");
-
-                                //} else {
-                                //    toastr.error(result.pesan, "Gagal");
-                                //}
+                                if (result.status) {
+                                    $.ajax({
+                                        url: "/PengelolaanInvestasi/addDetailPenerimaanBarang",
+                                        type: "POST",
+                                        headers: { RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+                                        data: {
+                                            detailTerimaAsetArr: dataDetailTerimaAset,
+                                            IDTerimaAset: result.data,
+                                        },
+                                        dataType: "json",
+                                        success: function (result) {
+                                            if (result.status) {
+                                                toastr.success(result.pesan, "Berhasil");
+                                                clsInputTerimaAset();
+                                            } else {
+                                                toastr.error(result.pesan, "Gagal");
+                                            }
+                                        },
+                                    });
+                                } else {
+                                    toastr.error(result.pesan, "Gagal");
+                                }
                             },
                         });
                     }
@@ -326,7 +342,6 @@
                                     IDPurchaseOrderInvestasi : item.ID_PO_INVESTASI,
                                     nomorInvoice: item.NO_INVOICE,
                                     tanggalTerima: item.TGL_TERIMA,
-                                    dokumenInvoice: item.DOKUMEN_INVOICE,
                                 };
                             })
                         );
@@ -337,14 +352,19 @@
                 $("#findNomorPO").val(i.item.value);
 
                 $("#IDPurchaseOrderInvestasi").val(i.item.IDPurchaseOrderInvestasi);
-                $("#nomorInvoice").val(i.item.nomorInvoice);
-                $("#tanggalTerima").val(i.item.tanggalTerima);
-                $("#dokumenInvoice").val(i.item.dokumenInvoice);
 
+                if (i.item.nomorInvoice == null) {
+                    $("#nomorInvoice").val('');
+                    $("#nomorInvoice").attr('readonly', false);
+                }else{
+                    $("#nomorInvoice").val(i.item.nomorInvoice);
+                    $("#nomorInvoice").attr('readonly', true);
+                }
+                
                 if(i.item.tanggalTerima == null){
                     $("#tanggalTerima").val(new Date().toLocaleDateString());
                 }else{
-                    $("#tanggalTerima").val(new Date().toLocaleDateString());
+                    $("#tanggalTerima").val(new Date(i.item.tanggalTerima).toLocaleDateString());
                 }
 
                 $("#tabelTerimaBarang").DataTable().ajax.reload(function () {

@@ -100,9 +100,10 @@ namespace SISPRAS.Models
         public string IPAddress { get; set; }
         public string insertDate { get; set; }
         [Required]
-        //[MaxFileSize(20 * 1024 * 1024)]
-        //[AllowedExtensions(new string[] { ".pdf", ".doc", ".docx" })]
+        [MaxFileSize(20 * 1024 * 1024)]
+        [AllowedExtensions(new string[] { ".pdf", ".doc", ".docx" })]
         public IFormFile DokumenInvoice { get; set; }
+        public byte[] DokumenInvoiceByte { get; set; }
     }
 
     public class DetailTerimaAset

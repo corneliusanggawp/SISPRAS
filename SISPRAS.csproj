@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\pdf\Dokumen\" />
+    <Folder Include="wwwroot\pdf\Dokumen Invoice\" />
   </ItemGroup>
 
 </Project>

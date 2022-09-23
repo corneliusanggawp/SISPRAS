@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -11,6 +12,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Dynamic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -112,6 +114,13 @@ namespace SISPRAS.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult PenerimaanBarangInvestasi()
         {
+            return View(myObj);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult RekapPenerimaanBarangInvestasi()
+        {
+            myObj.tahun = masterDAO.getAllTahunAnggaran();
             return View(myObj);
         }
 
@@ -488,108 +497,105 @@ namespace SISPRAS.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult addPenerimaanBarang(TerimaAset terimaAset, DetailTerimaAset[] detailTerimaAsetArr)
+        public IActionResult addPenerimaanBarang(TerimaAset terimaAset)
         {
             DBOutput data = new DBOutput();
 
-            
-            data.status = false;
-            data.pesan = "mohon periksa kembali inputan anda";
-            data.data = terimaAset;
+            if (ModelState.IsValid)
+            {
+                using (MemoryStream mStream = new())
+                {
+                    terimaAset.DokumenInvoice.CopyTo(mStream);
+                    terimaAset.DokumenInvoiceByte = mStream.ToArray();
+                }
+                terimaAset.userID = User.Claims.Where(c => c.Type == "NPP").Select(c => c.Value).SingleOrDefault();
+                terimaAset.IPAddress = HttpContext.Connection.RemoteIpAddress.ToString();
+                terimaAset.insertDate = DateTime.Now.ToString();
+
+                var addTerimaAset = mainDAO.addTerimaAset(terimaAset);
+
+                if(addTerimaAset.status == true)
+                {
+                    data.status = true;
+                    data.data = addTerimaAset.data;
+                }
+                else
+                {
+                    data.status = false;
+                    data.pesan = addTerimaAset.pesan;
+                }
+            }
+            else
+            {
+                data.status = false;
+                data.pesan = "mohon periksa kembali inputan anda";
+            }
 
             return Json(data);
         }
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult addPenerimaanBarang(TerimaAset terimaAset, DetailTerimaAset[] detailTerimaAsetArr)
-        //{
-        //    DBOutput data = new DBOutput();
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult addDetailPenerimaanBarang(DetailTerimaAset[] detailTerimaAsetArr, int IDTerimaAset)
+        {
+            DBOutput data = new DBOutput();
 
-        //    //if (ModelState.IsValid && detailTerimaAsetArr.Length > 0)
-        //    //{
-        //    //    data.status = false;
-        //    //    data.pesan = "nononono";
-        //    //}
-        //    //else
-        //    //{
-        //    //    data.status = false;
-        //    //    data.pesan = "niceee";
-        //    //}
+            if (detailTerimaAsetArr.Length > 0)
+            {
+                var success = 0;
 
-        //    data.status = false;
-        //    data.pesan = "niceee";
+                foreach (var detailTerimaAset in detailTerimaAsetArr)
+                {
+                    detailTerimaAset.IDTerimaAset = IDTerimaAset;
+                    var addDetailTerimaAset = mainDAO.addDetailTerimaAset(detailTerimaAset);
 
-        //    return Json(data);
-        //}
+                    if (addDetailTerimaAset.status == true)
+                    {
+                        success++;
+                    }
+                }
+
+                if (success != 0)
+                {
+                    data.status = true;
+                    data.pesan = "Sejumlah " + success + " dari " + detailTerimaAsetArr.Length + " barang berhasil diperbarui";
+                }
+                else
+                {
+                    mainDAO.updateTerimaAset(IDTerimaAset);
+
+                    data.status = false;
+                    data.pesan = "Sejumlah 0 dari " + detailTerimaAsetArr.Length + " barang diperbarui";
+                }
+            }
+            else
+            {
+                data.status = false;
+                data.pesan = "mohon periksa kembali inputan anda";
+            }
+
+            return Json(data);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult getRekapPenerimaanBarangInvestasi()
+        {
+            var rekapPurchaseOrderInvestasi = mainDAO.getRekapPenerimaanBarangInvestasi();
+            return Json(rekapPurchaseOrderInvestasi);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult getDokumenInvoice(int IDTerimaAset)
+        {
+            byte[] byteArray = mainDAO.getDokumenInvoice(IDTerimaAset);
+
+            return Json(Convert.ToBase64String(byteArray));
+        }
 
 
 
-
-
-
-
-
-
-
-
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult addPenerimaanBarang(string nomorInvoice, string tanggalTerima, decimal totalInvoice, string IDDetailPO, int IDPO)
-        //{
-            //TerimaAset TA = new TerimaAset();
-
-            //TA.tanggalTerima = tanggalTerima;
-            //TA.nomorInvoice = nomorInvoice;
-            //TA.totalInvoice = totalInvoice;
-            //TA.IDPurchaseOrderInvestasi = IDPO;
-            //TA.userID = User.Claims.Where(c => c.Type == "NPP").Select(c => c.Value).SingleOrDefault();
-            //TA.IPAddress = HttpContext.Connection.RemoteIpAddress.ToString();
-            //TA.insertDate = DateTime.Now.ToString();
-            //var IDDetailPurchaseOrder = IDDetailPO.Split(",").Select(Int32.Parse).ToArray();
-            //TA.jumlahItem = IDDetailPurchaseOrder.Length;
-
-            //var checkTerimaAset = mainDAO.addTerimaAset(TA);
-
-            //if (checkTerimaAset.status == true)
-            //{
-            //    DetailTerimaAset DTA = new DetailTerimaAset();
-
-            //    DTA.IDTerimaAset = checkTerimaAset.data;
-            //    DTA.isProccessed = false;
-            //    var success = 0;
-
-            //    foreach (int IDDetail in IDDetailPurchaseOrder)
-            //    {
-            //        DTA.IDDetailPurchaseOrderInvestasi = IDDetail;
-
-            //        var inpDetailTerimaAset = mainDAO.addDetailTerimaAset(DTA);
-
-            //        if (inpDetailTerimaAset.status == true)
-            //        {
-            //            success++;
-            //        }
-            //        else
-            //        {
-            //            TempData["error"] = inpDetailTerimaAset.pesan;
-            //        }
-            //    }
-
-            //    if (success != 0)
-            //    {
-            //        TempData["success"] = "memproses " + success + " dari " + IDDetailPurchaseOrder.Length + " aset";
-            //    }
-            //}
-            //else
-            //{
-            //    TempData["error"] = checkTerimaAset.pesan;
-            //}
-
-        //    TempData["success"] = "memproses penerimaan barang";
-
-        //    return RedirectToAction("PenerimaanBarangInvestasi");
-        //}
 
 
         public JsonResult ajaxGetDetailPurchaseOrderPenerimaanBarang(string nomorPO)
@@ -617,9 +623,6 @@ namespace SISPRAS.Controllers
             var data = masterDAO.getSubKategori(IDKategori);
             return Json(data);
         }
-
-
-
 
         public string toRomanNumber(int num)
         {
