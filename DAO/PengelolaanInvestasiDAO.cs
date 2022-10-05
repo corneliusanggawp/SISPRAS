@@ -945,6 +945,7 @@ namespace SISPRAS.DAO
                         LEFT JOIN sispras.TBL_TERIMA_ASET ON sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI = sispras.TBL_TERIMA_ASET.ID_PO_INVESTASI
                         WHERE sispras.TBL_PO_INVESTASI.NO_PO LIKE @nomorPO + '%'
                         AND (sispras.TBL_PO_INVESTASI.IS_REVISI = 0)
+                        AND (IS_LUNAS = 0)
                     ";
 
                     var data = conn.Query<dynamic>(query, new { nomorPO = nomorPO }).ToList();
@@ -1107,7 +1108,13 @@ namespace SISPRAS.DAO
                     string query = @"
                         UPDATE sispras.TBL_TERIMA_ASET
                         SET TOTAL_INVOICE = (SELECT	SUM(JUMLAH*HARGA_SATUAN) FROM sispras.TBL_DETAIL_TERIMA_ASET WHERE (ID_TERIMA_ASET = @IDTerimaAset)), JUMLAH_ITEM = (SELECT COUNT(*) FROM sispras.TBL_DETAIL_TERIMA_ASET WHERE (ID_TERIMA_ASET = @IDTerimaAset))
-                        WHERE  (ID_TERIMA_ASET = @IDTerimaAset)
+                        WHERE (ID_TERIMA_ASET = @IDTerimaAset)
+
+						UPDATE sispras.TBL_PO_INVESTASI
+						SET IS_LUNAS = 1
+						FROM sispras.TBL_PO_INVESTASI
+						LEFT JOIN sispras.TBL_TERIMA_ASET ON sispras.TBL_PO_INVESTASI.ID_PO_INVESTASI = sispras.TBL_TERIMA_ASET.ID_PO_INVESTASI
+						WHERE (ID_TERIMA_ASET = @IDTerimaAset)
                     ";
 
                     output.data = conn.QueryFirstOrDefault<int>(query, new { IDTerimaAset = IDTerimaAset });
@@ -1187,18 +1194,6 @@ namespace SISPRAS.DAO
             }
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
         public List<dynamic> getAllSupplier()
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
@@ -1223,11 +1218,5 @@ namespace SISPRAS.DAO
                 }
             }
         }
-
-
-
-
-
-
     }
 }

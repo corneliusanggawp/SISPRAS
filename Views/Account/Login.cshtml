@@ -31,8 +31,8 @@
                         <h5 class="modal-title" id="staticBackdropLabel">Login sebagai</h5>
                     </div>
                     <div class="modal-body">
-                        <input type="hidden" class="form-control" id="username" name="username" value="" readonly="readonly">
-                        <input type="hidden" class="form-control" id="password" name="password" value="" readonly="readonly">
+                        <input type="hidden" class="form-control" id="username" name="username" value="" readonly="readonly" required>
+                        <input type="hidden" class="form-control" id="password" name="password" value="" readonly="readonly" required>
                         <select id="role" name="role" class="form-select" required></select>
                     </div>
                     <div class="modal-footer">
@@ -79,14 +79,14 @@
                                 <span class="input-group-text" id="addon-wrapping">
                                     <i class="mdi mdi-account" aria-hidden="true"></i>
                                 </span>
-                                <input type="text" id="inpUsername" class="form-control" placeholder="Username" name="username" aria-label="Username" aria-describedby="addon-wrapping" />
+                                <input type="text" id="inpUsername" class="form-control" placeholder="Username" name="username" aria-label="Username" aria-describedby="addon-wrapping" required />
                             </div>
                             <!-- Password Field -->
                             <div data-aos="fade-left" data-aos-delay="400" class="input-group flex-nowrap mb-4 px-5">
                                 <span class="input-group-text" id="addon-wrapping">
                                     <i class="mdi mdi-key" aria-hidden="true"></i>
                                 </span>
-                                <input type="password" id="inpPassword" class="form-control" placeholder="Password" aria-label="Password" name="password" aria-describedby="addon-wrapping" />
+                                <input type="password" id="inpPassword" class="form-control" placeholder="Password" aria-label="Password" name="password" aria-describedby="addon-wrapping" required />
                             </div>
                             <!-- Submit Button -->
                             <div data-aos="fade-left" data-aos-delay="500" class="input-group d-flex justify-content-center">

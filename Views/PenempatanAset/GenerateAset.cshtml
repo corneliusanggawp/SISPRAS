@@ -12,3 +12,137 @@
     var namaUnit = User.Claims.Where(c => c.Type == "namaUnit").Select(c => c.Value).Single();
 }
 
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <table id="tabelDetailTerimaAset" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nama Aset</th>
+                            <th>Merk</th>
+                            <th>Jumlah</th>
+                            <th>Satuan</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        let tabelDetailTerimaAset;
+
+        refreshTabelDetailTerimaAset();
+
+        //Function Variabel
+        let formatRupiah = (number) => {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }
+            ).format(number);
+        }
+
+        let formatString = (value) => {
+            return '"' + value + '"';
+        };
+
+        let formatDate = (date) => {
+            return new Date(date).toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric'
+            });
+        };
+
+        function refreshTabelDetailTerimaAset() {
+            tabelDetailTerimaAset = $("#tabelDetailTerimaAset").DataTable({
+                ajax: {
+                    url: '/PenempatanAset/getRekapDetailTerimaAset',
+                    type: 'POST',
+                    dataSrc: 'data',
+                    beforeSend: function (request) {
+                        request.setRequestHeader("RequestVerificationToken", $('input[name="__RequestVerificationToken"]').val());
+                    },
+                },
+                columns: [
+                    { data: "NAMA_ASET" },
+                    { data: "MERK" },
+                    { data: "JUMLAH" },
+                    { data: "SATUAN" },
+                    {
+                        data: "ID_DETAIL_TERIMA",
+                        render: function (data, type, row, meta) {
+                            return type === 'display' ?
+                                '<a id="btnGenerateAset" data-id="' + data + '" data-toggle="modal" href="#GenerateAsetModal" class="btn btn-success btn-sm my-1"> <i class="fas fa-sync-alt"> </i> Generate </a>' : data;
+                        },
+                    },
+                ],
+                language: {
+                    url: "../json/datatables-id.json"
+                },
+                columnDefs: [
+                    {
+                        targets: [0, 1, 2, 3],
+                        className: "align-middle",
+                    },
+                    {
+                        targets: 4,
+                        className: "text-center align-middle",
+                        orderable: false,
+                    },
+                ],
+                fixedHeader: {
+                    header: true,
+                    footer: true,
+                },
+                paging: true,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true
+            });
+        }
+
+        //jQuery Function
+        $("#tabelDetailTerimaAset").on('click', '[id=btnGenerateAset]', function () {
+            Swal.fire({
+                title: 'Lanjutkan Proses Generate Aset?',
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                text: "Mohon pastikan aset yang dipilih sudah sesuai",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#007bff',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, lanjutkan!',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "/PenempatanAset/generateAset",
+                        type: "POST",
+                        headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                        data: { IDDetailTerimaAset: $(this).data("id") },
+                        dataType: "json",
+                        success: function (result) {
+                            if (result.status) {
+                                toastr.success(result.pesan, 'Berhasil');
+                                $('#tabelDetailTerimaAset').DataTable().ajax.reload();
+                            } else {
+                                toastr.error(result.pesan, 'Gagal');
+                            }
+                        },
+                    });
+                }
+            })
+        });
+
+    </script>
+}

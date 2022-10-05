@@ -74,7 +74,7 @@ namespace SISPRAS.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult ApprovalPencairanInvestasi()
+        public IActionResult ApprovalPengadaanAset()
         {
             var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
             var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).Single();
@@ -557,13 +557,12 @@ namespace SISPRAS.Controllers
 
                 if (success != 0)
                 {
+                    mainDAO.updateTerimaAset(IDTerimaAset);
                     data.status = true;
                     data.pesan = "Sejumlah " + success + " dari " + detailTerimaAsetArr.Length + " barang berhasil diperbarui";
                 }
                 else
                 {
-                    mainDAO.updateTerimaAset(IDTerimaAset);
-
                     data.status = false;
                     data.pesan = "Sejumlah 0 dari " + detailTerimaAsetArr.Length + " barang diperbarui";
                 }

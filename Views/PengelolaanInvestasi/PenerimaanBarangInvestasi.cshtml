@@ -238,9 +238,12 @@
             $('#dokumenInvoice').val('');
             $('#dokumenInvoice').next('label').html('Pilih File');
 
-
             $("#nomorInvoice").attr('readonly', false);
+            $("#nomorInvoice").prop("disabled", true);
+            $("#tanggalTerima").prop("disabled", true);
+            $("#dokumenInvoice").prop("disabled", true);
 
+            $("#btnPenerimaanBarang").prop("disabled", true);
             $('#formDetailTerimaBarang').removeClass("was-validated");
             $('#formTerimaBarang').removeClass("was-validated");
             $('#formTerimaBarangFooter').removeClass("was-validated");
@@ -251,6 +254,10 @@
         }
 
         //jQuery Function
+        $(document).ready(function () {
+            clsInputTerimaAset();
+        });
+
         $("#tabelTerimaBarang").on("input", "[id=jumlah]", function () {
             let hargaSatuan = $("#tabelTerimaBarang").DataTable().cell($(this).closest('tr'), 3).data();
             let jumlah = $(this).val();
@@ -366,6 +373,11 @@
                 }else{
                     $("#tanggalTerima").val(new Date(i.item.tanggalTerima).toLocaleDateString());
                 }
+
+                $("#nomorInvoice").prop("disabled", false);
+                $("#tanggalTerima").prop("disabled", false);
+                $("#dokumenInvoice").prop("disabled", false);
+                $("#btnPenerimaanBarang").prop("disabled", false);
 
                 $("#tabelTerimaBarang").DataTable().ajax.reload(function () {
                     $("#totalPenerimaan").val(formatRupiah($("#tabelTerimaBarang").DataTable().columns(5).data().sum()))

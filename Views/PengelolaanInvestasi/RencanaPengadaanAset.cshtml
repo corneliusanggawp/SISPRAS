@@ -421,7 +421,7 @@
         });
 
         $('[id=btnShowDetailRencanaKhususInvestasi]').on('click', function (e) {
-            $('#detailRencanaKhususInvestasiModal').attr("data-idrka", $(this).data("idrka"));
+            $('#detailRencanaKhususInvestasiModal').data('idrka', $(this).data("idrka"));
             let tabelDetailRencanaKhususInvestasi = $('#tabelDetailRencanaKhususInvestasi').DataTable();
 
              $.ajax({
@@ -551,7 +551,6 @@
                             toastr.error(result.pesan, 'Gagal');
                         } else {
                             toastr.success(result.pesan, 'Berhasil');
-
                             let tabelDetailRencanaKhususInvestasi = $('#tabelDetailRencanaKhususInvestasi').DataTable();
 
                             $.ajax({
