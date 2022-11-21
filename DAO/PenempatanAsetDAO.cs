@@ -43,7 +43,45 @@ namespace SISPRAS.DAO
             }
         }
 
-        public DBOutput generateAset(int IDDetailTerimaAset)
+        public DBOutput addAset(Aset obj)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        DECLARE @i AS INT = 0
+
+                        WHILE @i < @jumlah
+                        BEGIN
+                            INSERT INTO sispras.MST_ASET (ID_KATEGORI, ID_REF_SK_SIASET, ID_UNIT, ID_MST_RUANG, NAMA_BARANG, MERK, ID_REF_STATUS_KEPEMILIKAN, HARGA_BELI, ID_REF_GOL_AKTIVA, NOMOR_GARANSI, TGL_DITERIMA, STATUS, NO_DOKUMEN, SPESIFIKASI)
+                            VALUES (IDKategori, IDRefSK, IDUnit, IDMSTRuang, namaBarang, merk, IDRefStatusKepemilikan, hargaBeli, IDRefGolonganAktiva, nomorGaransi, tanggalDiterima, status, nomorDokumen, spesifikasi)
+	                        SET @i = @i + 1
+                        END
+                    ";
+
+                    output.data = conn.Execute(query, obj);
+
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public DBOutput generateAset(int IDDetailTerimaAset, string nomorDokumen, int IDMSTRuang)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -59,7 +97,7 @@ namespace SISPRAS.DAO
                         WHILE @i < @jumlahAset
                         BEGIN
 	                        INSERT INTO sispras.MST_ASET(ID_REF_SK, ID_KATEGORI, KODE_ASET, ID_UNIT, ID_REF_STATUS_KEPEMILIKAN, ID_MST_RUANG, NAMA_BARANG, MERK, HARGA_BELI, SPESIFIKASI, STATUS, KONDISI_BARANG, NO_DOKUMEN, NOMOR_GARANSI, ID_REF_GOL_AKTIVA, TGL_DITERIMA)
-	                        SELECT      ID_REF_SK, ID_KATEGORI, NULL, ID_UNIT, 1, NULL, NAMA_BARANG, sispras.TBL_DETAIL_TERIMA_ASET.MERK, sispras.TBL_DETAIL_TERIMA_ASET.HARGA_SATUAN, NULL, 'Ada', 'Baik digunakan', NULL, NULL, NULL, TGL_TERIMA
+	                        SELECT      ID_REF_SK, ID_KATEGORI, CAST(YEAR(sispras.TBL_TERIMA_ASET.TGL_TERIMA) as VARCHAR(10)) + '-' + CAST((@i+1) as VARCHAR(10)), ID_UNIT, 1, @IDMSTRuang, NAMA_BARANG, sispras.TBL_DETAIL_TERIMA_ASET.MERK, sispras.TBL_DETAIL_TERIMA_ASET.HARGA_SATUAN, sispras.TBL_DETAIL_TERIMA_ASET.SPESIFIKASI, 'Ada', 'Baik digunakan', @nomorDokumen, NULL, NULL, TGL_TERIMA
 	                        FROM        sispras.TBL_DETAIL_TERIMA_ASET
 	                        INNER JOIN	sispras.TBL_TERIMA_ASET ON sispras.TBL_DETAIL_TERIMA_ASET.ID_TERIMA_ASET = sispras.TBL_TERIMA_ASET.ID_TERIMA_ASET
 	                        INNER JOIN	sispras.TBL_DETAIL_PO_INVESTASI ON sispras.TBL_DETAIL_TERIMA_ASET.ID_DETAIL_PO_INVESTASI = sispras.TBL_DETAIL_PO_INVESTASI.ID_DETAIL_PO_INVESTASI
@@ -74,7 +112,7 @@ namespace SISPRAS.DAO
                         WHERE (ID_DETAIL_TERIMA = @IDDetailTerimaAset)
                     ";
 
-                    output.data = conn.QueryFirstOrDefault<int>(query, new { IDDetailTerimaAset = IDDetailTerimaAset });
+                    output.data = conn.QueryFirstOrDefault<int>(query, new { IDDetailTerimaAset = IDDetailTerimaAset, nomorDokumen = nomorDokumen, IDMSTRuang = IDMSTRuang });
 
                     return output;
                 }
@@ -84,6 +122,118 @@ namespace SISPRAS.DAO
                     output.pesan = ex.Message;
                     output.data = new List<string>();
                     return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public DBOutput getAllMasterAset()
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT sispras.MST_ASET.ID_ASSET, sispras.MST_ASET.KODE_ASET, sispras.MST_ASET.NAMA_BARANG, sispras.MST_ASET.MERK, sispras.REF_SUB_KATEGORI.DESKRIPSI AS SUB_KATEGORI, sispras.MST_ASET.TGL_DITERIMA, sispras.REF_GOLONGAN_AKTIVA.DESKRIPSI AS AKTIVA, sispras.MST_ASET.HARGA_BELI, sispras.MST_ASET.SPESIFIKASI, sispras.MST_ASET.KONDISI_BARANG, sispras.MST_ASET.NO_DOKUMEN
+                        FROM sispras.MST_ASET 
+                        INNER JOIN sispras.REF_SUB_KATEGORI ON sispras.MST_ASET.ID_REF_SK = sispras.REF_SUB_KATEGORI.ID_REF_SK
+                        INNER JOIN sispras.REF_GOLONGAN_AKTIVA ON sispras.MST_ASET.ID_REF_GOL_AKTIVA = sispras.REF_GOLONGAN_AKTIVA.ID_REF_GOL_AKTIVA
+                        ORDER BY sispras.MST_ASET.ID_ASSET DESC
+                    ";
+
+                    output.data = conn.Query<dynamic>(query).ToList();
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public List<dynamic> getAllGolonganAktiva()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT  *
+                        FROM    sispras.REF_GOLONGAN_AKTIVA
+                    ";
+
+                    var data = conn.Query<dynamic>(query).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public List<dynamic> getAllStatusKepemilikan()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT  *
+                        FROM    sispras.REF_STATUS_KEPEMILIKAN
+                    ";
+
+                    var data = conn.Query<dynamic>(query).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public List<dynamic> getRuangan(string IDUnit)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT ID_MST_RUANG, NAMA_RUANG
+                        FROM sispras.MST_RUANG_BANGUNAN
+                        WHERE ID_UNIT = @IDUnit
+                    ";
+                    var data = conn.Query<dynamic>(query, new { IDUnit = IDUnit }).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
                 }
                 finally
                 {

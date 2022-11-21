@@ -1,0 +1,492 @@
+﻿@using System.Globalization;
+@Html.AntiForgeryToken()
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Controller"] = "Pengelolaan Investasi";
+    ViewData["Title"] = "Entri Data Aset";
+
+    CultureInfo culture = new CultureInfo("id-ID");
+    var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
+    var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
+    var namaUnit = User.Claims.Where(c => c.Type == "namaUnit").Select(c => c.Value).Single();
+}
+
+@section Header{
+    <!-- jQuery UI -->
+    <link rel="stylesheet" href="~/lib/jquery-ui/jquery-ui.css" />
+    <!-- DataTables Select-->
+    <link rel="stylesheet" href="~/lib/jquery-datatables-checkboxes-1.2.12/css/dataTables.checkboxes.css" />
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="~/lib/daterangepicker/daterangepicker.css" />
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet" href="~/lib/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css" />
+}
+
+<div class="modal fade" id="generateAsetModal" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Generate Data Aset</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" id="formGenerateAset" enctype="multipart/form-data" novalidate>
+                <div class="modal-body">
+                    <input type="hidden" class="form-control" id="IDDetailTerimaAset" name="IDDetailTerimaAset" value="" readonly="readonly" />
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Status Barang <b class="text-danger">*</b></label>
+                                    <select id="status" name="status" class="form-control select2bs4" required>
+                                        <option value="" disabled selected>Pilih Status</option>
+                                        <option value="Ada">Ada</option>
+                                        <option value="Tidak Ada">Tidak Ada</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Status Kepemilikan <b class="text-danger">*</b></label>
+                                    <select id="IDRefStatusKepemilikan" name="IDRefStatusKepemilikan" class="form-control select2bs4" required>
+                                        <option value="" disabled selected>Pilih Status Kepemilikan</option>
+                                        @foreach (var statusKepemilikan in Model.statusKepemilikan) {
+                                            <option value="@statusKepemilikan.ID_REF_STATUS_KEPEMILIKAN">@statusKepemilikan.DESKRIPSI</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Portabilitas <b class="text-danger">*</b></label>
+                                    <select id="IDRefGolonganAktiva" name="IDRefGolonganAktiva" class="form-control select2bs4" required>
+                                        <option value="" disabled selected>Pilih Portabilitas</option>
+                                        @foreach (var golonganAktiva in Model.golonganAktiva)
+                                        {
+                                        <option value="@golonganAktiva.ID_REF_GOL_AKTIVA">@golonganAktiva.DESKRIPSI</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Tanggal Pengadaan <b class="text-danger">*</b></label>
+                                    <div class="input-group date" id="reservationdate1" data-target-input="nearest">
+                                        <input id="tanggalDiterima" name="tanggalDiterima" type="text" class="form-control datetimepicker-input" placeholder="mm/dd/yy" data-target="#reservationdate1" required />
+                                        <div class="input-group-append" data-target="#reservationdate1" data-toggle="datetimepicker">
+                                            <div class="input-group-text btn"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Nomor Garansi </label>
+                                    <input id="nomorGaransi" name="nomorGaransi" type="text" class="form-control" placeholder="Masukkan nomor garansi..." />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Nomor Dokumen</label>
+                                    <input id="nomorDokumen" name="nomorDokumen" type="text" class="form-control" placeholder="Masukkan nomor dokumen..." />
+                                </div>
+                            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Keluar</button>
+                    <button type="submit" class="btn btn-primary">Generate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="card-header p-0 border-bottom-0">
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-toggle="pill" href="#entriManualDataAsetTab" role="tab" aria-controls="entriManualDataAsetTab" aria-selected="true">Entri Manual</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="pill" href="#generateDataAsetTab" role="tab" aria-controls="generateDataAsetTab" aria-selected="false">Generate</a>
+        </li>
+    </ul>
+</div>
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="entriManualDataAsetTab" role="tabpanel" aria-labelledby="entriManualDataAsetTab">
+        <br />
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Entri Manual Data Aset</h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" id="formEntriManualAset" enctype="multipart/form-data" novalidate>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Kategori <b class="text-danger">*</b></label>
+                                    <select id="IDRefSK" name="IDRefSK" class="form-control select2bs4" required>
+                                        <option value="" disabled selected>Pilih kategori</option>
+                                        @foreach (var kategori in Model.kategori) {
+                                        <option value="" disabled>@kategori.DESKRIPSI</option>
+                                        @foreach (var subKategori in Model.subKategori) { 
+                                        if (@subKategori.ID_KATEGORI == @kategori.ID_KATEGORI) {
+                                        <option value="@kategori.ID_KATEGORI,@subKategori.ID_REF_SK">&emsp;@subKategori.DESKRIPSI</option>
+                                        }}}
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Portabilitas <b class="text-danger">*</b></label>
+                                    <select id="IDRefGolonganAktiva" name="IDRefGolonganAktiva" class="form-control select2bs4" required>
+                                        <option value="" disabled selected>Pilih Portabilitas</option>
+                                        @foreach (var golonganAktiva in Model.golonganAktiva)
+                                        {
+                                        <option value="@golonganAktiva.ID_REF_GOL_AKTIVA">@golonganAktiva.DESKRIPSI</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label>Tanggal Pengadaan <b class="text-danger">*</b></label>
+                                    <div class="input-group date" id="reservationdate1" data-target-input="nearest">
+                                        <input id="tanggalDiterima" name="tanggalDiterima" type="text" class="form-control datetimepicker-input" placeholder="mm/dd/yy" data-target="#reservationdate1" required />
+                                        <div class="input-group-append" data-target="#reservationdate1" data-toggle="datetimepicker">
+                                            <div class="input-group-text btn"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Status Barang <b class="text-danger">*</b></label>
+                                    <select id="status" name="status" class="form-control select2bs4" required>
+                                        <option value="" disabled selected>Pilih Status</option>
+                                        <option value="Ada">Ada</option>
+                                        <option value="Tidak Ada">Tidak Ada</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Status Kepemilikan <b class="text-danger">*</b></label>
+                                    <select id="IDRefStatusKepemilikan" name="IDRefStatusKepemilikan" class="form-control select2bs4" required>
+                                        <option value="" disabled selected>Pilih Status Kepemilikan</option>
+                                        @foreach (var statusKepemilikan in Model.statusKepemilikan) {
+                                            <option value="@statusKepemilikan.ID_REF_STATUS_KEPEMILIKAN">@statusKepemilikan.DESKRIPSI</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Unit Pemilik Barang <b class="text-danger">*</b></label>
+                                    <select id="IDUnit" name="IDUnit" class="form-control select2bs4" required>
+                                        <option value="" disabled selected>Pilih Unit</option>
+                                        @foreach (var unit in Model.unit) {
+                                        <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Ruang <b class="text-danger">*</b></label>
+                                    <select id="IDMSTRuang" name="IDMSTRuang" class="form-control select2bs4" required>
+                                        <option value="" disabled selected>Pilih Ruangan</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label>Nama Barang <b class="text-danger">*</b></label>
+                                    <input id="namaBarang" name="namaBarang" type="text" class="form-control" placeholder="Masukan nama barang..." required />
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Nomor Garansi </label>
+                                    <input id="nomorGaransi" name="nomorGaransi" type="text" class="form-control" placeholder="Masukkan nomor garansi..." />
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Nomor Dokumen</label>
+                                    <input id="nomorDokumen" name="nomorDokumen" type="text" class="form-control" placeholder="Masukkan nomor dokumen..." />
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label>Merk <b class="text-danger">*</b></label>
+                                    <input id="merk" name="merk" type="text" class="form-control" placeholder="Masukan merk..." required />
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Harga Satuan <b class="text-danger">*</b></label>
+                                    <input id="hargaBeli" name="hargaBeli" type="text" class="form-control" placeholder="Masukkan harga satuan barang..." required />
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Jumlah Barang <b class="text-danger">*</b></label>
+                                    <input id="jumlah" name="jumlah" type="number" class="form-control" min="1" placeholder="Masukkan jumlah barang..." required />
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-12">
+                                    <label>Spesifikasi <b class="text-danger">*</b></label>
+                                    <textarea id="spesifikasi" name="spesifikasi" class="form-control" rows="3" placeholder="Masukkan spesifikasi barang..." required></textarea>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="row justify-content-end">
+                                <button id="btnSimpanBarang" type="submit" class="btn btn-primary">Simpan Barang</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="generateDataAsetTab" role="tabpanel" aria-labelledby="generateDataAsetTab">
+        <br />
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Generate Data Aset</h3>
+                    </div>
+                    <div class="card-body">
+                        <table id="tabelDetailTerimaAset" class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nama Aset</th>
+                                    <th>Merk</th>
+                                    <th>Jumlah</th>
+                                    <th>Satuan</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <!-- jQuery UI -->
+    <script src="~/lib/jquery-ui/jquery-ui.js"></script>
+    <!-- Select -->
+    <script src="~/lib/datatables-select/js/dataTables.select.min.js"></script>
+    <!-- CheckBox -->
+    <script src="~/lib/jquery-datatables-checkboxes-1.2.12/js/dataTables.checkboxes.min.js"></script>
+    <!-- InputMask -->
+    <script src="~/lib/moment/moment.min.js"></script>
+    <script src="~/lib/inputmask/jquery.inputmask.min.js"></script>
+    <!-- date-range-picker -->
+    <script src="~/lib/daterangepicker/daterangepicker.js"></script>
+    <!-- Tempusdominus Bootstrap 4 -->
+    <script src="~/lib/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+
+    <script>
+        let tabelDetailTerimaAset;
+
+        refreshTabelDetailTerimaAset();
+
+        $('#formEntriManualAset .select2bs4').select2({
+            theme: 'bootstrap4'
+        });
+
+        $('#formGenerateAset .select2bs4').select2({
+            theme: 'bootstrap4'
+        });
+
+        $("#reservationdate1").datetimepicker({
+            format: "L",
+        });
+
+        //Function Variabel
+        let formatRupiah = (number) => {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }
+            ).format(number);
+        }
+
+        let formatString = (value) => {
+            return '"' + value + '"';
+        };
+
+        let formatDate = (date) => {
+            return new Date(date).toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric'
+            });
+        };
+
+        function refreshTabelDetailTerimaAset() {
+            tabelDetailTerimaAset = $("#tabelDetailTerimaAset").DataTable({
+                ajax: {
+                    url: '/PenempatanAset/getRekapDetailTerimaAset',
+                    type: 'POST',
+                    dataSrc: 'data',
+                    beforeSend: function (request) {
+                        request.setRequestHeader("RequestVerificationToken", $('input[name="__RequestVerificationToken"]').val());
+                    },
+                },
+                columns: [
+                    { data: "NAMA_ASET" },
+                    { data: "MERK" },
+                    { data: "JUMLAH" },
+                    { data: "SATUAN" },
+                    {
+                        data: "ID_DETAIL_TERIMA",
+                        render: function (data, type, row, meta) {
+                            return type === 'display' ?
+                                '<a id="btnGenerateAset" data-id="' + data + '" data-toggle="modal" href="#generateAsetModal" class="btn btn-success btn-sm my-1"> <i class="fas fa-sync-alt"> </i> Generate </a>' : data;
+                        },
+                    },
+                ],
+                language: {
+                    url: "../json/datatables-id.json"
+                },
+                columnDefs: [
+                    {
+                        targets: [0, 1, 2, 3],
+                        className: "align-middle",
+                    },
+                    {
+                        targets: 4,
+                        className: "text-center align-middle",
+                        orderable: false,
+                    },
+                ],
+                fixedHeader: {
+                    header: true,
+                    footer: true,
+                },
+                paging: true,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true
+            });
+        }
+
+        //jQuery Function
+        $('#generateAsetModal').on('hidden.bs.modal', function (e) {
+            $('#formGenerateAset').removeClass('was-validated');
+        });
+
+        $("#tabelDetailTerimaAset").on('click', '[id=btnGenerateAset]', function () {
+            $('#IDDetailTerimaAset').val($(this).data("id"));
+        });
+
+        $("#hargaSatuan").on('input', function () {
+            let hargaSatuan = $(this).val();
+            $("#hargaSatuan").val(formatRupiah(hargaSatuan.replace(/[^\d]/g, '') * 1));
+        });
+
+        $("#formEntriManualAset #IDUnit").on("change", function () {
+            $("#formEntriManualAset #IDMSTRuang").empty();
+            $("#formEntriManualAset #IDMSTRuang").append('<option value="" selected>Pilih Ruangan...</option>');
+
+            if ($(this).val() == "") {
+                $("#formEntriManualAset #IDMSTRuang").prop("disabled", true);
+            } else {
+                $.ajax({
+                    url: "/PenempatanAset/getRuangan",
+                    type: "POST",
+                    headers: { RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+                    data: { IDUnit: $(this).val() },
+                    dataType: "json",
+                    success: function (result) {
+                        for (var i = 0; i < result.length; i++) {
+                            $("#formEntriManualAset #IDMSTRuang").append('<option value="' + result[i].ID_MST_RUANG + '">' + result[i].NAMA_RUANG + "</option>");
+                        }
+                    },
+                });
+                $("#formEntriManualAset #IDMSTRuang").prop("disabled", false);
+            }
+        });
+
+        $("#formEntriManualAset").submit(function () {
+            if ($(this)[0].checkValidity() === false) {
+                event.preventDefault()
+                event.stopPropagation()
+            } else {
+                let formData = Object.fromEntries(new FormData(event.target).entries());
+                formData.hargaSatuan = formData.hargaSatuan.replace(/[^\d]/g, '') * 1;
+
+                Swal.fire({
+                    title: 'Lanjutkan Proses Simpan Aset?',
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                    text: "Mohon pastikan aset yang dimasukkan sudah sesuai",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#007bff',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, lanjutkan!',
+                    cancelButtonText: 'Batal',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "/PenempatanAset/inputAset",
+                            type: "POST",
+                            headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                            data: formData,
+                            dataType: "json",
+                            success: function (result) {
+                                if (result.status) {
+                                    toastr.success(result.pesan, 'Berhasil');
+                                } else {
+                                    toastr.error(result.pesan, 'Gagal');
+                                }
+                            },
+                        });
+                    }
+                })
+            }
+            $(this).addClass('was-validated');
+            return false;
+        });
+
+        $("#formGenerateAset").submit(function () {
+            if ($(this)[0].checkValidity() === false) {
+                event.preventDefault()
+                event.stopPropagation()
+            } else {
+                let formData = Object.fromEntries(new FormData(event.target).entries());
+
+                Swal.fire({
+                    title: 'Lanjutkan Proses Generate Aset?',
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                    text: "Mohon pastikan aset yang dipilih sudah sesuai",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#007bff',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, lanjutkan!',
+                    cancelButtonText: 'Batal',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "/PenempatanAset/generateAset",
+                            type: "POST",
+                            headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                            data: formData,
+                            dataType: "json",
+                            success: function (result) {
+                                if (result.status) {
+                                    $('#tabelDetailTerimaAset').DataTable().ajax.reload();
+                                    toastr.success(result.pesan, 'Berhasil');
+                                } else {
+                                    toastr.error(result.pesan, 'Gagal');
+                                }
+                                $('#generateAsetModal').modal('hide');
+                            },
+                        });
+                    }
+                })
+            }
+            $(this).addClass('was-validated');
+            return false;
+        });
+
+        $(document).ready(function () {
+            $("#entriManualDataAsetTab #IDMSTRuang").prop("disabled", true);
+
+            $("#entriManualDataAsetTab #tanggalDiterima").val(new Date().toLocaleDateString());
+        });
+
+    </script>
+}

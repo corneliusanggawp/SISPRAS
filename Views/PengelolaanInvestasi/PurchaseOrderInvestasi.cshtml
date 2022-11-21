@@ -44,49 +44,39 @@
                         <h3 class="card-title"> Input Purchase Order </h3>
                     </div>
                     <div class="card-body">
-                            <form method="post" id="formInputPurchaseOrder" enctype="multipart/form-data" novalidate>
-                            <div class="row">
-                                <div class="col-4">
-                                    <div class="form-group">
-                                        <label>Nomor PO <b class="text-danger">*</b></label>
-                                        <input id="nomorPO" name="nomorPO" type="text" class="form-control" placeholder="Masukan Nomor PO..." onkeydown="return false;" required />
-                                    </div>
+                        <form method="post" id="formInputPurchaseOrder" enctype="multipart/form-data" novalidate>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label>Nomor PO <b class="text-danger">*</b></label>
+                                    <input id="nomorPO" name="nomorPO" type="text" class="form-control" placeholder="Masukan Nomor PO..." onkeydown="return false;" required />
                                 </div>
-                                <div class="col-4">
-                                    <div class="form-group">
-                                        <label>Supplier <b class="text-danger">*</b></label>
-                                        <select id="IDSupplier" name="IDSupplier" class="form-control select2bs4" required>
-                                            <option value="" style="display: none" disabled selected>Pilih supplier...</option>
-                                            @foreach (var supplier in Model.supplier) {
-                                            <option value="@supplier.ID_SUPPLIER">@supplier.NAMA_SUPPLIER</option>
-                                            }
-                                        </select>
-                                    </div>
+                                <div class="form-group col-md-4">
+                                    <label>Supplier <b class="text-danger">*</b></label>
+                                    <select id="IDSupplier" name="IDSupplier" class="form-control select2bs4" required>
+                                        <option value="" style="display: none" disabled selected>Pilih supplier...</option>
+                                        @foreach (var supplier in Model.supplier) {
+                                        <option value="@supplier.ID_SUPPLIER">@supplier.NAMA_SUPPLIER</option>
+                                        }
+                                    </select>
                                 </div>
-                                <div class="col-4">
-                                    <div class="form-group">
-                                        <label>Tanggal PO <b class="text-danger">*</b></label>
-                                        <div class="input-group date" id="reservationdate1" data-target-input="nearest">
-                                            <input id="tanggalPO" name="tanggalPO" type="text" class="form-control datetimepicker-input" placeholder="mm/dd/yy" data-target="#reservationdate1" required />
-                                            <div class="input-group-append" data-target="#reservationdate1" data-toggle="datetimepicker">
-                                                <div class="input-group-text btn"><i class="fa fa-calendar"></i></div>
-                                            </div>
+                                <div class="form-group col-md-4">
+                                    <label>Tanggal PO <b class="text-danger">*</b></label>
+                                    <div class="input-group date" id="reservationdate1" data-target-input="nearest">
+                                        <input id="tanggalPO" name="tanggalPO" type="text" class="form-control datetimepicker-input" placeholder="mm/dd/yy" data-target="#reservationdate1" required />
+                                        <div class="input-group-append" data-target="#reservationdate1" data-toggle="datetimepicker">
+                                            <div class="input-group-text btn"><i class="fa fa-calendar"></i></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label>Pajak (Dalam %) <b class="text-danger">*</b></label>
-                                        <input id="pajak" name="pajak" type="number" class="form-control" min="0" placeholder="Masukan jumlah pajak..." required />
-                                    </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Pajak (Dalam %) <b class="text-danger">*</b></label>
+                                    <input id="pajak" name="pajak" type="number" class="form-control" min="0" placeholder="Masukan jumlah pajak..." required />
                                 </div>
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label>Diskon</label>
-                                        <input id="diskon" name="diskon" type="text" class="form-control" placeholder="Rp 0" />
-                                    </div>
+                                <div class="form-group col-md-6">
+                                    <label>Diskon</label>
+                                    <input id="diskon" name="diskon" type="text" class="form-control" placeholder="Rp 0" />
                                 </div>
                             </div>
                         </form>
@@ -106,56 +96,48 @@
                                         <div class="row">
                                             <fieldset class="col-12 border">
                                                 <legend class="w-auto"><h6>Tampil data berdasarkan:</h6></legend>
-                                                <div class="row px-2">
-                                                    <div class="col-3">
-                                                        <div class="form-group">
-                                                            <label>Tahun</label>
-                                                            <select id="tahun" class="form-control select2bs4" style="width: 100%" novalidate>
-                                                                <option value="" selected>Semua tahun...</option>
-                                                                @foreach (var tahun in Model.tahun) {
-                                                                <option value="@tahun.TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
-                                                                }
-                                                            </select>
-                                                        </div>
+                                                <div class="form-row px-2">
+                                                    <div class="form-group col-md-3">
+                                                        <label>Tahun</label>
+                                                        <select id="tahun" class="form-control select2bs4" style="width: 100%" novalidate>
+                                                            <option value="" selected>Semua tahun...</option>
+                                                            @foreach (var tahun in Model.tahun) {
+                                                            <option value="@tahun.TAHUN_ANGGARAN">@tahun.TAHUN_ANGGARAN</option>
+                                                            }
+                                                        </select>
                                                     </div>
-                                                    <div class="col-3">
-                                                        <div class="form-group">
-                                                            <label>Bulan</label>
-                                                            <select id="bulan" class="form-control select2bs4" style="width: 100%" novalidate>
-                                                                <option value="" selected>Semua bulan...</option>
-                                                                <option value="Januari">Januari</option>
-                                                                <option value="Februari">Februari</option>
-                                                                <option value="Maret">Maret</option>
-                                                                <option value="April">April</option>
-                                                                <option value="Mei">Mei</option>
-                                                                <option value="Juni">Juni</option>
-                                                                <option value="Juli">Juli</option>
-                                                                <option value="Agustus">Agustus</option>
-                                                                <option value="September">September</option>
-                                                                <option value="Oktober">Oktober</option>
-                                                                <option value="November">November</option>
-                                                                <option value="Desember">Desember</option>
-                                                            </select>
-                                                        </div>
+                                                    <div class="form-group col-md-3">
+                                                        <label>Bulan</label>
+                                                        <select id="bulan" class="form-control select2bs4" style="width: 100%" novalidate>
+                                                            <option value="" selected>Semua bulan...</option>
+                                                            <option value="Januari">Januari</option>
+                                                            <option value="Februari">Februari</option>
+                                                            <option value="Maret">Maret</option>
+                                                            <option value="April">April</option>
+                                                            <option value="Mei">Mei</option>
+                                                            <option value="Juni">Juni</option>
+                                                            <option value="Juli">Juli</option>
+                                                            <option value="Agustus">Agustus</option>
+                                                            <option value="September">September</option>
+                                                            <option value="Oktober">Oktober</option>
+                                                            <option value="November">November</option>
+                                                            <option value="Desember">Desember</option>
+                                                        </select>
                                                     </div>
-                                                    <div class="col-3">
-                                                        <div class="form-group">
-                                                            <label>Kategori</label>
-                                                            <select id="kategori" class="form-control select2bs4" style="width: 100%" novalidate>
-                                                                <option value="" selected>Semua kategori...</option>
-                                                                @foreach (var kategori in Model.kategori) {
-                                                                <option value="@kategori.ID_KATEGORI">@kategori.DESKRIPSI</option>
-                                                                }
-                                                            </select>
-                                                        </div>
+                                                    <div class="form-group col-md-3">
+                                                        <label>Kategori</label>
+                                                        <select id="kategori" class="form-control select2bs4" style="width: 100%" novalidate>
+                                                            <option value="" selected>Semua kategori...</option>
+                                                            @foreach (var kategori in Model.kategori) {
+                                                            <option value="@kategori.ID_KATEGORI">@kategori.DESKRIPSI</option>
+                                                            }
+                                                        </select>
                                                     </div>
-                                                    <div class="col-3">
-                                                        <div class="form-group">
-                                                            <label>Sub Kategori</label>
-                                                            <select id="subKategori" class="form-control select2bs4" style="width: 100%" novalidate>
-                                                                <option value="" selected>Semua sub kategori...</option>
-                                                            </select>
-                                                        </div>
+                                                    <div class="form-group col-md-3">
+                                                        <label>Sub Kategori</label>
+                                                        <select id="subKategori" class="form-control select2bs4" style="width: 100%" novalidate>
+                                                            <option value="" selected>Semua sub kategori...</option>
+                                                        </select>
                                                     </div>
                                                 </div>
                                             </fieldset>
@@ -210,8 +192,8 @@
                         <h3 class="card-title"> Revisi Purchase Order </h3>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-4">
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
                                 <div class="input-group mb-2">
                                     <input id="findNomorPO" name="findNomorPO" type="text" class="form-control" placeholder="Masukkan No. Purchase Order..." />
                                     <div class="input-group-append">
@@ -251,48 +233,38 @@
                                 </div>
                                 <div class="card-body">
                                     <input id="IDPurchaseOrderRevisi" name="IDPurchaseOrderInvestasi" type="hidden" class="form-control" readonly required />
-                                    <div class="row">
-                                        <div class="col-4">
-                                            <div class="form-group">
-                                                <label>Nomor PO <b class="text-danger">*</b></label>
-                                                <input id="nomorPORevisi" name="nomorPO" type="text" class="form-control" placeholder="Masukan Nomor PO..." onkeydown="return false;" required />
-                                            </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-4">
+                                            <label>Nomor PO <b class="text-danger">*</b></label>
+                                            <input id="nomorPORevisi" name="nomorPO" type="text" class="form-control" placeholder="Masukan Nomor PO..." onkeydown="return false;" required />
                                         </div>
-                                        <div class="col-4">
-                                            <div class="form-group">
-                                                <label>Supplier <b class="text-danger">*</b></label>
-                                                <select id="IDSupplierRevisi" name="IDSupplier" class="form-control select2bs4" required>
-                                                    <option value="" style="display: none" disabled selected>Pilih supplier...</option>
-                                                    @foreach (var supplier in Model.supplier) {
-                                                    <option value="@supplier.ID_SUPPLIER">@supplier.NAMA_SUPPLIER</option>
-                                                    }
-                                                </select>
-                                            </div>
+                                        <div class="form-group col-md-4">
+                                            <label>Supplier <b class="text-danger">*</b></label>
+                                            <select id="IDSupplierRevisi" name="IDSupplier" class="form-control select2bs4" required>
+                                                <option value="" style="display: none" disabled selected>Pilih supplier...</option>
+                                                @foreach (var supplier in Model.supplier) {
+                                                <option value="@supplier.ID_SUPPLIER">@supplier.NAMA_SUPPLIER</option>
+                                                }
+                                            </select>
                                         </div>
-                                        <div class="col-4">
-                                            <div class="form-group">
-                                                <label>Tanggal PO <b class="text-danger">*</b></label>
-                                                <div class="input-group date" id="reservationdate2" data-target-input="nearest">
-                                                    <input id="tanggalPORevisi" name="tanggalPO" type="text" class="form-control datetimepicker-input" placeholder="mm/dd/yy" data-target="#reservationdate2" required />
-                                                    <div class="input-group-append" data-target="#reservationdate2" data-toggle="datetimepicker">
-                                                        <div class="input-group-text btn"><i class="fa fa-calendar"></i></div>
-                                                    </div>
+                                        <div class="form-group col-md-4">
+                                            <label>Tanggal PO <b class="text-danger">*</b></label>
+                                            <div class="input-group date" id="reservationdate2" data-target-input="nearest">
+                                                <input id="tanggalPORevisi" name="tanggalPO" type="text" class="form-control datetimepicker-input" placeholder="mm/dd/yy" data-target="#reservationdate2" required />
+                                                <div class="input-group-append" data-target="#reservationdate2" data-toggle="datetimepicker">
+                                                    <div class="input-group-text btn"><i class="fa fa-calendar"></i></div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <div class="form-group">
-                                                <label>Pajak (Dalam %) <b class="text-danger">*</b></label>
-                                                <input id="pajakRevisi" name="pajak" type="number" class="form-control" min="0" placeholder="Masukan jumlah pajak..." required />
-                                            </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label>Pajak (Dalam %) <b class="text-danger">*</b></label>
+                                            <input id="pajakRevisi" name="pajak" type="number" class="form-control" min="0" placeholder="Masukan jumlah pajak..." required />
                                         </div>
-                                        <div class="col-6">
-                                            <div class="form-group">
-                                                <label>Diskon</label>
-                                                <input id="diskonRevisi" name="diskon" type="text" class="form-control" placeholder="Rp 0" />
-                                            </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Diskon</label>
+                                            <input id="diskonRevisi" name="diskon" type="text" class="form-control" placeholder="Rp 0" />
                                         </div>
                                     </div>
                                 </div>

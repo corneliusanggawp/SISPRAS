@@ -256,7 +256,7 @@ namespace SISPRAS.Controllers
                 if (success != 0)
                 {
                     data.status = true;
-                    data.pesan = "menyetujui" + success + " dari " + IDPencairanInvestasi.Length + " pencairan investasi";
+                    data.pesan = "menyetujui " + success + " dari " + IDPencairanInvestasi.Length + " pencairan investasi";
                 }
                 else
                 {

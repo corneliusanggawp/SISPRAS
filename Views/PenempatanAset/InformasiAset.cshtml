@@ -1,0 +1,169 @@
+﻿@using System.Globalization;
+@Html.AntiForgeryToken()
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Controller"] = "Pengelolaan Investasi";
+    ViewData["Title"] = "Informasi Aset";
+
+    CultureInfo culture = new CultureInfo("id-ID");
+    var IDUnitUser = User.Claims.Where(c => c.Type == "IDUnit").Select(c => c.Value).Single();
+    var IDRoleUser = User.Claims.Where(c => c.Type == "IDRole").Select(c => c.Value).ToArray();
+    var namaUnit = User.Claims.Where(c => c.Type == "namaUnit").Select(c => c.Value).Single();
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Cari data berdasarkan:</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label>Unit</label>
+                        <select id="unit" class="form-control select2bs4" style="width: 100%">
+                            @if (Array.IndexOf(IDRoleUser, "9") != -1) {
+                            <option value="" selected>Semua unit...</option> }
+                            @foreach (var unit in Model.unit) {
+                            <option value="@unit.ID_UNIT">@unit.NAMA_UNIT</option> }
+                        </select>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label>Kategori</label>
+                        <select id="kategori" class="form-control select2bs4" style="width: 100%">
+                            <option value="" disabled selected>Pilih kategori</option>
+                            @foreach (var kategori in Model.kategori) {
+                            <option value="" disabled>@kategori.DESKRIPSI</option>
+                            @foreach (var subKategori in Model.subKategori) { 
+                            if (@subKategori.ID_KATEGORI == @kategori.ID_KATEGORI) {
+                            <option value="@kategori.ID_KATEGORI,@subKategori.ID_REF_SK">&emsp;@subKategori.DESKRIPSI</option> }}}
+                        </select>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label>Ruangan</label>
+                        <select id="IDMSTRuang" class="form-control select2bs4" style="width: 100%">
+                            <option value="" disabled selected>Pilih ruangan</option>
+                            @foreach (var ruangan in Model.ruangan) {
+                            <option value="@ruangan.ID_MST_RUANG">@ruangan.NAMA_RUANG</option> }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <table id="tabelMasterAset" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Kode Aset:</th>
+                            <th>Nama Barang:</th>
+                            <th class="none">Merk:</th>
+                            <th class="none">Kategori:</th>
+                            <th>Tanggal Terima:</th>
+                            <th class="none">Aktiva:</th>
+                            <th>Harga Beli:</th>
+                            <th class="none">Spesifikasi:</th>
+                            <th>Kondisi Barang:</th>
+                            <th>No Dokumen:</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        let tabelMasterAset;
+
+        refreshTabelMasterAset();
+
+        $('.select2bs4').select2({
+            theme: 'bootstrap4'
+        });
+
+        //Function Variabel
+        let formatRupiah = (number) => {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }
+            ).format(number);
+        }
+
+        let formatDate = (date) => {
+            return new Date(date).toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric'
+            });
+        };
+
+        function refreshTabelMasterAset() {
+            tabelMasterAset = $("#tabelMasterAset").DataTable({
+                ajax: {
+                    url: '/PenempatanAset/getAllAset',
+                    type: 'POST',
+                    dataSrc: 'data',
+                    beforeSend: function (request) {
+                        request.setRequestHeader("RequestVerificationToken", $('input[name="__RequestVerificationToken"]').val());
+                    },
+                },
+                columns: [
+                    { data: "KODE_ASET" },
+                    { data: "NAMA_BARANG" },
+                    { data: "MERK" },
+                    { data: "SUB_KATEGORI" },
+                    {
+                        data: "TGL_DITERIMA",
+                        render: function (data, type, row, meta) {
+                            return formatDate(data);
+                        },
+                    },
+                    { data: "AKTIVA" },
+                    {
+                        data: "HARGA_BELI",
+                        render: function (data, type, row, meta) {
+                            return formatRupiah(data);
+                        },
+                    },
+                    { data: "SPESIFIKASI" },
+                    { data: "KONDISI_BARANG" },
+                    { data: "NO_DOKUMEN" },
+                ],
+                language: {
+                    url: "../json/datatables-id.json"
+                },
+                columnDefs: [
+                    {
+                        targets: "_all",
+                        className: "align-middle",
+                    },
+                ],
+                fixedHeader: {
+                    header: true,
+                    footer: true,
+                },
+                paging: true,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true,
+            });
+        }
+
+    </script>
+}

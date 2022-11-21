@@ -294,5 +294,31 @@ namespace SISPRAS.DAO
                 }
             }
         }
+
+        public List<dynamic> getAllRuangan()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT *
+                        FROM sispras.MST_RUANG_BANGUNAN
+                    ";
+
+                    var data = conn.Query<dynamic>(query).ToList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return new List<dynamic>();
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
     }
 }

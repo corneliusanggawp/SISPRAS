@@ -31,8 +31,8 @@
                     <h3 class="card-title"> Terima Barang </h3>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-4">
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
                             <div class="input-group mb-2">
                                 <input id="findNomorPO" name="findNomorPO" type="text" class="form-control" placeholder="Masukkan No. Purchase Order..." />
                                 <div class="input-group-append">
@@ -70,32 +70,26 @@
                             </div>
                             <div class="card-body">
                                 <input id="IDPurchaseOrderInvestasi" name="IDPurchaseOrderInvestasi" type="hidden" class="form-control" readonly required />
-                                <div class="row">
-                                    <div class="col-4">
-                                        <div class="form-group">
-                                            <label>Nomor Invoice <b class="text-danger">*</b></label>
-                                            <input id="nomorInvoice" name="nomorInvoice" type="text" class="form-control" placeholder="Masukan Nomor Invoice..." required />
-                                        </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-4">
+                                        <label>Nomor Invoice <b class="text-danger">*</b></label>
+                                        <input id="nomorInvoice" name="nomorInvoice" type="text" class="form-control" placeholder="Masukan Nomor Invoice..." required />
                                     </div>
-                                    <div class="col-4">
-                                        <div class="form-group">
-                                            <label>Tanggal Terima <b class="text-danger">*</b></label>
-                                            <div class="input-group date" id="reservationdate" data-target-input="nearest">
-                                                <input id="tanggalTerima" name="tanggalTerima" type="text" class="form-control datetimepicker-input" placeholder="mm/dd/yy" data-target="#reservationdate" required />
-                                                <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
-                                                    <div class="input-group-text btn"><i class="fa fa-calendar"></i></div>
-                                                </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Tanggal Terima <b class="text-danger">*</b></label>
+                                        <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                                            <input id="tanggalTerima" name="tanggalTerima" type="text" class="form-control datetimepicker-input" placeholder="mm/dd/yy" data-target="#reservationdate" required />
+                                            <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                                                <div class="input-group-text btn"><i class="fa fa-calendar"></i></div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-4">
-                                        <div class="form-group">
-                                            <label>Dokumen Invoice<b class="text-danger">*</b></label>
-                                            <div class="input-group">
-                                                <div class="custom-file">
-                                                    <input id="dokumenInvoice" name="dokumenInvoice" type="file" class="custom-file-input" accept="application/pdf" required/>
-                                                    <label class="custom-file-label">Pilih File</label>
-                                                </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Dokumen Invoice<b class="text-danger">*</b></label>
+                                        <div class="input-group">
+                                            <div class="custom-file">
+                                                <input id="dokumenInvoice" name="dokumenInvoice" type="file" class="custom-file-input" accept="application/pdf" required/>
+                                                <label class="custom-file-label">Pilih File</label>
                                             </div>
                                         </div>
                                     </div>
