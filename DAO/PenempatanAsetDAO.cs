@@ -57,8 +57,8 @@ namespace SISPRAS.DAO
 
                         WHILE @i < @jumlah
                         BEGIN
-                            INSERT INTO sispras.MST_ASET (ID_KATEGORI, ID_REF_SK_SIASET, ID_UNIT, ID_MST_RUANG, NAMA_BARANG, MERK, ID_REF_STATUS_KEPEMILIKAN, HARGA_BELI, ID_REF_GOL_AKTIVA, NOMOR_GARANSI, TGL_DITERIMA, STATUS, NO_DOKUMEN, SPESIFIKASI)
-                            VALUES (IDKategori, IDRefSK, IDUnit, IDMSTRuang, namaBarang, merk, IDRefStatusKepemilikan, hargaBeli, IDRefGolonganAktiva, nomorGaransi, tanggalDiterima, status, nomorDokumen, spesifikasi)
+                            INSERT INTO sispras.MST_ASET(ID_REF_SK, ID_KATEGORI, KODE_ASET, ID_UNIT, ID_REF_STATUS_KEPEMILIKAN, ID_MST_RUANG, NAMA_BARANG, MERK, HARGA_BELI, SPESIFIKASI, STATUS, NO_DOKUMEN, NOMOR_GARANSI, ID_REF_GOL_AKTIVA, TGL_DITERIMA)
+                            VALUES (@IDRefSK, @IDKategori, (SELECT REPLACE((CAST(YEAR(@tanggalDiterima) as VARCHAR(10))+ '-' + REF_SUB_KATEGORI.KODE_BARANG + '-' + REF_SUB_KATEGORI.KODE_JENIS_BARANG + '-' + CAST((SELECT COUNT(MST_ASET.ID_ASSET) + 1 FROM sispras.MST_ASET MST_ASET WHERE YEAR(MST_ASET.TGL_DITERIMA) = YEAR(@tanggalDiterima)) AS VARCHAR(10))), ' ', '') FROM sispras.REF_SUB_KATEGORI REF_SUB_KATEGORI WHERE REF_SUB_KATEGORI.ID_REF_SK = @IDRefSK), @IDUnit, @IDRefStatusKepemilikan, @IDMSTRuang, @namaBarang, @merk, @hargaBeli, @spesifikasi, @status, @nomorDokumen, @nomorGaransi, @IDRefGolonganAktiva, @tanggalDiterima)
 	                        SET @i = @i + 1
                         END
                     ";
@@ -81,7 +81,7 @@ namespace SISPRAS.DAO
             }
         }
 
-        public DBOutput generateAset(int IDDetailTerimaAset, string nomorDokumen, int IDMSTRuang)
+        public DBOutput generateAset(int IDDetailTerimaAset, int IDRefGolonganAktiva, int IDRefStatusKepemilikan, string nomorDokumen, string nomorGaransi, string status, string tanggalDiterima)
         {
             DBOutput output = new DBOutput();
             output.status = true;
@@ -97,13 +97,13 @@ namespace SISPRAS.DAO
                         WHILE @i < @jumlahAset
                         BEGIN
 	                        INSERT INTO sispras.MST_ASET(ID_REF_SK, ID_KATEGORI, KODE_ASET, ID_UNIT, ID_REF_STATUS_KEPEMILIKAN, ID_MST_RUANG, NAMA_BARANG, MERK, HARGA_BELI, SPESIFIKASI, STATUS, KONDISI_BARANG, NO_DOKUMEN, NOMOR_GARANSI, ID_REF_GOL_AKTIVA, TGL_DITERIMA)
-	                        SELECT      ID_REF_SK, ID_KATEGORI, CAST(YEAR(sispras.TBL_TERIMA_ASET.TGL_TERIMA) as VARCHAR(10)) + '-' + CAST((@i+1) as VARCHAR(10)), ID_UNIT, 1, @IDMSTRuang, NAMA_BARANG, sispras.TBL_DETAIL_TERIMA_ASET.MERK, sispras.TBL_DETAIL_TERIMA_ASET.HARGA_SATUAN, sispras.TBL_DETAIL_TERIMA_ASET.SPESIFIKASI, 'Ada', 'Baik digunakan', @nomorDokumen, NULL, NULL, TGL_TERIMA
-	                        FROM        sispras.TBL_DETAIL_TERIMA_ASET
-	                        INNER JOIN	sispras.TBL_TERIMA_ASET ON sispras.TBL_DETAIL_TERIMA_ASET.ID_TERIMA_ASET = sispras.TBL_TERIMA_ASET.ID_TERIMA_ASET
-	                        INNER JOIN	sispras.TBL_DETAIL_PO_INVESTASI ON sispras.TBL_DETAIL_TERIMA_ASET.ID_DETAIL_PO_INVESTASI = sispras.TBL_DETAIL_PO_INVESTASI.ID_DETAIL_PO_INVESTASI
-	                        INNER JOIN	sispras.TBL_DETAIL_PENCAIRAN_INVESTASI ON sispras.TBL_DETAIL_PO_INVESTASI.ID_DETAIL_PENCAIRAN_INVESTASI = sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.ID_DETAIL_PENCAIRAN_INVESTASI
-	                        WHERE       (sispras.TBL_DETAIL_TERIMA_ASET.ID_DETAIL_TERIMA = @IDDetailTerimaAset)
-	
+                            SELECT ID_REF_SK, ID_KATEGORI, (SELECT REPLACE((CAST(YEAR(@tanggalDiterima) as VARCHAR(10))+ '-' + REF_SUB_KATEGORI.KODE_BARANG + '-' + REF_SUB_KATEGORI.KODE_JENIS_BARANG + '-' + CAST((SELECT COUNT(MST_ASET.ID_ASSET) + 1 FROM sispras.MST_ASET MST_ASET WHERE YEAR(MST_ASET.TGL_DITERIMA) = YEAR(@tanggalDiterima)) AS VARCHAR(10))), ' ', '') FROM sispras.REF_SUB_KATEGORI REF_SUB_KATEGORI WHERE REF_SUB_KATEGORI.ID_REF_SK = 184), ID_UNIT, @IDRefStatusKepemilikan, 3086, sispras.TBL_DETAIL_TERIMA_ASET.NAMA_ASET, sispras.TBL_DETAIL_TERIMA_ASET.MERK, sispras.TBL_DETAIL_TERIMA_ASET.HARGA_SATUAN, sispras.TBL_DETAIL_TERIMA_ASET.SPESIFIKASI, @status, 'Baik Digunakan', @nomorDokumen, @nomorGaransi, @IDRefGolonganAktiva, @tanggalDiterima
+                            FROM        sispras.TBL_DETAIL_TERIMA_ASET
+                            INNER JOIN	sispras.TBL_TERIMA_ASET ON sispras.TBL_DETAIL_TERIMA_ASET.ID_TERIMA_ASET = sispras.TBL_TERIMA_ASET.ID_TERIMA_ASET
+                            INNER JOIN	sispras.TBL_DETAIL_PO_INVESTASI ON sispras.TBL_DETAIL_TERIMA_ASET.ID_DETAIL_PO_INVESTASI = sispras.TBL_DETAIL_PO_INVESTASI.ID_DETAIL_PO_INVESTASI
+                            INNER JOIN	sispras.TBL_DETAIL_PENCAIRAN_INVESTASI ON sispras.TBL_DETAIL_PO_INVESTASI.ID_DETAIL_PENCAIRAN_INVESTASI = sispras.TBL_DETAIL_PENCAIRAN_INVESTASI.ID_DETAIL_PENCAIRAN_INVESTASI
+                            WHERE (sispras.TBL_DETAIL_TERIMA_ASET.ID_DETAIL_TERIMA = @IDDetailTerimaAset)
+
 	                        SET @i = @i + 1
                         END
 
@@ -112,7 +112,7 @@ namespace SISPRAS.DAO
                         WHERE (ID_DETAIL_TERIMA = @IDDetailTerimaAset)
                     ";
 
-                    output.data = conn.QueryFirstOrDefault<int>(query, new { IDDetailTerimaAset = IDDetailTerimaAset, nomorDokumen = nomorDokumen, IDMSTRuang = IDMSTRuang });
+                    output.data = conn.QueryFirstOrDefault<int>(query, new { IDDetailTerimaAset = IDDetailTerimaAset, IDRefGolonganAktiva = IDRefGolonganAktiva, IDRefStatusKepemilikan = IDRefStatusKepemilikan, nomorDokumen = nomorDokumen, nomorGaransi = nomorGaransi, status = status, tanggalDiterima = tanggalDiterima });
 
                     return output;
                 }

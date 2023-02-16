@@ -335,7 +335,8 @@
         $("#btnProsesApproval").on('click', function() {
             if($('#tabelPencairanInvestasi').DataTable().rows('.selected').count() == 0){
                 toastr.error('tidak ada pencairan yang dipilih', 'Gagal');
-            }else
+            }
+            else
             {
                 Swal.fire({
                     title: 'Lanjutkan Proses Approval?',

@@ -35,7 +35,6 @@ namespace SISPRAS.Controllers
             myObj.golonganAktiva = mainDAO.getAllGolonganAktiva();
             myObj.statusKepemilikan = mainDAO.getAllStatusKepemilikan();
             myObj.unit = masterDAO.getAllUnit(IDUnitUser, IDRoleUser);
-            //myObj.ruangan = masterDAO.getAllRuangan();
             myObj.tahun = masterDAO.getAllTahunAnggaran();
             myObj.kategori = masterDAO.getAllKategori();
             myObj.subKategori = masterDAO.getAllSubKategori();
@@ -94,7 +93,7 @@ namespace SISPRAS.Controllers
 
                 var inputAset = mainDAO.addAset(aset);
 
-                if (inputAset.status == true) 
+                if (inputAset.status == true)
                 {
                     data.status = true;
                     data.pesan = "aset berhasil disimpan";
@@ -116,13 +115,13 @@ namespace SISPRAS.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult generateAset(int IDDetailTerimaAset, string nomorDokumen, int IDMSTRuang)
+        public IActionResult generateAset(int IDDetailTerimaAset, int IDRefGolonganAktiva, int IDRefStatusKepemilikan, string nomorDokumen, string nomorGaransi, string status, string tanggalDiterima)
         {
             DBOutput data = new DBOutput();
 
             if (IDDetailTerimaAset != 0)
             {
-                var generateAset = mainDAO.generateAset(IDDetailTerimaAset, nomorDokumen, IDMSTRuang);
+                var generateAset = mainDAO.generateAset(IDDetailTerimaAset, IDRefGolonganAktiva, IDRefStatusKepemilikan, nomorDokumen, nomorGaransi, status, tanggalDiterima);
 
                 if (generateAset.status == true)
                 {
