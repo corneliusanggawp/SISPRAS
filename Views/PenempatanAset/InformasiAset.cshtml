@@ -38,7 +38,7 @@
                     <div class="form-group col-md-4">
                         <label>Kategori</label>
                         <select id="kategori" class="form-control select2bs4" style="width: 100%">
-                            <option value="" disabled selected>Pilih kategori</option>
+                            <option value="" selected>Semua kategori...</option>
                             @foreach (var kategori in Model.kategori) {
                             <option value="" disabled>@kategori.DESKRIPSI</option>
                             @foreach (var subKategori in Model.subKategori) { 
@@ -48,8 +48,8 @@
                     </div>
                     <div class="form-group col-md-4">
                         <label>Ruangan</label>
-                        <select id="IDMSTRuang" class="form-control select2bs4" style="width: 100%">
-                            <option value="" disabled selected>Pilih ruangan</option>
+                        <select id="ruang" class="form-control select2bs4" style="width: 100%">
+                            <option value="" selected>Semua ruangan...</option>
                             @foreach (var ruangan in Model.ruangan) {
                             <option value="@ruangan.ID_MST_RUANG">@ruangan.NAMA_RUANG</option> }
                         </select>
@@ -74,6 +74,10 @@
                             <th class="none">Spesifikasi:</th>
                             <th>Kondisi Barang:</th>
                             <th>No Dokumen:</th>
+                            <th></th>
+                            <th style="color:transparent;"></th>
+                            <th style="color:transparent;"></th>
+                            <th style="color:transparent;"></th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -141,6 +145,16 @@
                     { data: "SPESIFIKASI" },
                     { data: "KONDISI_BARANG" },
                     { data: "NO_DOKUMEN" },
+                    {
+                        data: { ID_PO_INVESTASI: "ID_ASSET" },
+                        render: function (data, type, row, meta) {
+                            return type === 'display' ?
+                                '<a id="btnEditAset" data-id="' + data.ID_ASSET + '" data-toggle="modal" href="#MasterAsetModal" class="btn btn-success btn-sm my-1"> <i class="fas fa-edit"> </i></a> ' : data;
+                        },
+                    },
+                    { data: "ID_UNIT" },
+                    { data: "ID_REF_SK_SIASET" },
+                    { data: "ID_MST_RUANG" },
                 ],
                 language: {
                     url: "../json/datatables-id.json"
@@ -150,6 +164,11 @@
                         targets: "_all",
                         className: "align-middle",
                     },
+                    {
+                        targets: [11,12,13],
+                        visible: false,
+                        searchable: true,
+                    },
                 ],
                 fixedHeader: {
                     header: true,
@@ -158,12 +177,46 @@
                 paging: true,
                 lengthChange: true,
                 searching: true,
-                ordering: true,
+                ordering: false,
                 info: true,
                 autoWidth: false,
                 responsive: true,
+                buttons: [
+                    {
+                        text: 'Salin Tabel',
+                        extend: 'copyHtml5',
+                        exportOptions: {
+                            columns: [0,1,2,3,4,5,6,7,8,9]
+                        }
+                    },
+                    {
+                        text: 'Download Excel',
+                        extend: 'excelHtml5',
+                        exportOptions: {
+                            columns: [0,1,2,3,4,5,6,7,8,9]
+                        }
+                    }
+                ],
+                initComplete: function () {
+                    this.api().buttons().container()
+                        .appendTo($('.col-sm-12:eq(0)', this.api().table().container()));
+                }
             });
         }
+
+
+        //jQuery Function
+        $("#unit, #kategori, #ruang").on('change', function () {
+            let unit = $('#unit').val();
+            let kategori = $('#kategori').val();
+            let ruang = $('#ruang').val();
+
+            $("#tabelMasterAset").DataTable()
+                .column(10).search(unit ? '^' + unit + '\\s*$' : '', true, false)
+                .column(11).search(kategori ? '^' + kategori + '\\s*$' : '', true, false)
+                .column(12).search(ruang ? '^' + ruang + '\\s*$' : '', true, false)
+                .order([0, 'desc']).draw();
+        });
 
     </script>
 }

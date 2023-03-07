@@ -19,7 +19,6 @@ namespace SISPRAS.Models
         public string IDMSTRuang { get; set; }
         [Required]
         public string namaBarang { get; set; }
-        [Required]
         public string merk { get; set; }
         [Required]
         public string IDRefStatusKepemilikan { get; set; }

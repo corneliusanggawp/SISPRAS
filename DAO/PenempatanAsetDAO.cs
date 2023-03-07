@@ -57,7 +57,7 @@ namespace SISPRAS.DAO
 
                         WHILE @i < @jumlah
                         BEGIN
-                            INSERT INTO sispras.MST_ASET(ID_REF_SK, ID_KATEGORI, KODE_ASET, ID_UNIT, ID_REF_STATUS_KEPEMILIKAN, ID_MST_RUANG, NAMA_BARANG, MERK, HARGA_BELI, SPESIFIKASI, STATUS, NO_DOKUMEN, NOMOR_GARANSI, ID_REF_GOL_AKTIVA, TGL_DITERIMA)
+                            INSERT INTO sispras.MST_ASET(ID_REF_SK_SIASET, ID_KATEGORI, KODE_ASET_SIASET, ID_UNIT, ID_REF_STATUS_KEPEMILIKAN, ID_MST_RUANG, NAMA_BARANG, MERK, HARGA_BELI, SPESIFIKASI, STATUS, NO_DOKUMEN, NOMOR_GARANSI, ID_REF_GOL_AKTIVA, TGL_DITERIMA)
                             VALUES (@IDRefSK, @IDKategori, (SELECT REPLACE((CAST(YEAR(@tanggalDiterima) as VARCHAR(10))+ '-' + REF_SUB_KATEGORI.KODE_BARANG + '-' + REF_SUB_KATEGORI.KODE_JENIS_BARANG + '-' + CAST((SELECT COUNT(MST_ASET.ID_ASSET) + 1 FROM sispras.MST_ASET MST_ASET WHERE YEAR(MST_ASET.TGL_DITERIMA) = YEAR(@tanggalDiterima)) AS VARCHAR(10))), ' ', '') FROM sispras.REF_SUB_KATEGORI REF_SUB_KATEGORI WHERE REF_SUB_KATEGORI.ID_REF_SK = @IDRefSK), @IDUnit, @IDRefStatusKepemilikan, @IDMSTRuang, @namaBarang, @merk, @hargaBeli, @spesifikasi, @status, @nomorDokumen, @nomorGaransi, @IDRefGolonganAktiva, @tanggalDiterima)
 	                        SET @i = @i + 1
                         END
@@ -96,7 +96,7 @@ namespace SISPRAS.DAO
 
                         WHILE @i < @jumlahAset
                         BEGIN
-	                        INSERT INTO sispras.MST_ASET(ID_REF_SK, ID_KATEGORI, KODE_ASET, ID_UNIT, ID_REF_STATUS_KEPEMILIKAN, ID_MST_RUANG, NAMA_BARANG, MERK, HARGA_BELI, SPESIFIKASI, STATUS, KONDISI_BARANG, NO_DOKUMEN, NOMOR_GARANSI, ID_REF_GOL_AKTIVA, TGL_DITERIMA)
+	                        INSERT INTO sispras.MST_ASET(ID_REF_SK_SIASET, ID_KATEGORI, KODE_ASET_SIASET, ID_UNIT, ID_REF_STATUS_KEPEMILIKAN, ID_MST_RUANG, NAMA_BARANG, MERK, HARGA_BELI, SPESIFIKASI, STATUS, KONDISI_BARANG, NO_DOKUMEN, NOMOR_GARANSI, ID_REF_GOL_AKTIVA, TGL_DITERIMA)
                             SELECT ID_REF_SK, ID_KATEGORI, (SELECT REPLACE((CAST(YEAR(@tanggalDiterima) as VARCHAR(10))+ '-' + REF_SUB_KATEGORI.KODE_BARANG + '-' + REF_SUB_KATEGORI.KODE_JENIS_BARANG + '-' + CAST((SELECT COUNT(MST_ASET.ID_ASSET) + 1 FROM sispras.MST_ASET MST_ASET WHERE YEAR(MST_ASET.TGL_DITERIMA) = YEAR(@tanggalDiterima)) AS VARCHAR(10))), ' ', '') FROM sispras.REF_SUB_KATEGORI REF_SUB_KATEGORI WHERE REF_SUB_KATEGORI.ID_REF_SK = 184), ID_UNIT, @IDRefStatusKepemilikan, 3086, sispras.TBL_DETAIL_TERIMA_ASET.NAMA_ASET, sispras.TBL_DETAIL_TERIMA_ASET.MERK, sispras.TBL_DETAIL_TERIMA_ASET.HARGA_SATUAN, sispras.TBL_DETAIL_TERIMA_ASET.SPESIFIKASI, @status, 'Baik Digunakan', @nomorDokumen, @nomorGaransi, @IDRefGolonganAktiva, @tanggalDiterima
                             FROM        sispras.TBL_DETAIL_TERIMA_ASET
                             INNER JOIN	sispras.TBL_TERIMA_ASET ON sispras.TBL_DETAIL_TERIMA_ASET.ID_TERIMA_ASET = sispras.TBL_TERIMA_ASET.ID_TERIMA_ASET
@@ -140,11 +140,11 @@ namespace SISPRAS.DAO
                 try
                 {
                     string query = @"
-                        SELECT sispras.MST_ASET.ID_ASSET, sispras.MST_ASET.KODE_ASET, sispras.MST_ASET.NAMA_BARANG, sispras.MST_ASET.MERK, sispras.REF_SUB_KATEGORI.DESKRIPSI AS SUB_KATEGORI, sispras.MST_ASET.TGL_DITERIMA, sispras.REF_GOLONGAN_AKTIVA.DESKRIPSI AS AKTIVA, sispras.MST_ASET.HARGA_BELI, sispras.MST_ASET.SPESIFIKASI, sispras.MST_ASET.KONDISI_BARANG, sispras.MST_ASET.NO_DOKUMEN
+                        SELECT TOP(100) sispras.MST_ASET.ID_ASSET, sispras.MST_ASET.KODE_ASET_SIASET AS KODE_ASET, sispras.MST_ASET.NAMA_BARANG, sispras.MST_ASET.MERK, sispras.REF_SUB_KATEGORI.DESKRIPSI AS SUB_KATEGORI, sispras.MST_ASET.TGL_DITERIMA, sispras.REF_GOLONGAN_AKTIVA.DESKRIPSI AS AKTIVA, sispras.MST_ASET.HARGA_BELI, sispras.MST_ASET.SPESIFIKASI, sispras.MST_ASET.KONDISI_BARANG, sispras.MST_ASET.NO_DOKUMEN, sispras.MST_ASET.ID_REF_SK_SIASET, sispras.MST_ASET.ID_MST_RUANG, sispras.MST_ASET.ID_UNIT
                         FROM sispras.MST_ASET 
-                        INNER JOIN sispras.REF_SUB_KATEGORI ON sispras.MST_ASET.ID_REF_SK = sispras.REF_SUB_KATEGORI.ID_REF_SK
+                        INNER JOIN sispras.REF_SUB_KATEGORI ON sispras.MST_ASET.ID_REF_SK_SIASET = sispras.REF_SUB_KATEGORI.ID_REF_SK
                         INNER JOIN sispras.REF_GOLONGAN_AKTIVA ON sispras.MST_ASET.ID_REF_GOL_AKTIVA = sispras.REF_GOLONGAN_AKTIVA.ID_REF_GOL_AKTIVA
-                        ORDER BY sispras.MST_ASET.ID_ASSET DESC
+                        ORDER BY sispras.MST_ASET.KODE_ASET_SIASET DESC
                     ";
 
                     output.data = conn.Query<dynamic>(query).ToList();

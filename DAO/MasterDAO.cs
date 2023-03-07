@@ -227,7 +227,9 @@ namespace SISPRAS.DAO
                 {
                     string query = @"
                         SELECT *
-                        FROM sispras.REF_KATEGORI";
+                        FROM sispras.REF_KATEGORI
+                        WHERE IS_DELETED = 0
+                    ";
 
                     var data = conn.Query<dynamic>(query).ToList();
 
@@ -252,7 +254,10 @@ namespace SISPRAS.DAO
                 {
                     string query = @"
                         SELECT *
-                        FROM sispras.REF_SUB_KATEGORI";
+                        FROM sispras.REF_SUB_KATEGORI
+                        WHERE IS_DELETED = 0
+                    ";
+
                     var data = conn.Query<dynamic>(query).ToList();
 
                     return data;
