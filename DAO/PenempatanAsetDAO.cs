@@ -81,6 +81,39 @@ namespace SISPRAS.DAO
             }
         }
 
+        public DBOutput updateAset(int IDAset, string nomorDokumen, string nomorGaransi, decimal hargaBeli)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        UPDATE sispras.MST_ASET
+                        SET NO_DOKUMEN = @nomorDokumen, HARGA_BELI = @hargaBeli, NOMOR_GARANSI = @nomorGaransi
+                        WHERE (ID_ASSET = @IDAset)
+                    ";
+
+                    output.data = conn.Execute(query, new { IDAset = IDAset, nomorDokumen = nomorDokumen, nomorGaransi = nomorGaransi, hargaBeli = hargaBeli });
+
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
         public DBOutput generateAset(int IDDetailTerimaAset, int IDRefGolonganAktiva, int IDRefStatusKepemilikan, string nomorDokumen, string nomorGaransi, string status, string tanggalDiterima)
         {
             DBOutput output = new DBOutput();
@@ -148,6 +181,38 @@ namespace SISPRAS.DAO
                     ";
 
                     output.data = conn.Query<dynamic>(query).ToList();
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    output.status = false;
+                    output.pesan = ex.Message;
+                    output.data = new List<string>();
+                    return output;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public DBOutput getDetailAset(int IDAset)
+        {
+            DBOutput output = new DBOutput();
+            output.status = true;
+
+            using (SqlConnection conn = new SqlConnection(DBConnection.db_sispras))
+            {
+                try
+                {
+                    string query = @"
+                        SELECT NO_DOKUMEN, HARGA_BELI, NOMOR_GARANSI
+                        FROM   sispras.MST_ASET
+                        WHERE (ID_ASSET = @IDAset)
+                    ";
+
+                    output.data = conn.QueryFirstOrDefault<dynamic>(query, new { IDAset = IDAset });
                     return output;
                 }
                 catch (Exception ex)

@@ -12,6 +12,42 @@
     var namaUnit = User.Claims.Where(c => c.Type == "namaUnit").Select(c => c.Value).Single();
 }
 
+<div class="modal fade" id="masterAsetModal" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detail Aset</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" id="formAset" enctype="multipart/form-data" novalidate>
+                <div class="modal-body">
+                    <input type="hidden" class="form-control" id="IDAset" name="IDAset" value="" readonly="readonly" />
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label>Nomor Garansi</label>
+                            <input id="nomorGaransi" name="nomorGaransi" type="text" class="form-control" placeholder="Masukkan nomor garansi..." />
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label>Nomor Dokumen</label>
+                            <input id="nomorDokumen" name="nomorDokumen" type="text" class="form-control" placeholder="Masukkan nomor dokumen..." />
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label>Harga Beli <b class="text-danger">*</b></label>
+                            <input id="hargaBeli" name="hargaBeli" type="text" class="form-control" placeholder="Masukkan harga satuan barang..." required />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Keluar</button>
+                    <button type="submit" class="btn btn-primary">Perbarui</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-12">
         <div class="card card-primary">
@@ -149,7 +185,7 @@
                         data: { ID_PO_INVESTASI: "ID_ASSET" },
                         render: function (data, type, row, meta) {
                             return type === 'display' ?
-                                '<a id="btnEditAset" data-id="' + data.ID_ASSET + '" data-toggle="modal" href="#MasterAsetModal" class="btn btn-success btn-sm my-1"> <i class="fas fa-edit"> </i></a> ' : data;
+                                '<a id="btnEditAset" data-id="' + data.ID_ASSET + '" data-toggle="modal" href="#masterAsetModal" class="btn btn-success btn-sm my-1"> <i class="fas fa-edit"> </i></a> ' : data;
                         },
                     },
                     { data: "ID_UNIT" },
@@ -195,6 +231,15 @@
                         exportOptions: {
                             columns: [0,1,2,3,4,5,6,7,8,9]
                         }
+                    },
+                    {
+                        text: 'Download PDF',
+                        extend: 'pdfHtml5',
+                        orientation: 'landscape',
+                        pageSize: 'LEGAL',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+                        }
                     }
                 ],
                 initComplete: function () {
@@ -206,6 +251,10 @@
 
 
         //jQuery Function
+        $('#masterAsetModal').on('hidden.bs.modal', function (e) {
+            $('#formAset').removeClass('was-validated');
+        });
+
         $("#unit, #kategori, #ruang").on('change', function () {
             let unit = $('#unit').val();
             let kategori = $('#kategori').val();
@@ -216,6 +265,72 @@
                 .column(11).search(kategori ? '^' + kategori + '\\s*$' : '', true, false)
                 .column(12).search(ruang ? '^' + ruang + '\\s*$' : '', true, false)
                 .order([0, 'desc']).draw();
+        });
+
+        $("#hargaBeli").on('input', function () {
+            let hargaBeli = $(this).val();
+            $("#hargaBeli").val(formatRupiah(hargaBeli.replace(/[^\d]/g, '') * 1));
+        });
+
+        $('#tabelMasterAset').on('click', '[id="btnEditAset"]', function (e) {
+            $('#formAset #IDAset').val($(this).data("id"));
+
+            $.ajax({
+                url: "/PenempatanAset/getDetailAset",
+                type: "POST",
+                headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                data: { "IDAset": $(this).data("id") },
+                dataType: "json",
+                success: function (result) {
+                    $('#formAset #nomorDokumen').val(result.data.NO_DOKUMEN);
+                    $('#formAset #nomorGaransi').val(result.data.NOMOR_GARANSI);
+                    $('#formAset #hargaBeli').val(formatRupiah(result.data.HARGA_BELI));
+                }
+            })
+        });
+
+        $("#formAset").submit(function () {
+            if ($(this)[0].checkValidity() === false) {
+                event.preventDefault()
+                event.stopPropagation()
+            } else {
+                let formData = Object.fromEntries(new FormData(event.target).entries());
+                formData.hargaBeli = formData.hargaBeli.replace(/[^\d]/g, '') * 1;
+
+                Swal.fire({
+                    title: 'Lanjutkan Proses Pembaruan Aset?',
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                    text: "Mohon pastikan input sudah sesuai",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#007bff',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, lanjutkan!',
+                    cancelButtonText: 'Batal',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "/PenempatanAset/updateAset",
+                            type: "POST",
+                            headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                            data: formData,
+                            dataType: "json",
+                            success: function (result) {
+                                if (result.status) {
+                                    $('#tabelMasterAset').DataTable().ajax.reload();
+                                    toastr.success(result.pesan, 'Berhasil');
+                                } else {
+                                    toastr.error(result.pesan, 'Gagal');
+                                }
+                            },
+                        });
+                        $('#masterAsetModal').modal('hide');
+                    }
+                })
+            }
+            $(this).addClass('was-validated');
+            return false;
         });
 
     </script>

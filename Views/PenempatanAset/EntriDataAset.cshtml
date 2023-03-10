@@ -485,23 +485,22 @@
                     cancelButtonText: 'Batal',
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        console.log(formData);
-                        //$.ajax({
-                        //    url: "/PenempatanAset/generateAset",
-                        //    type: "POST",
-                        //    headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
-                        //    data: formData,
-                        //    dataType: "json",
-                        //    success: function (result) {
-                        //        if (result.status) {
-                        //            $('#tabelDetailTerimaAset').DataTable().ajax.reload();
-                        //            toastr.success(result.pesan, 'Berhasil');
-                        //        } else {
-                        //            toastr.error(result.pesan, 'Gagal');
-                        //        }
-                        //        $('#generateAsetModal').modal('hide');
-                        //    },
-                        //});
+                        $.ajax({
+                            url: "/PenempatanAset/generateAset",
+                            type: "POST",
+                            headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                            data: formData,
+                            dataType: "json",
+                            success: function (result) {
+                                if (result.status) {
+                                    $('#tabelDetailTerimaAset').DataTable().ajax.reload();
+                                    toastr.success(result.pesan, 'Berhasil');
+                                } else {
+                                    toastr.error(result.pesan, 'Gagal');
+                                }
+                                $('#generateAsetModal').modal('hide');
+                            },
+                        });
                     }
                 })
             }

@@ -115,6 +115,44 @@ namespace SISPRAS.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public IActionResult updateAset(int IDAset, string nomorDokumen, string nomorGaransi, decimal hargaBeli)
+        {
+            DBOutput data = new DBOutput();
+
+            if (IDAset != 0)
+            {
+                var updateAset = mainDAO.updateAset(IDAset, nomorDokumen, nomorGaransi, hargaBeli);
+
+                if (updateAset.status == true)
+                {
+                    data.status = true;
+                    data.pesan = "aset berhasil diperbarui";
+                }
+                else
+                {
+                    data.status = false;
+                    data.pesan = updateAset.pesan;
+                }
+            }
+            else
+            {
+                data.status = false;
+                data.pesan = "mohon periksa kembali inputan anda";
+            }
+
+            return Json(data);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult getDetailAset(int IDAset)
+        {
+            var detailAset = mainDAO.getDetailAset(IDAset);
+            return Json(detailAset);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult generateAset(int IDDetailTerimaAset, int IDRefGolonganAktiva, int IDRefStatusKepemilikan, string nomorDokumen, string nomorGaransi, string status, string tanggalDiterima)
         {
             DBOutput data = new DBOutput();
@@ -142,5 +180,7 @@ namespace SISPRAS.Controllers
 
             return Json(data);
         }
+
+
     }
 }
