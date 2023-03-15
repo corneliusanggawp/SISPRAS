@@ -261,9 +261,9 @@
             let ruang = $('#ruang').val();
 
             $("#tabelMasterAset").DataTable()
-                .column(10).search(unit ? '^' + unit + '\\s*$' : '', true, false)
-                .column(11).search(kategori ? '^' + kategori + '\\s*$' : '', true, false)
-                .column(12).search(ruang ? '^' + ruang + '\\s*$' : '', true, false)
+                .column(11).search(unit ? '^' + unit + '\\s*$' : '', true, false)
+                .column(12).search(kategori ? '^' + kategori + '\\s*$' : '', true, false)
+                .column(13).search(ruang ? '^' + ruang + '\\s*$' : '', true, false)
                 .order([0, 'desc']).draw();
         });
 
